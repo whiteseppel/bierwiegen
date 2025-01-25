@@ -9,19 +9,10 @@ class StartScreen extends StatefulWidget {
 }
 
 class _StartScreenState extends State<StartScreen> {
-  List<TextEditingController> _playerControllers = [];
+  List<TextEditingController> _playerControllers = [TextEditingController()];
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> _widgets = [];
-
-    for (final controller in _playerControllers) {
-      final t = TextField(
-        controller: controller,
-      );
-      _widgets.add(t);
-    }
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
@@ -31,7 +22,18 @@ class _StartScreenState extends State<StartScreen> {
         child: Column(
           children: [
             Text("Spieler eingeben"),
-            ..._widgets,
+            ..._playerControllers.map(
+              (element) => TextField(
+                controller: element,
+                onChanged: (input){
+                  if (_playerControllers.last.value.text.isNotEmpty){
+                    setState(() {
+                      _playerControllers.add(TextEditingController());
+                    });
+                  }
+                },
+              ),
+            ),
             MaterialButton(
               color: Colors.amber,
               child: Text("Spiel starten"),
@@ -42,20 +44,15 @@ class _StartScreenState extends State<StartScreen> {
                     players.add(controller.value.text);
                   }
                 }
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => GameScreen(playerNames: players)));
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => GameScreen(playerNames: players),
+                  ),
+                );
               },
             )
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          setState(() {
-            _playerControllers.add(TextEditingController());
-          });
-        },
-        child: Icon(Icons.add),
       ),
     );
   }
