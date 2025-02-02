@@ -1,25 +1,6 @@
 import 'package:flutter/material.dart';
 
-class Player {
-  final String name;
-  Measurement initialWeight;
-
-  Player(this.name, this.initialWeight);
-}
-
-class Measurement {
-  TextEditingController controller;
-  double value;
-
-  Measurement(this.controller, this.value);
-}
-
-class GameRound {
-  Measurement target;
-  List<Measurement> measurements;
-
-  GameRound(this.target, this.measurements);
-}
+import '../models/game_round.dart';
 
 class GameScreen extends StatefulWidget {
   const GameScreen({super.key, required this.playerNames});
@@ -33,9 +14,11 @@ class GameScreen extends StatefulWidget {
 class _GameScreenState extends State<GameScreen> {
   List<Player> _players = [];
   List<GameRound> rounds = [];
+  List<Widget> allWidgets = [];
 
   @override
   void initState() {
+    super.initState();
     for (final name in widget.playerNames) {
       _players.add(
         Player(
@@ -46,83 +29,151 @@ class _GameScreenState extends State<GameScreen> {
           ),
         ),
       );
-    }
-
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    List<Widget> playerWidgets = [];
-
-    List<Widget> initialWeight = [];
-    initialWeight.add(Text("Einwiegen"));
-
-    for (final player in _players) {
-      playerWidgets.add(
+      // add one container - we need it for the grid view to be correct
+      allWidgets.add(Container());
+      allWidgets.add(
         Container(
-          child: Text(player.name),
+          child: Text(name),
         ),
       );
-      initialWeight.add(
+      addInitialRound();
+    }
+  }
+
+  Future<double?> showDoubleInputDialog(BuildContext context) async {
+    final TextEditingController controller = TextEditingController();
+
+    return showDialog<double>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Zielgewicht eingeben'),
+          content: TextField(
+            controller: controller,
+            keyboardType: TextInputType.numberWithOptions(decimal: true),
+            decoration: InputDecoration(
+              hintText: 'Zielgewicht ...',
+              border: OutlineInputBorder(),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(null);
+              },
+              child: Text('Abbrechen'),
+            ),
+            TextButton(
+              onPressed: () {
+                final text = controller.text;
+                final value = double.tryParse(text);
+
+                if (value != null) {
+                  Navigator.of(context).pop(value);
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Bitte gib eine gültige Nummer ein'),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                }
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  addInitialRound(){
+    allWidgets.add(Text("Einwiegen"));
+    for (final player in _players) {
+      allWidgets.add(
         TextField(
           keyboardType: TextInputType.number,
           textInputAction: TextInputAction.next,
-          onSubmitted: (result) {
+          onSubmitted: (result) async {
             print(result);
             final r = double.tryParse(result);
             if (r != null) {
               player.initialWeight.value = r;
             }
 
-            // wenn die aktuelle runde eingetragen ist
             if (!_players.any((player) => player.initialWeight.value == 0)) {
-              print("adding round");
-              var newRound = GameRound(
-                Measurement(TextEditingController(), 0),
-                [],
-              );
+              if (rounds.last.isFinished){
+                final weight = await showDoubleInputDialog(context);
 
-              for (final player in _players) {
-                newRound.measurements.add(
-                  Measurement(
-                    TextEditingController(),
-                    0,
-                  ),
-                );
+                if (weight == null) {
+                  return;
+                }
+
+                addRound(weight);
               }
-
-              setState(() {
-                rounds.add(newRound);
-              });
-              // add round
             }
           },
           controller: player.initialWeight.controller,
         ),
       );
     }
+  }
 
+  addRound(double weight){
+    var newRound = GameRound(
+      weight,
+      [],
+    );
+
+    for (final _ in _players) {
+      newRound.measurements.add(
+        Measurement(
+          TextEditingController(),
+          0,
+        ),
+      );
+    }
+
+    setState(() {
+      rounds.add(newRound);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     List<Widget> roundsWidgets = [];
 
     for (final round in rounds) {
-      roundsWidgets.add(
-        TextField(
-          controller: round.target.controller,
-          keyboardType: TextInputType.number,
-          textInputAction: TextInputAction.next,
-        ),
-      );
+      roundsWidgets.add(Text(round.target.toString()));
       for (final measurement in round.measurements) {
         roundsWidgets.add(
           TextField(
             controller: measurement.controller,
             keyboardType: TextInputType.number,
             textInputAction: TextInputAction.next,
+            onSubmitted: (result){
+              // add the value to the measurement
+              final r = double.tryParse(result);
+
+              if(r == null){
+                // wenn wir die nummer nicht parsen können müssen wir den wert löschen
+                return;
+              }
+
+              measurement.value = r;
+              if (round.isFinished){
+                // evaluate round
+
+                // after evaluation add new round to the game
+
+              }
+            },
           ),
         );
       }
     }
+
+    allWidgets.addAll(roundsWidgets);
 
     return Scaffold(
       appBar: AppBar(
@@ -130,18 +181,23 @@ class _GameScreenState extends State<GameScreen> {
         title: Text("Bierwiegen"),
       ),
       body: Center(
-        child: GridView.count(
-          childAspectRatio: 4.0,
+        child: GridView.builder(
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: widget.playerNames.length + 1,
+            childAspectRatio: 1,
+            mainAxisSpacing: 1,
+            crossAxisSpacing: 1,
+          ),
+          itemCount: allWidgets.length,
           primary: true,
           shrinkWrap: true,
           padding: const EdgeInsets.all(20),
-          crossAxisCount: widget.playerNames.length + 1,
-          children: [
-            Container(),
-            ...playerWidgets,
-            ...initialWeight,
-            ...roundsWidgets,
-          ],
+          itemBuilder: (context, index) {
+            return Container(
+              color: Colors.blue,
+              child: allWidgets[index],
+            );
+          },
         ),
       ),
     );

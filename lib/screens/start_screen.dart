@@ -18,15 +18,16 @@ class _StartScreenState extends State<StartScreen> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text("Bierwiegen"),
       ),
-      body: Container(
+      body: SingleChildScrollView(
         child: Column(
           children: [
             Text("Spieler eingeben"),
             ..._playerControllers.map(
               (element) => TextField(
+                textInputAction: TextInputAction.next,
                 controller: element,
-                onChanged: (input){
-                  if (_playerControllers.last.value.text.isNotEmpty){
+                onChanged: (input) {
+                  if (_playerControllers.last.value.text.isNotEmpty) {
                     setState(() {
                       _playerControllers.add(TextEditingController());
                     });
