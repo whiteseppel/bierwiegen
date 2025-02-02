@@ -19,11 +19,14 @@ class _GameScreenState extends State<GameScreen> {
   @override
   void initState() {
     super.initState();
-    allWidgets.add(IconButton(
+    allWidgets.add(
+      IconButton(
         onPressed: () {
           Navigator.of(context).pop();
         },
-        icon: Icon(Icons.arrow_back)));
+        icon: Icon(Icons.arrow_back),
+      ),
+    );
     for (final name in widget.playerNames) {
       players.add(
         Player(
@@ -34,11 +37,8 @@ class _GameScreenState extends State<GameScreen> {
           ),
         ),
       );
-      // add one container - we need it for the grid view to be correct
       allWidgets.add(
-        Container(
-          child: Text(name),
-        ),
+        Text(name),
       );
     }
     addInitialRound();
@@ -201,7 +201,6 @@ class _GameScreenState extends State<GameScreen> {
           padding: const EdgeInsets.all(20),
           itemBuilder: (context, index) {
             return Container(
-              color: Colors.blue,
               child: allWidgets[index],
             );
           },
