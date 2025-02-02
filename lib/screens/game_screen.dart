@@ -12,15 +12,20 @@ class GameScreen extends StatefulWidget {
 }
 
 class _GameScreenState extends State<GameScreen> {
-  List<Player> _players = [];
+  List<Player> players = [];
   List<GameRound> rounds = [];
   List<Widget> allWidgets = [];
 
   @override
   void initState() {
     super.initState();
+    allWidgets.add(IconButton(
+        onPressed: () {
+          Navigator.of(context).pop();
+        },
+        icon: Icon(Icons.arrow_back)));
     for (final name in widget.playerNames) {
-      _players.add(
+      players.add(
         Player(
           name,
           Measurement(
@@ -30,14 +35,13 @@ class _GameScreenState extends State<GameScreen> {
         ),
       );
       // add one container - we need it for the grid view to be correct
-      allWidgets.add(Container());
       allWidgets.add(
         Container(
           child: Text(name),
         ),
       );
-      addInitialRound();
     }
+    addInitialRound();
   }
 
   Future<double?> showDoubleInputDialog(BuildContext context) async {
@@ -87,22 +91,24 @@ class _GameScreenState extends State<GameScreen> {
     );
   }
 
-  addInitialRound(){
+  addInitialRound() {
+    print('adding initial round');
     allWidgets.add(Text("Einwiegen"));
-    for (final player in _players) {
+    for (final player in players) {
       allWidgets.add(
         TextField(
           keyboardType: TextInputType.number,
           textInputAction: TextInputAction.next,
           onSubmitted: (result) async {
-            print(result);
+            print('Result Einwiegen: $result');
             final r = double.tryParse(result);
             if (r != null) {
+              print('seeting weight for player $player');
               player.initialWeight.value = r;
             }
 
-            if (!_players.any((player) => player.initialWeight.value == 0)) {
-              if (rounds.last.isFinished){
+            if (!players.any((player) => player.initialWeight.value == 0)) {
+              if (rounds.isEmpty || rounds.last.isFinished) {
                 final weight = await showDoubleInputDialog(context);
 
                 if (weight == null) {
@@ -119,17 +125,55 @@ class _GameScreenState extends State<GameScreen> {
     }
   }
 
-  addRound(double weight){
+  addRound(double weight) {
+    allWidgets.add(Text(
+      'Zielgewicht: $weight',
+    ));
     var newRound = GameRound(
       weight,
       [],
     );
 
-    for (final _ in _players) {
+    for (final _ in players) {
       newRound.measurements.add(
         Measurement(
           TextEditingController(),
           0,
+        ),
+      );
+    }
+    for (final measurement in newRound.measurements) {
+      allWidgets.add(
+        TextField(
+          controller: measurement.controller,
+          keyboardType: TextInputType.number,
+          textInputAction: TextInputAction.next,
+          onSubmitted: (result) async {
+            // add the value to the measurement
+            final r = double.tryParse(result);
+
+            if (r == null) {
+              print('value could not be converted');
+              // wenn wir die nummer nicht parsen können müssen wir den wert löschen
+              return;
+            }
+            print('setting value for round: $r');
+
+            measurement.value = r;
+            print('new round is finished: ${newRound.isFinished}');
+
+            if (newRound.isFinished) {
+              print('adding new round');
+              // after evaluation add new round to the game
+              final weight = await showDoubleInputDialog(context);
+
+              if (weight == null) {
+                return;
+              }
+
+              addRound(weight);
+            }
+          },
         ),
       );
     }
@@ -141,50 +185,13 @@ class _GameScreenState extends State<GameScreen> {
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> roundsWidgets = [];
-
-    for (final round in rounds) {
-      roundsWidgets.add(Text(round.target.toString()));
-      for (final measurement in round.measurements) {
-        roundsWidgets.add(
-          TextField(
-            controller: measurement.controller,
-            keyboardType: TextInputType.number,
-            textInputAction: TextInputAction.next,
-            onSubmitted: (result){
-              // add the value to the measurement
-              final r = double.tryParse(result);
-
-              if(r == null){
-                // wenn wir die nummer nicht parsen können müssen wir den wert löschen
-                return;
-              }
-
-              measurement.value = r;
-              if (round.isFinished){
-                // evaluate round
-
-                // after evaluation add new round to the game
-
-              }
-            },
-          ),
-        );
-      }
-    }
-
-    allWidgets.addAll(roundsWidgets);
-
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text("Bierwiegen"),
-      ),
       body: Center(
         child: GridView.builder(
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: widget.playerNames.length + 1,
             childAspectRatio: 1,
+            mainAxisExtent: 50,
             mainAxisSpacing: 1,
             crossAxisSpacing: 1,
           ),

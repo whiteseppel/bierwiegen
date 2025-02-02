@@ -5,7 +5,7 @@ class GameRound {
   List<Measurement> measurements;
 
   bool get isFinished {
-    return !measurements.any((m) => m.value != 0.0);
+    return measurements.every((m) => m.value != 0.0);
   }
 
   GameRound(this.target, this.measurements);
