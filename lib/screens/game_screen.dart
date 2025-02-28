@@ -1,17 +1,21 @@
+import 'package:bierwiegen/providers/providers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/game_round.dart';
+import '../models/measurement.dart';
+import '../models/player.dart';
 
-class GameScreen extends StatefulWidget {
+class GameScreen extends ConsumerStatefulWidget {
   const GameScreen({super.key, required this.playerNames});
 
   final List<String> playerNames;
 
   @override
-  State<GameScreen> createState() => _GameScreenState();
+  _GameScreenState createState() => _GameScreenState();
 }
 
-class _GameScreenState extends State<GameScreen> {
+class _GameScreenState extends ConsumerState<GameScreen> {
   List<Player> players = [];
   List<GameRound> rounds = [];
   List<Widget> allWidgets = [];
@@ -19,14 +23,6 @@ class _GameScreenState extends State<GameScreen> {
   @override
   void initState() {
     super.initState();
-    allWidgets.add(
-      IconButton(
-        onPressed: () {
-          Navigator.of(context).pop();
-        },
-        icon: Icon(Icons.arrow_back),
-      ),
-    );
     for (final name in widget.playerNames) {
       players.add(
         Player(
@@ -37,11 +33,7 @@ class _GameScreenState extends State<GameScreen> {
           ),
         ),
       );
-      allWidgets.add(
-        Text(name),
-      );
     }
-    addInitialRound();
   }
 
   Future<double?> showDoubleInputDialog(BuildContext context) async {
@@ -89,40 +81,6 @@ class _GameScreenState extends State<GameScreen> {
         );
       },
     );
-  }
-
-  addInitialRound() {
-    print('adding initial round');
-    allWidgets.add(Text("Einwiegen"));
-    for (final player in players) {
-      allWidgets.add(
-        TextField(
-          keyboardType: TextInputType.number,
-          textInputAction: TextInputAction.next,
-          onSubmitted: (result) async {
-            print('Result Einwiegen: $result');
-            final r = double.tryParse(result);
-            if (r != null) {
-              print('seeting weight for player $player');
-              player.initialWeight.value = r;
-            }
-
-            if (!players.any((player) => player.initialWeight.value == 0)) {
-              if (rounds.isEmpty || rounds.last.isFinished) {
-                final weight = await showDoubleInputDialog(context);
-
-                if (weight == null) {
-                  return;
-                }
-
-                addRound(weight);
-              }
-            }
-          },
-          controller: player.initialWeight.controller,
-        ),
-      );
-    }
   }
 
   addRound(double weight) {
@@ -185,27 +143,151 @@ class _GameScreenState extends State<GameScreen> {
 
   @override
   Widget build(BuildContext context) {
+    double spacing = 1.0;
+
     return Scaffold(
-      body: Center(
-        child: GridView.builder(
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: widget.playerNames.length + 1,
-            childAspectRatio: 1,
-            mainAxisExtent: 50,
-            mainAxisSpacing: 1,
-            crossAxisSpacing: 1,
+      body: SafeArea(
+        child: Container(
+          padding: EdgeInsets.all(10),
+          child: CustomScrollView(
+            slivers: <Widget>[
+              SliverPersistentHeader(
+                pinned: true,
+                floating: false,
+                delegate: _StickyHeaderDelegate(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: spacing / 2),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Container(
+                            margin: EdgeInsets.all(spacing / 2),
+                            child: IconButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              icon: Icon(Icons.arrow_back),
+                            ),
+                          ),
+                        ),
+                        ...List.generate(
+                          players.length,
+                          (i) {
+                            return Expanded(
+                              child: Container(
+                                alignment: Alignment.center,
+                                margin: EdgeInsets.all(spacing / 2),
+                                child: Text(players[i].name),
+                              ),
+                            );
+                          },
+                        )
+                      ],
+                    ),
+                  ),
+                  // NOTE: this caused an error when setting it to 50 or more
+                  height: 40,
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        margin: EdgeInsets.all(spacing / 2),
+                        child: Text('Einwiegen'),
+                      ),
+                    ),
+                    ...List.generate(
+                      players.length,
+                      (i) {
+                        return Expanded(
+                          child: Container(
+                            alignment: Alignment.center,
+                            margin: EdgeInsets.all(spacing / 2),
+                            child: TextField(
+                              keyboardType: TextInputType.number,
+                              textInputAction: TextInputAction.next,
+                              onSubmitted: (result) async {
+                                print('Result Einwiegen: $result');
+                                final r = double.tryParse(result);
+                                if (r != null) {
+                                  print(
+                                      'setting weight for player ${players[i].name}');
+                                  players[i].initialWeight.value = r;
+                                }
+
+                                if (!players.any((player) =>
+                                    player.initialWeight.value == 0)) {
+                                  if (rounds.isEmpty ||
+                                      rounds.last.isFinished) {
+                                    final weight =
+                                        await showDoubleInputDialog(context);
+
+                                    if (weight == null) {
+                                      return;
+                                    }
+
+                                    addRound(weight);
+                                  }
+                                }
+                              },
+                              controller: players[i].initialWeight.controller,
+                            ),
+                          ),
+                        );
+                      },
+                    )
+                  ],
+                ),
+              ),
+              SliverGrid(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: widget.playerNames.length + 1,
+                  childAspectRatio: 1,
+                  mainAxisExtent: 50,
+                  mainAxisSpacing: spacing,
+                  crossAxisSpacing: spacing,
+                ),
+                delegate: SliverChildBuilderDelegate(
+                  (BuildContext context, int index) {
+                    return Container(
+                      child: allWidgets[index],
+                    );
+                  },
+                  childCount: allWidgets.length,
+                ),
+              ),
+            ],
           ),
-          itemCount: allWidgets.length,
-          primary: true,
-          shrinkWrap: true,
-          padding: const EdgeInsets.all(20),
-          itemBuilder: (context, index) {
-            return Container(
-              child: allWidgets[index],
-            );
-          },
         ),
       ),
     );
+  }
+}
+
+class _StickyHeaderDelegate extends SliverPersistentHeaderDelegate {
+  final Widget child;
+  final double height;
+
+  _StickyHeaderDelegate({required this.child, required this.height});
+
+  @override
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return Container(
+      child: child,
+    );
+  }
+
+  @override
+  double get maxExtent => height;
+
+  @override
+  double get minExtent => height;
+
+  @override
+  bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) {
+    return false;
   }
 }

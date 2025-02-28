@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/game_round.dart';
+import '../models/player.dart';
 
-// StateNotifier for managing players list
 class PlayerNotifier extends StateNotifier<List<Player>> {
   PlayerNotifier() : super([]);
 
@@ -10,9 +10,9 @@ class PlayerNotifier extends StateNotifier<List<Player>> {
   }
 }
 
-final playerProvider = StateNotifierProvider<PlayerNotifier, List<Player>>((ref) => PlayerNotifier());
+final playerProvider = StateNotifierProvider<PlayerNotifier, List<Player>>(
+    (ref) => PlayerNotifier());
 
-// StateNotifier for managing game rounds
 class GameRoundNotifier extends StateNotifier<List<GameRound>> {
   GameRoundNotifier() : super([]);
 
@@ -21,4 +21,6 @@ class GameRoundNotifier extends StateNotifier<List<GameRound>> {
   }
 }
 
-final gameRoundProvider = StateNotifierProvider<GameRoundNotifier, List<GameRound>>((ref) => GameRoundNotifier());
+final gameRoundProvider =
+    StateNotifierProvider<GameRoundNotifier, List<GameRound>>(
+        (ref) => GameRoundNotifier());

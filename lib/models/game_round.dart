@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'measurement.dart';
 
 class GameRound {
   double target;
@@ -9,22 +9,4 @@ class GameRound {
   }
 
   GameRound(this.target, this.measurements);
-}
-
-class Player {
-  final String name;
-  Measurement initialWeight;
-
-  Player(this.name, this.initialWeight);
-}
-
-class Measurement {
-  TextEditingController controller;
-  double value;
-
-  Measurement(this.controller, this.value);
-
-  double distanceToTarget(double target) {
-    return (target - value).abs();
-  }
 }
