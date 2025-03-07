@@ -147,147 +147,141 @@ class _GameScreenState extends ConsumerState<GameScreen> {
 
     return Scaffold(
       body: SafeArea(
-        child: Container(
-          padding: EdgeInsets.all(10),
-          child: CustomScrollView(
-            slivers: <Widget>[
-              SliverPersistentHeader(
-                pinned: true,
-                floating: false,
-                delegate: _StickyHeaderDelegate(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: spacing / 2),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Container(
-                            margin: EdgeInsets.all(spacing / 2),
-                            child: IconButton(
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                              icon: Icon(Icons.arrow_back),
-                            ),
-                          ),
-                        ),
-                        ...List.generate(
-                          players.length,
-                          (i) {
-                            return Expanded(
-                              child: Container(
-                                alignment: Alignment.center,
-                                margin: EdgeInsets.all(spacing / 2),
-                                child: Text(players[i].name),
-                              ),
-                            );
-                          },
-                        )
-                      ],
-                    ),
-                  ),
-                  // NOTE: this caused an error when setting it to 50 or more
-                  height: 40,
-                ),
-              ),
-              SliverToBoxAdapter(
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        margin: EdgeInsets.all(spacing / 2),
-                        child: Text('Einwiegen'),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      margin: EdgeInsets.all(spacing / 2),
+                      child: IconButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        icon: Icon(Icons.arrow_back),
                       ),
                     ),
-                    ...List.generate(
-                      players.length,
-                      (i) {
-                        return Expanded(
-                          child: Container(
-                            alignment: Alignment.center,
-                            margin: EdgeInsets.all(spacing / 2),
-                            child: TextField(
-                              keyboardType: TextInputType.number,
-                              textInputAction: TextInputAction.next,
-                              onSubmitted: (result) async {
-                                print('Result Einwiegen: $result');
-                                final r = double.tryParse(result);
-                                if (r != null) {
-                                  print(
-                                      'setting weight for player ${players[i].name}');
-                                  players[i].initialWeight.value = r;
-                                }
+                  ),
+                  ...List.generate(
+                    players.length,
+                    (i) {
+                      return Expanded(
+                        child: Container(
+                          alignment: Alignment.center,
+                          margin: EdgeInsets.all(spacing / 2),
+                          child: Text(players[i].name),
+                        ),
+                      );
+                    },
+                  )
+                ],
+              ),
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      margin: EdgeInsets.all(spacing / 2),
+                      child: Text('Einwiegen'),
+                    ),
+                  ),
+                  ...List.generate(
+                    players.length,
+                    (i) {
+                      return Expanded(
+                        child: Container(
+                          alignment: Alignment.center,
+                          margin: EdgeInsets.all(spacing / 2),
+                          child: TextField(
+                            keyboardType: TextInputType.number,
+                            textInputAction: TextInputAction.next,
+                            onSubmitted: (result) async {
+                              print('Result Einwiegen: $result');
+                              final r = double.tryParse(result);
+                              if (r != null) {
+                                print(
+                                    'setting weight for player ${players[i].name}');
+                                players[i].initialWeight.value = r;
+                              }
 
-                                if (!players.any((player) =>
-                                    player.initialWeight.value == 0)) {
-                                  if (rounds.isEmpty ||
-                                      rounds.last.isFinished) {
-                                    final weight =
-                                        await showDoubleInputDialog(context);
+                              if (!players.any((player) =>
+                                  player.initialWeight.value == 0)) {
+                                if (rounds.isEmpty || rounds.last.isFinished) {
+                                  final weight =
+                                      await showDoubleInputDialog(context);
 
-                                    if (weight == null) {
-                                      return;
-                                    }
-
-                                    addRound(weight);
+                                  if (weight == null) {
+                                    return;
                                   }
+
+                                  addRound(weight);
                                 }
-                              },
-                              controller: players[i].initialWeight.controller,
-                            ),
+                              }
+                            },
+                            controller: players[i].initialWeight.controller,
+                          ),
+                        ),
+                      );
+                    },
+                  )
+                ],
+              ),
+              ListView.builder(
+                shrinkWrap: true,
+                itemCount: rounds.length,
+                itemBuilder: (context, i) {
+                  final round = rounds[i];
+                  return Row(
+                    children: [
+                      Text('Ziel: ${round.target.toString()}'),
+                      ...List.generate(round.measurements.length, (j) {
+                        final measurement = round.measurements[j];
+                        return Container(
+                          color: round.winningIndex == j ? Colors.green : null,
+                          child: TextField(
+                            controller: measurement.controller,
+                            keyboardType: TextInputType.number,
+                            textInputAction: TextInputAction.next,
+                            onSubmitted: (result) async {
+                              // add the value to the measurement
+                              final r = double.tryParse(result);
+
+                              if (r == null) {
+                                print('value could not be converted');
+                                // wenn wir die nummer nicht parsen können müssen wir den wert löschen
+                                return;
+                              }
+                              print('setting value for round: $r');
+
+                              measurement.value = r;
+                              print(
+                                  'new round is finished: ${round.isFinished}');
+
+                              if (round.isFinished) {
+                                print('adding new round');
+                                // after evaluation add new round to the game
+                                final weight =
+                                    await showDoubleInputDialog(context);
+
+                                if (weight == null) {
+                                  return;
+                                }
+
+                                addRound(weight);
+                              }
+                            },
                           ),
                         );
-                      },
-                    )
-                  ],
-                ),
-              ),
-              SliverGrid(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: widget.playerNames.length + 1,
-                  childAspectRatio: 1,
-                  mainAxisExtent: 50,
-                  mainAxisSpacing: spacing,
-                  crossAxisSpacing: spacing,
-                ),
-                delegate: SliverChildBuilderDelegate(
-                  (BuildContext context, int index) {
-                    return Container(
-                      child: allWidgets[index],
-                    );
-                  },
-                  childCount: allWidgets.length,
-                ),
+                      })
+                    ],
+                  );
+                },
               ),
             ],
           ),
         ),
       ),
     );
-  }
-}
-
-class _StickyHeaderDelegate extends SliverPersistentHeaderDelegate {
-  final Widget child;
-  final double height;
-
-  _StickyHeaderDelegate({required this.child, required this.height});
-
-  @override
-  Widget build(
-      BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return Container(
-      child: child,
-    );
-  }
-
-  @override
-  double get maxExtent => height;
-
-  @override
-  double get minExtent => height;
-
-  @override
-  bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) {
-    return false;
   }
 }
