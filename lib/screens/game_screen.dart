@@ -19,6 +19,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
   List<Player> players = [];
   List<GameRound> rounds = [];
   List<Widget> allWidgets = [];
+  bool _isExpanded = false;
 
   @override
   void initState() {
@@ -237,40 +238,44 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                       Text('Ziel: ${round.target.toString()}'),
                       ...List.generate(round.measurements.length, (j) {
                         final measurement = round.measurements[j];
-                        return Container(
-                          color: round.winningIndex == j ? Colors.green : null,
-                          child: TextField(
-                            controller: measurement.controller,
-                            keyboardType: TextInputType.number,
-                            textInputAction: TextInputAction.next,
-                            onSubmitted: (result) async {
-                              // add the value to the measurement
-                              final r = double.tryParse(result);
+                        return Expanded(
+                          child: Container(
+                            alignment: Alignment.center,
+                            color:
+                                round.winningIndex == j ? Colors.green : null,
+                            child: TextField(
+                              controller: measurement.controller,
+                              keyboardType: TextInputType.number,
+                              textInputAction: TextInputAction.next,
+                              onSubmitted: (result) async {
+                                // add the value to the measurement
+                                final r = double.tryParse(result);
 
-                              if (r == null) {
-                                print('value could not be converted');
-                                // wenn wir die nummer nicht parsen können müssen wir den wert löschen
-                                return;
-                              }
-                              print('setting value for round: $r');
-
-                              measurement.value = r;
-                              print(
-                                  'new round is finished: ${round.isFinished}');
-
-                              if (round.isFinished) {
-                                print('adding new round');
-                                // after evaluation add new round to the game
-                                final weight =
-                                    await showDoubleInputDialog(context);
-
-                                if (weight == null) {
+                                if (r == null) {
+                                  print('value could not be converted');
+                                  // wenn wir die nummer nicht parsen können müssen wir den wert löschen
                                   return;
                                 }
+                                print('setting value for round: $r');
 
-                                addRound(weight);
-                              }
-                            },
+                                measurement.value = r;
+                                print(
+                                    'new round is finished: ${round.isFinished}');
+
+                                if (round.isFinished) {
+                                  print('adding new round');
+                                  // after evaluation add new round to the game
+                                  final weight =
+                                      await showDoubleInputDialog(context);
+
+                                  if (weight == null) {
+                                    return;
+                                  }
+
+                                  addRound(weight);
+                                }
+                              },
+                            ),
                           ),
                         );
                       })
@@ -281,6 +286,40 @@ class _GameScreenState extends ConsumerState<GameScreen> {
             ],
           ),
         ),
+      ),
+      floatingActionButton: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (_isExpanded) ...[
+            // TODO: restarting game
+            FloatingActionButton(
+              onPressed: () {
+                // Action for first button
+              },
+              child: Icon(Icons.refresh),
+              heroTag: "edit",
+            ),
+            SizedBox(width: 10),
+            // TODO: adding round
+            FloatingActionButton(
+              onPressed: () {
+                // Action for second button
+              },
+              child: Icon(Icons.sports_esports),
+              heroTag: "share",
+            ),
+            SizedBox(width: 10),
+          ],
+          FloatingActionButton(
+            onPressed: () {
+              setState(() {
+                _isExpanded = !_isExpanded;
+              });
+            },
+            child: Icon(_isExpanded ? Icons.close : Icons.more_vert),
+            heroTag: "toggle",
+          ),
+        ],
       ),
     );
   }
