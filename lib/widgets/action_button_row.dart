@@ -1,13 +1,15 @@
+import 'package:bierwiegen/providers/providers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class ActionButtonRow extends StatefulWidget {
+class ActionButtonRow extends ConsumerStatefulWidget {
   const ActionButtonRow({super.key});
 
   @override
-  State<ActionButtonRow> createState() => _ActionButtonRowState();
+  ConsumerState<ActionButtonRow> createState() => _ActionButtonRowState();
 }
 
-class _ActionButtonRowState extends State<ActionButtonRow> {
+class _ActionButtonRowState extends ConsumerState<ActionButtonRow> {
   bool _isExpanded = false;
 
   @override
@@ -29,21 +31,26 @@ class _ActionButtonRowState extends State<ActionButtonRow> {
           /// Restart Game Button
           FloatingActionButton(
             onPressed: () {
-              // TODO: reset the whole game (not sure yet how i will do it)
+              // NOTE: maybe create a pop up before resetting the round?
+              ref.read(gameRoundProvider.notifier).clearRounds();
+              ref.read(playerProvider.notifier).resetInitialWeight();
+              setState(() {
+                _isExpanded = !_isExpanded;
+              });
             },
             heroTag: "Runde neu starten",
             child: const Icon(Icons.refresh),
           ),
           const SizedBox(width: 10),
-          // TODO: adding round
-          FloatingActionButton(
-            onPressed: () {
-              // Action for second button
-            },
-            heroTag: "share",
-            child: const Icon(Icons.sports_esports),
-          ),
-          const SizedBox(width: 10),
+          // NOTE: adding round - is this button really necessary?
+          // FloatingActionButton(
+          //   onPressed: () {
+          //     // Action for second button
+          //   },
+          //   heroTag: "share",
+          //   child: const Icon(Icons.sports_esports),
+          // ),
+          // const SizedBox(width: 10),
         ],
         FloatingActionButton(
           onPressed: () {

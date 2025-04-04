@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/providers.dart';
@@ -18,6 +19,9 @@ class _InitialInputFieldState extends ConsumerState<InitialInputField> {
     return TextField(
       keyboardType: TextInputType.number,
       textInputAction: TextInputAction.next,
+      inputFormatters: [
+        FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+      ],
       onSubmitted: (result) async {
         print('Result Einwiegen: $result');
         final r = double.tryParse(result);

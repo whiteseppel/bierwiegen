@@ -1,5 +1,6 @@
 import 'package:bierwiegen/models/measurement.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../functions/weight_input_dialog.dart';
 
@@ -20,6 +21,9 @@ class _WeightInputFieldState extends ConsumerState<WeightInputField> {
       controller: widget.m.controller,
       keyboardType: TextInputType.number,
       textInputAction: TextInputAction.next,
+      inputFormatters: [
+        FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+      ],
       onSubmitted: (result) async {
         // add the value to the measurement
         final r = double.tryParse(result);

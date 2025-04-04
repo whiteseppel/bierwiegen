@@ -16,6 +16,15 @@ class PlayerNotifier extends StateNotifier<List<Player>> {
   void addPlayer(Player player) {
     state = [...state, player];
   }
+
+  void resetInitialWeight() {
+    final players = state;
+    for (final p in players) {
+      p.initialWeight.value = 0;
+      p.initialWeight.controller.clear();
+    }
+    state = players;
+  }
 }
 
 final playerProvider = StateNotifierProvider<PlayerNotifier, List<Player>>(
@@ -25,6 +34,10 @@ class GameRoundNotifier extends StateNotifier<List<GameRound>> {
   GameRoundNotifier(this.ref) : super([]);
 
   final Ref ref;
+
+  void clearRounds() {
+    state = [];
+  }
 
   void addRound(double weight) {
     final r = GameRound(weight, []);

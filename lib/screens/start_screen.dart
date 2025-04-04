@@ -46,6 +46,7 @@ class _StartScreenState extends ConsumerState<StartScreen> {
               color: Colors.amber,
               child: const Text("Spiel starten"),
               onPressed: () {
+                ref.read(gameRoundProvider.notifier).clearRounds();
                 ref.read(playerProvider.notifier).clearPlayers();
                 List<String> players = [];
                 for (final controller in _playerControllers) {
