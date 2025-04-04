@@ -2,12 +2,13 @@ import 'package:bierwiegen/models/measurement.dart';
 import 'package:bierwiegen/providers/providers.dart';
 import 'package:bierwiegen/screens/game_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:riverpod/riverpod.dart';
 import 'package:flutter/material.dart';
 
 import '../models/player.dart';
 
 class StartScreen extends ConsumerStatefulWidget {
+  const StartScreen({super.key});
+
   @override
   ConsumerState<StartScreen> createState() => _StartScreenState();
 }

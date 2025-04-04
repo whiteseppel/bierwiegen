@@ -21,8 +21,8 @@ class _ActionButtonRowState extends State<ActionButtonRow> {
             onPressed: () {
               Navigator.of(context).pop();
             },
-            child: const Icon(Icons.arrow_back),
             heroTag: "Zurück",
+            child: const Icon(Icons.arrow_back),
           ),
           const SizedBox(width: 10),
 
@@ -31,8 +31,8 @@ class _ActionButtonRowState extends State<ActionButtonRow> {
             onPressed: () {
               // TODO: reset the whole game (not sure yet how i will do it)
             },
-            child: const Icon(Icons.refresh),
             heroTag: "Runde neu starten",
+            child: const Icon(Icons.refresh),
           ),
           const SizedBox(width: 10),
           // TODO: adding round
@@ -40,8 +40,8 @@ class _ActionButtonRowState extends State<ActionButtonRow> {
             onPressed: () {
               // Action for second button
             },
-            child: const Icon(Icons.sports_esports),
             heroTag: "share",
+            child: const Icon(Icons.sports_esports),
           ),
           const SizedBox(width: 10),
         ],
@@ -51,8 +51,8 @@ class _ActionButtonRowState extends State<ActionButtonRow> {
               _isExpanded = !_isExpanded;
             });
           },
-          child: Icon(_isExpanded ? Icons.close : Icons.more_vert),
           heroTag: "toggle",
+          child: Icon(_isExpanded ? Icons.close : Icons.more_vert),
         ),
       ],
     );
