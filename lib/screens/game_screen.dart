@@ -30,6 +30,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               // NOTE: players
+              //       we can add trophies in the colors according to the winning person (Icons.emoji_events)
               GridView.count(
                 crossAxisCount: ref.read(playerProvider).length + 1,
                 shrinkWrap: true,
@@ -130,6 +131,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                                       if (round.winningIndex == j)
                                         Icon(
                                           Icons.star,
+                                          // NOTE: when we use a scale we have to calculate the exact number by grams
                                           color:
                                               round.target == measurement.value
                                                   ? Colors.amber
