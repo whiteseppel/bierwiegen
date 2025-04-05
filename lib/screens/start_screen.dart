@@ -21,9 +21,9 @@ class _StartScreenState extends ConsumerState<StartScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        body: Container(
+    return Scaffold(
+      body: SafeArea(
+        child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: SingleChildScrollView(
             child: Column(
@@ -98,7 +98,9 @@ class _StartScreenState extends ConsumerState<StartScreen> {
                 Container(
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(standardBorderRadius),
+                    borderRadius: BorderRadius.circular(
+                      12.0,
+                    ),
                   ),
                   child: MaterialButton(
                     color: Colors.blue,
@@ -139,7 +141,10 @@ class _StartScreenState extends ConsumerState<StartScreen> {
                 const Text(
                   "Passende Digitalwagen für die Verbindung zur App gibt es auf unserer Website.",
                   textAlign: TextAlign.center,
-                )
+                ),
+                const SizedBox(
+                  height: 60,
+                ),
               ],
             ),
           ),
