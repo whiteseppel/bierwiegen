@@ -18,6 +18,9 @@ class _GameScreenState extends ConsumerState<GameScreen> {
   Widget build(BuildContext context) {
     double spacing = 1.0;
 
+    // TODO: implement pretty design
+    // NOTE: i think we need to implement the grid view again - i need all quaters to have exactly the same size
+    //       currently some of them are different sized.
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
