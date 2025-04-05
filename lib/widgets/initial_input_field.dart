@@ -19,9 +19,14 @@ class _InitialInputFieldState extends ConsumerState<InitialInputField> {
     return TextField(
       keyboardType: TextInputType.number,
       textInputAction: TextInputAction.next,
+      decoration: const InputDecoration(
+        border: InputBorder.none,
+        hintText: "...",
+      ),
       inputFormatters: [
         FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
       ],
+      textAlign: TextAlign.center,
       onSubmitted: (result) async {
         print('Result Einwiegen: $result');
         final r = double.tryParse(result);

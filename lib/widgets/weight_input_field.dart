@@ -24,6 +24,11 @@ class _WeightInputFieldState extends ConsumerState<WeightInputField> {
       inputFormatters: [
         FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
       ],
+      decoration: InputDecoration(
+        border: InputBorder.none,
+        hintText: "...",
+      ),
+      textAlign: TextAlign.center,
       onSubmitted: (result) async {
         // add the value to the measurement
         final r = double.tryParse(result);

@@ -1,16 +1,15 @@
 # bierwiegen
 
-A new Flutter project.
+This is a project digitalizing a party drinking game. 
 
-## Getting Started
+## Improvements
 
-This project is a starting point for a Flutter application.
+### Integration Bluetooth Scale
+- Order the "Decent Scale".
+- Optimize Input flow for the use of Bluetooth.
 
-A few resources to get you started if this is your first Flutter project:
+### Usability
+- After adding a round the focus should jump straight to the first field
+  in the row so that users can start typing immediately.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.

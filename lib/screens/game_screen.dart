@@ -17,79 +17,131 @@ class _GameScreenState extends ConsumerState<GameScreen> {
   @override
   Widget build(BuildContext context) {
     double spacing = 1.0;
+    // NOTE: when having a lot of players 1.8 is very ince in landscape mode.
+    //       maybe we need to change the game settings based on how many players there are
+    //       and the orientation of the phone so that the layout is fitting for all playstyles
+    double childAspectRatio = 1.8;
 
-    // TODO: implement pretty design
-    // NOTE: i think we need to implement the grid view again - i need all quaters to have exactly the same size
-    //       currently some of them are different sized.
     return Scaffold(
       body: SafeArea(
-        child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Row(
+              // NOTE: players
+              GridView.count(
+                crossAxisCount: ref.read(playerProvider).length + 1,
+                shrinkWrap: true,
+                childAspectRatio: childAspectRatio,
+                physics: const NeverScrollableScrollPhysics(),
                 children: [
-                  Expanded(
-                    child: Container(),
-                  ),
-                  ...List.generate(
-                    ref.read(playerProvider).length,
-                    (i) {
-                      return Expanded(
-                        child: Container(
-                          alignment: Alignment.center,
-                          margin: EdgeInsets.all(spacing / 2),
-                          child: Text(ref.read(playerProvider)[i].name),
-                        ),
-                      );
-                    },
-                  )
-                ],
-              ),
-              Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      margin: EdgeInsets.all(spacing / 2),
-                      child: const Text('Einwiegen'),
+                  Container(
+                    alignment: Alignment.center,
+                    child: const Text(
+                      "Ziel",
+                      textAlign: TextAlign.center,
                     ),
                   ),
                   ...List.generate(
                     ref.read(playerProvider).length,
                     (i) {
-                      return Expanded(
-                        child: Container(
-                          alignment: Alignment.center,
-                          margin: EdgeInsets.all(spacing / 2),
-                          child: InitialInputField(i),
+                      return Container(
+                        alignment: Alignment.center,
+                        margin: EdgeInsets.all(spacing / 2),
+                        child: Text(
+                          ref.read(playerProvider)[i].name,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                            // fontSize: 18,
+                          ),
                         ),
                       );
                     },
                   )
                 ],
               ),
-              ListView.builder(
-                shrinkWrap: true,
-                itemCount: ref.watch(gameRoundProvider).length,
-                itemBuilder: (context, i) {
-                  final round = ref.watch(gameRoundProvider)[i];
-                  return Row(
-                    children: [
-                      Text('Ziel: ${round.target.toString()}'),
-                      ...List.generate(round.measurements.length, (j) {
-                        final measurement = round.measurements[j];
-                        return Expanded(
-                          child: Container(
-                            alignment: Alignment.center,
-                            color:
-                                round.winningIndex == j ? Colors.green : null,
-                            child: WeightInputField(measurement),
-                          ),
-                        );
-                      })
-                    ],
-                  );
-                },
+              Container(
+                decoration: BoxDecoration(
+                    color: const Color(0xFFE0E0E0),
+                    borderRadius: BorderRadius.circular(24)),
+                child: Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        // NOTE: initial weight
+                        // TODO:
+                        // - we need to calculate for each player how many rounds they have won and display it underneath the player
+                        GridView.count(
+                          crossAxisCount: ref.read(playerProvider).length + 1,
+                          shrinkWrap: true,
+                          childAspectRatio: childAspectRatio,
+                          physics: const NeverScrollableScrollPhysics(),
+                          children: [
+                            Container(
+                              alignment: Alignment.center,
+                              margin: EdgeInsets.all(spacing / 2),
+                            ),
+                            ...List.generate(
+                              ref.read(playerProvider).length,
+                              (i) {
+                                return Container(
+                                  alignment: Alignment.center,
+                                  margin: EdgeInsets.all(spacing / 2),
+                                  child: InitialInputField(i),
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+
+                        // NOTE: All game rounds
+                        ...List.generate(ref.watch(gameRoundProvider).length,
+                            (i) {
+                          final round = ref.watch(gameRoundProvider)[i];
+
+                          // NOTE: single game round
+                          // TODO:
+                          // - the calculation for the winning round is off
+                          String target = round.target.toString();
+                          target = target.substring(0, target.length - 2);
+                          return GridView.count(
+                            crossAxisCount: ref.read(playerProvider).length + 1,
+                            shrinkWrap: true,
+                            childAspectRatio: childAspectRatio,
+                            physics: const NeverScrollableScrollPhysics(),
+                            children: [
+                              Container(
+                                alignment: Alignment.center,
+                                child: TextField(
+                                  textAlign: TextAlign.center,
+                                  decoration: const InputDecoration(
+                                    border: InputBorder.none,
+                                  ),
+                                  enabled: false,
+                                  controller: TextEditingController()
+                                    ..text = target,
+                                ),
+                              ),
+                              ...List.generate(round.measurements.length, (j) {
+                                final measurement = round.measurements[j];
+                                return Expanded(
+                                  child: Container(
+                                    alignment: Alignment.center,
+                                    color: round.winningIndex == j
+                                        ? Colors.green
+                                        : null,
+                                    child: WeightInputField(measurement),
+                                  ),
+                                );
+                              })
+                            ],
+                          );
+                        }),
+                      ],
+                    ),
+                  ),
+                ),
               ),
             ],
           ),
