@@ -101,8 +101,6 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                           final round = ref.watch(gameRoundProvider)[i];
 
                           // NOTE: single game round
-                          // TODO:
-                          // - the calculation for the winning round is off
                           String target = round.target.toString();
                           target = target.substring(0, target.length - 2);
                           return GridView.count(
@@ -128,10 +126,17 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                                 return Expanded(
                                   child: Container(
                                     alignment: Alignment.center,
-                                    color: round.winningIndex == j
-                                        ? Colors.green
-                                        : null,
-                                    child: WeightInputField(measurement),
+                                    child: Stack(children: [
+                                      if (round.winningIndex == j)
+                                        Icon(
+                                          Icons.star,
+                                          color:
+                                              round.target == measurement.value
+                                                  ? Colors.amber
+                                                  : Colors.green,
+                                        ),
+                                      WeightInputField(measurement),
+                                    ]),
                                   ),
                                 );
                               })

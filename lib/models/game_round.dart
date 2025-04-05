@@ -9,7 +9,7 @@ class GameRound {
   }
 
   int? get winningIndex {
-    if (isFinished) {
+    if (!isFinished) {
       return null;
     }
 

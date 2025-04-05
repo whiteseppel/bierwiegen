@@ -28,7 +28,8 @@ class PlayerNotifier extends StateNotifier<List<Player>> {
 }
 
 final playerProvider = StateNotifierProvider<PlayerNotifier, List<Player>>(
-    (ref) => PlayerNotifier(ref));
+  (ref) => PlayerNotifier(ref),
+);
 
 class GameRoundNotifier extends StateNotifier<List<GameRound>> {
   GameRoundNotifier(this.ref) : super([]);
@@ -47,8 +48,13 @@ class GameRoundNotifier extends StateNotifier<List<GameRound>> {
 
     state = [...state, r];
   }
+
+  void forceRefresh() {
+    state = [...state];
+  }
 }
 
 final gameRoundProvider =
     StateNotifierProvider<GameRoundNotifier, List<GameRound>>(
-        (ref) => GameRoundNotifier(ref));
+  (ref) => GameRoundNotifier(ref),
+);

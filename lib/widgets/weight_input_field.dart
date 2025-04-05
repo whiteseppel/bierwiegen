@@ -24,7 +24,7 @@ class _WeightInputFieldState extends ConsumerState<WeightInputField> {
       inputFormatters: [
         FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
       ],
-      decoration: InputDecoration(
+      decoration: const InputDecoration(
         border: InputBorder.none,
         hintText: "...",
       ),
@@ -47,6 +47,7 @@ class _WeightInputFieldState extends ConsumerState<WeightInputField> {
         // NOTE:
         // when we move this part to its own widget we can check if the last round is finisheod
         if (ref.read(gameRoundProvider).last.isFinished) {
+          ref.read(gameRoundProvider.notifier).forceRefresh();
           print('adding new round');
           // after evaluation add new round to the game
           final weight = await showWeightInputDialog(context);
