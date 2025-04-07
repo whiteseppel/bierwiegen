@@ -30,49 +30,59 @@ class _GameScreenState extends ConsumerState<GameScreen> {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               // NOTE: players
-              //       we can add trophies in the colors according to the winning person (Icons.emoji_events)
               GridView.count(
+                padding: const EdgeInsets.only(top: 32, bottom: 12),
                 crossAxisCount: ref.read(playerProvider).length + 1,
                 shrinkWrap: true,
                 childAspectRatio: childAspectRatio,
                 physics: const NeverScrollableScrollPhysics(),
                 children: [
-                  Container(
-                    alignment: Alignment.center,
-                    child: const Text(
-                      "Ziel",
-                      textAlign: TextAlign.center,
-                    ),
+                  const Text(
+                    "Ziel",
+                    textAlign: TextAlign.center,
                   ),
                   ...List.generate(
                     ref.read(playerProvider).length,
                     (i) {
-                      return Container(
-                        alignment: Alignment.center,
-                        margin: EdgeInsets.all(spacing / 2),
-                        child: Text(
-                          ref.read(playerProvider)[i].name,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w600,
-                            // fontSize: 18,
+                      int winsByPlayer = 0;
+                      for (final r in ref.read(gameRoundProvider)) {
+                        if (r.winningIndex == i) {
+                          winsByPlayer++;
+                        }
+                      }
+                      return Column(
+                        children: [
+                          Text(
+                            ref.read(playerProvider)[i].name,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                        ),
+                          if (winsByPlayer > 0) ...[
+                            Text(
+                              winsByPlayer.toString(),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ],
                       );
                     },
-                  )
+                  ),
                 ],
               ),
-              Container(
-                decoration: BoxDecoration(
+              Flexible(
+                fit: FlexFit.loose,
+                child: Container(
+                  decoration: BoxDecoration(
                     color: const Color(0xFFE0E0E0),
-                    borderRadius: BorderRadius.circular(24)),
-                child: Expanded(
+                    borderRadius: BorderRadius.circular(24),
+                  ),
                   child: SingleChildScrollView(
                     child: Column(
                       children: [
                         // NOTE: initial weight
-                        // TODO:
-                        // - we need to calculate for each player how many rounds they have won and display it underneath the player
                         GridView.count(
                           crossAxisCount: ref.read(playerProvider).length + 1,
                           shrinkWrap: true,
@@ -124,22 +134,19 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                               ),
                               ...List.generate(round.measurements.length, (j) {
                                 final measurement = round.measurements[j];
-                                return Expanded(
-                                  child: Container(
-                                    alignment: Alignment.center,
-                                    child: Stack(children: [
-                                      if (round.winningIndex == j)
-                                        Icon(
-                                          Icons.star,
-                                          // NOTE: when we use a scale we have to calculate the exact number by grams
-                                          color:
-                                              round.target == measurement.value
-                                                  ? Colors.amber
-                                                  : Colors.green,
-                                        ),
-                                      WeightInputField(measurement),
-                                    ]),
-                                  ),
+                                return Container(
+                                  alignment: Alignment.center,
+                                  child: Stack(children: [
+                                    if (round.winningIndex == j)
+                                      Icon(
+                                        Icons.star,
+                                        // NOTE: when we use a scale we have to calculate the exact number by grams
+                                        color: round.target == measurement.value
+                                            ? Colors.amber
+                                            : Colors.green,
+                                      ),
+                                    WeightInputField(measurement),
+                                  ]),
                                 );
                               })
                             ],
