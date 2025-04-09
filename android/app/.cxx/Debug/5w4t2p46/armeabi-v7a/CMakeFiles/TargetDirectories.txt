@@ -1,0 +1,2 @@
+F:/Projekte/bierwiegen/android/app/.cxx/Debug/5w4t2p46/armeabi-v7a/CMakeFiles/edit_cache.dir
+F:/Projekte/bierwiegen/android/app/.cxx/Debug/5w4t2p46/armeabi-v7a/CMakeFiles/rebuild_cache.dir

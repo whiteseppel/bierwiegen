@@ -127,6 +127,13 @@ class _StartScreenState extends ConsumerState<StartScreen> {
                               );
                         }
                       }
+
+                      if (players.isEmpty) {
+                        // TODO: also provide the player a noticable result
+                        print('You cannot start without players');
+                        return;
+                      }
+
                       Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (context) => const GameScreen(),
