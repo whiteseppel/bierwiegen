@@ -20,6 +20,7 @@ class _ActionButtonRowState extends ConsumerState<ActionButtonRow> {
         if (_isExpanded) ...[
           /// Back Button
           FloatingActionButton(
+            key: Key("backButton"),
             onPressed: () {
               Navigator.of(context).pop();
             },
@@ -30,6 +31,7 @@ class _ActionButtonRowState extends ConsumerState<ActionButtonRow> {
 
           /// Restart Game Button
           FloatingActionButton(
+            key: Key("resetButton"),
             onPressed: () {
               // NOTE: maybe create a pop up before resetting the round?
               ref.read(gameRoundProvider.notifier).clearRounds();
@@ -42,7 +44,7 @@ class _ActionButtonRowState extends ConsumerState<ActionButtonRow> {
             child: const Icon(Icons.refresh),
           ),
           const SizedBox(width: 10),
-          // NOTE: adding round - is this button really necessary?
+          // NOTE: we need a share button in the future for sharing the lobby
           // FloatingActionButton(
           //   onPressed: () {
           //     // Action for second button
@@ -53,6 +55,7 @@ class _ActionButtonRowState extends ConsumerState<ActionButtonRow> {
           // const SizedBox(width: 10),
         ],
         FloatingActionButton(
+          key: Key("toggleButton"),
           onPressed: () {
             setState(() {
               _isExpanded = !_isExpanded;

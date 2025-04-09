@@ -24,3 +24,7 @@ This is a project digitalizing a party drinking game.
 
 - [x] App Icon
 - [x] Launch Screen
+- [ ] Color Scheme
+- [ ] Last layout rework
+- [ ] Fix row height based on players and screen orientation
+
