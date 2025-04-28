@@ -1,4 +1,5 @@
 import 'package:bierwiegen/models/measurement.dart';
+import 'package:bierwiegen/sizes/sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -28,6 +29,7 @@ class _WeightInputFieldState extends ConsumerState<WeightInputField> {
         border: InputBorder.none,
         hintText: "...",
       ),
+      style: regularFont,
       textAlign: TextAlign.center,
       onSubmitted: (result) async {
         // add the value to the measurement
@@ -42,7 +44,8 @@ class _WeightInputFieldState extends ConsumerState<WeightInputField> {
 
         widget.m.value = r;
         print(
-            'new round is finished: ${ref.read(gameRoundProvider).last.isFinished}');
+          'new round is finished: ${ref.read(gameRoundProvider).last.isFinished}',
+        );
 
         // NOTE:
         // when we move this part to its own widget we can check if the last round is finisheod

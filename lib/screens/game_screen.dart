@@ -16,11 +16,15 @@ class GameScreen extends ConsumerStatefulWidget {
 class _GameScreenState extends ConsumerState<GameScreen> {
   @override
   Widget build(BuildContext context) {
-    double spacing = 1.0;
-    // NOTE: when having a lot of players 1.8 is very ince in landscape mode.
-    //       maybe we need to change the game settings based on how many players there are
-    //       and the orientation of the phone so that the layout is fitting for all playstyles
-    double childAspectRatio = 1.8;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final crossAxisCount = ref.read(playerProvider).length + 1;
+    final spacing = 8.0;
+
+    final itemWidth =
+        (screenWidth - (spacing * (crossAxisCount - 1))) / crossAxisCount;
+    final itemHeight = 80.0;
+
+    final childAspectRatio = itemWidth / itemHeight;
 
     return Scaffold(
       body: SafeArea(
@@ -32,44 +36,34 @@ class _GameScreenState extends ConsumerState<GameScreen> {
               // NOTE: players
               GridView.count(
                 padding: const EdgeInsets.only(top: 32, bottom: 12),
-                crossAxisCount: ref.read(playerProvider).length + 1,
+                crossAxisCount: crossAxisCount,
                 shrinkWrap: true,
                 childAspectRatio: childAspectRatio,
                 physics: const NeverScrollableScrollPhysics(),
                 children: [
-                  const Text(
-                    "Ziel",
-                    textAlign: TextAlign.center,
-                  ),
-                  ...List.generate(
-                    ref.read(playerProvider).length,
-                    (i) {
-                      int winsByPlayer = 0;
-                      for (final r in ref.read(gameRoundProvider)) {
-                        if (r.winningIndex == i) {
-                          winsByPlayer++;
-                        }
+                  const Text("Ziel", textAlign: TextAlign.center),
+                  ...List.generate(ref.read(playerProvider).length, (i) {
+                    int winsByPlayer = 0;
+                    for (final r in ref.read(gameRoundProvider)) {
+                      if (r.winningIndex == i) {
+                        winsByPlayer++;
                       }
-                      return Column(
-                        children: [
+                    }
+                    return Column(
+                      children: [
+                        Text(
+                          ref.read(playerProvider)[i].name,
+                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                        if (winsByPlayer > 0) ...[
                           Text(
-                            ref.read(playerProvider)[i].name,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w600,
-                            ),
+                            winsByPlayer.toString(),
+                            style: const TextStyle(fontWeight: FontWeight.w600),
                           ),
-                          if (winsByPlayer > 0) ...[
-                            Text(
-                              winsByPlayer.toString(),
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
                         ],
-                      );
-                    },
-                  ),
+                      ],
+                    );
+                  }),
                 ],
               ),
               Flexible(
@@ -93,22 +87,22 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                               alignment: Alignment.center,
                               margin: EdgeInsets.all(spacing / 2),
                             ),
-                            ...List.generate(
-                              ref.read(playerProvider).length,
-                              (i) {
-                                return Container(
-                                  alignment: Alignment.center,
-                                  margin: EdgeInsets.all(spacing / 2),
-                                  child: InitialInputField(i),
-                                );
-                              },
-                            ),
+                            ...List.generate(ref.read(playerProvider).length, (
+                              i,
+                            ) {
+                              return Container(
+                                alignment: Alignment.center,
+                                margin: EdgeInsets.all(spacing / 2),
+                                child: InitialInputField(i),
+                              );
+                            }),
                           ],
                         ),
 
                         // NOTE: All game rounds
-                        ...List.generate(ref.watch(gameRoundProvider).length,
-                            (i) {
+                        ...List.generate(ref.watch(gameRoundProvider).length, (
+                          i,
+                        ) {
                           final round = ref.watch(gameRoundProvider)[i];
 
                           // NOTE: single game round
@@ -128,27 +122,30 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                                     border: InputBorder.none,
                                   ),
                                   enabled: false,
-                                  controller: TextEditingController()
-                                    ..text = target,
+                                  controller:
+                                      TextEditingController()..text = target,
                                 ),
                               ),
                               ...List.generate(round.measurements.length, (j) {
                                 final measurement = round.measurements[j];
                                 return Container(
                                   alignment: Alignment.center,
-                                  child: Stack(children: [
-                                    if (round.winningIndex == j)
-                                      Icon(
-                                        Icons.star,
-                                        // NOTE: when we use a scale we have to calculate the exact number by grams
-                                        color: round.target == measurement.value
-                                            ? Colors.amber
-                                            : Colors.green,
-                                      ),
-                                    WeightInputField(measurement),
-                                  ]),
+                                  child: Stack(
+                                    children: [
+                                      if (round.winningIndex == j)
+                                        Icon(
+                                          Icons.star,
+                                          // NOTE: when we use a scale we have to calculate the exact number by grams
+                                          color:
+                                              round.target == measurement.value
+                                                  ? Colors.amber
+                                                  : Colors.green,
+                                        ),
+                                      WeightInputField(measurement),
+                                    ],
+                                  ),
                                 );
-                              })
+                              }),
                             ],
                           );
                         }),

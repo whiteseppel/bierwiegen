@@ -1,3 +1,4 @@
+import 'package:bierwiegen/sizes/sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -26,13 +27,15 @@ class _InitialInputFieldState extends ConsumerState<InitialInputField> {
       inputFormatters: [
         FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
       ],
+      style: regularFont,
       textAlign: TextAlign.center,
       onSubmitted: (result) async {
         print('Result Einwiegen: $result');
         final r = double.tryParse(result);
         if (r != null) {
           print(
-              'setting weight for player ${ref.read(playerProvider)[widget.index].name}');
+            'setting weight for player ${ref.read(playerProvider)[widget.index].name}',
+          );
           ref.read(playerProvider)[widget.index].initialWeight.value = r;
         }
 
