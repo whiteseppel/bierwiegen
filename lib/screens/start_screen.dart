@@ -16,7 +16,7 @@ class StartScreen extends ConsumerStatefulWidget {
 
 class _StartScreenState extends ConsumerState<StartScreen> {
   final List<TextEditingController> _playerControllers = [
-    TextEditingController()
+    TextEditingController(),
   ];
 
   @override
@@ -29,29 +29,22 @@ class _StartScreenState extends ConsumerState<StartScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                const SizedBox(
-                  height: 60,
-                ),
+                const SizedBox(height: 60),
                 const Text(
                   "Bierwiegen",
-                  style: TextStyle(
-                    fontWeight: FontWeight.w500,
-                    fontSize: 32,
-                  ),
+                  style: TextStyle(fontWeight: FontWeight.w500, fontSize: 32),
                 ),
-                const SizedBox(
-                  height: 40,
-                ),
+                const SizedBox(height: 40),
                 const Text(
                   "Dein Party-Game",
-                  style: TextStyle(
-                    fontWeight: FontWeight.w500,
-                    fontSize: 18,
-                  ),
+                  style: TextStyle(fontWeight: FontWeight.w500, fontSize: 18),
                 ),
                 Container(
-                  padding:
-                      const EdgeInsets.only(left: 40, right: 40, bottom: 40),
+                  padding: const EdgeInsets.only(
+                    left: 40,
+                    right: 40,
+                    bottom: 40,
+                  ),
                   alignment: Alignment.center,
                   child: const Text(
                     "Gib die Namen der Mitspieler ein und lege direkt los!",
@@ -67,27 +60,30 @@ class _StartScreenState extends ConsumerState<StartScreen> {
                       decoration: InputDecoration(
                         hintText: "Spieler ...",
                         border: OutlineInputBorder(
-                          borderRadius:
-                              BorderRadius.circular(standardBorderRadius),
+                          borderRadius: BorderRadius.circular(
+                            standardBorderRadius,
+                          ),
                         ),
-                        suffixIcon: controller.text.isNotEmpty
-                            ? IconButton(
-                                focusNode: FocusNode(skipTraversal: true),
-                                icon: const Icon(Icons.clear),
-                                onPressed: () {
-                                  setState(() {
-                                    _playerControllers.removeAt(index);
-                                  });
-                                },
-                              )
-                            : null,
+                        suffixIcon:
+                            controller.text.isNotEmpty
+                                ? IconButton(
+                                  focusNode: FocusNode(skipTraversal: true),
+                                  icon: const Icon(Icons.clear),
+                                  onPressed: () {
+                                    setState(() {
+                                      _playerControllers.removeAt(index);
+                                    });
+                                  },
+                                )
+                                : null,
                       ),
                       textInputAction: TextInputAction.next,
                       controller: controller,
                       onChanged: (input) {
                         setState(() {
-                          if (!_playerControllers
-                              .any((c) => c.value.text.isEmpty)) {
+                          if (!_playerControllers.any(
+                            (c) => c.value.text.isEmpty,
+                          )) {
                             _playerControllers.add(TextEditingController());
                           }
                         });
@@ -98,18 +94,14 @@ class _StartScreenState extends ConsumerState<StartScreen> {
                 Container(
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(
-                      12.0,
-                    ),
+                    borderRadius: BorderRadius.circular(12.0),
                   ),
                   child: MaterialButton(
                     color: Colors.blue,
                     textColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16.0),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(
-                        12.0,
-                      ),
+                      borderRadius: BorderRadius.circular(12.0),
                     ),
                     child: const Text("Spiel starten"),
                     onPressed: () {
@@ -119,10 +111,12 @@ class _StartScreenState extends ConsumerState<StartScreen> {
                       for (final controller in _playerControllers) {
                         if (controller.value.text.isNotEmpty) {
                           players.add(controller.value.text);
-                          ref.read(playerProvider.notifier).addPlayer(
+                          ref
+                              .read(playerProvider.notifier)
+                              .addPlayer(
                                 Player(
                                   controller.value.text,
-                                  Measurement(TextEditingController(), 0),
+                                  Measurement.empty(),
                                 ),
                               );
                         }
@@ -142,16 +136,39 @@ class _StartScreenState extends ConsumerState<StartScreen> {
                     },
                   ),
                 ),
-                const SizedBox(
-                  height: 40,
-                ),
+                const SizedBox(height: 40),
                 const Text(
                   "Passende Digitalwagen für die Verbindung zur App gibt es auf unserer Website.",
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(
-                  height: 60,
-                ),
+
+                const SizedBox(height: 60),
+                // NOTE: Button for the bluetooth connectivity
+                //       comment in if bluetooth is further developed
+                // Container(
+                //   width: double.infinity,
+                //   decoration: BoxDecoration(
+                //     borderRadius: BorderRadius.circular(12.0),
+                //   ),
+                //   child: MaterialButton(
+                //     color: Colors.blue,
+                //     textColor: Colors.white,
+                //     padding: const EdgeInsets.symmetric(vertical: 16.0),
+                //     shape: RoundedRectangleBorder(
+                //       borderRadius: BorderRadius.circular(12.0),
+                //     ),
+                //     child: const Text("Bluetooth Wage verbinden"),
+                //
+                //     onPressed: () {
+                //       Navigator.of(context).push(
+                //         MaterialPageRoute(
+                //           builder:
+                //               (context) => const BluetoothConnectionScreen(),
+                //         ),
+                //       );
+                //     },
+                //   ),
+                // ),
               ],
             ),
           ),

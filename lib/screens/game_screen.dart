@@ -14,6 +14,9 @@ class GameScreen extends ConsumerStatefulWidget {
 }
 
 class _GameScreenState extends ConsumerState<GameScreen> {
+  // TODO:
+  //    - when i tap next on my phone input i want to get to the next input field
+  //    - all Options from the floating action buttons need to be in a menu where i can do the rest of the necesssary tasks
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -87,15 +90,15 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                               alignment: Alignment.center,
                               margin: EdgeInsets.all(spacing / 2),
                             ),
-                            ...List.generate(ref.read(playerProvider).length, (
-                              i,
-                            ) {
-                              return Container(
-                                alignment: Alignment.center,
-                                margin: EdgeInsets.all(spacing / 2),
-                                child: InitialInputField(i),
-                              );
-                            }),
+                            ...ref
+                                .read(playerProvider)
+                                .map(
+                                  (player) => Container(
+                                    alignment: Alignment.center,
+                                    margin: EdgeInsets.all(spacing / 2),
+                                    child: InitialInputField(player),
+                                  ),
+                                ),
                           ],
                         ),
 

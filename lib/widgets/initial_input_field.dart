@@ -3,12 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../models/player.dart';
 import '../providers/providers.dart';
 import '../functions/weight_input_dialog.dart';
 
 class InitialInputField extends ConsumerStatefulWidget {
-  const InitialInputField(this.index, {super.key});
-  final int index;
+  const InitialInputField(this.player, {super.key});
+  final Player player;
+  // final int index;
 
   @override
   _InitialInputFieldState createState() => _InitialInputFieldState();
@@ -33,17 +35,15 @@ class _InitialInputFieldState extends ConsumerState<InitialInputField> {
         print('Result Einwiegen: $result');
         final r = double.tryParse(result);
         if (r != null) {
-          print(
-            'setting weight for player ${ref.read(playerProvider)[widget.index].name}',
-          );
-          ref.read(playerProvider)[widget.index].initialWeight.value = r;
+          print('setting weight for player ${widget.player.name}');
+          widget.player.initialWeight.value = r;
+          // ref.read(playerProvider)[widget.index].initialWeight.value = r;
         }
 
         if (!ref
             .read(playerProvider)
             .any((player) => player.initialWeight.value == 0)) {
-          if (ref.read(gameRoundProvider).isEmpty ||
-              ref.read(gameRoundProvider).last.isFinished) {
+          if (ref.read(gameRoundProvider).isEmpty) {
             final weight = await showWeightInputDialog(context);
 
             if (weight == null) {
@@ -54,8 +54,8 @@ class _InitialInputFieldState extends ConsumerState<InitialInputField> {
           }
         }
       },
-      controller:
-          ref.read(playerProvider)[widget.index].initialWeight.controller,
+      controller: widget.player.initialWeight.controller,
+      // ref.read(playerProvider)[widget.index].initialWeight.controller,
     );
   }
 }

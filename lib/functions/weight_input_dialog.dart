@@ -13,6 +13,9 @@ Future<double?> showWeightInputDialog(BuildContext context) async {
       void handleSubmission() {
         final value = double.tryParse(controller.text);
         if (value != null) {
+          Future.microtask(() {
+            print('');
+          });
           Navigator.of(context).pop(value);
         } else {
           ScaffoldMessenger.of(context).showSnackBar(

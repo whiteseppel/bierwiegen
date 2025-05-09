@@ -1,5 +1,4 @@
 import 'package:bierwiegen/models/measurement.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/game_round.dart';
 import '../models/player.dart';
@@ -43,7 +42,7 @@ class GameRoundNotifier extends StateNotifier<List<GameRound>> {
   void addRound(double weight) {
     final r = GameRound(weight, []);
     for (var _ in ref.read(playerProvider)) {
-      r.measurements.add(Measurement(TextEditingController(), 0));
+      r.measurements.add(Measurement.empty());
     }
 
     state = [...state, r];
@@ -56,5 +55,5 @@ class GameRoundNotifier extends StateNotifier<List<GameRound>> {
 
 final gameRoundProvider =
     StateNotifierProvider<GameRoundNotifier, List<GameRound>>(
-  (ref) => GameRoundNotifier(ref),
-);
+      (ref) => GameRoundNotifier(ref),
+    );

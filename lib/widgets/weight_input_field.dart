@@ -2,8 +2,10 @@ import 'package:bierwiegen/models/measurement.dart';
 import 'package:bierwiegen/sizes/sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../functions/weight_input_dialog.dart';
+import 'package:collection/collection.dart';
 
 import '../providers/providers.dart';
 
@@ -20,7 +22,9 @@ class _WeightInputFieldState extends ConsumerState<WeightInputField> {
   Widget build(BuildContext context) {
     return TextField(
       controller: widget.m.controller,
+      focusNode: widget.m.node,
       keyboardType: TextInputType.number,
+      // NOTE: when the round is finished the input action should be "done" or "submit" - otherwise "next"
       textInputAction: TextInputAction.next,
       inputFormatters: [
         FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
@@ -31,24 +35,24 @@ class _WeightInputFieldState extends ConsumerState<WeightInputField> {
       ),
       style: regularFont,
       textAlign: TextAlign.center,
-      onSubmitted: (result) async {
-        // add the value to the measurement
+      // NOTE: after submitting we can check if  we want to add a new round
+      // onEditingComplete:,
+      onChanged: (result) async {
         final r = double.tryParse(result);
 
         if (r == null) {
           print('value could not be converted');
-          // wenn wir die nummer nicht parsen können müssen wir den wert löschen
           return;
         }
+
         print('setting value for round: $r');
 
         widget.m.value = r;
         print(
           'new round is finished: ${ref.read(gameRoundProvider).last.isFinished}',
         );
-
-        // NOTE:
-        // when we move this part to its own widget we can check if the last round is finisheod
+      },
+      onSubmitted: (result) async {
         if (ref.read(gameRoundProvider).last.isFinished) {
           ref.read(gameRoundProvider.notifier).forceRefresh();
           print('adding new round');
@@ -61,6 +65,16 @@ class _WeightInputFieldState extends ConsumerState<WeightInputField> {
           }
 
           ref.read(gameRoundProvider.notifier).addRound(weight);
+        }
+
+        Measurement? m = ref
+            .read(gameRoundProvider)
+            .last
+            .measurements
+            .firstWhereOrNull((m) => m.value == 0);
+
+        if (m != null) {
+          m.node.requestFocus();
         }
       },
     );
