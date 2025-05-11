@@ -1,6 +1,8 @@
-import 'package:bierwiegen/providers/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../providers/game_round_provider.dart';
+import '../providers/player_provider.dart';
 
 class ActionButtonRow extends ConsumerStatefulWidget {
   const ActionButtonRow({super.key});

@@ -1,7 +1,8 @@
 import 'package:bierwiegen/models/scale_state.dart';
-import 'package:bierwiegen/providers/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../providers/scale_state_provider.dart';
 
 class OptionsScreen extends ConsumerStatefulWidget {
   const OptionsScreen({super.key});

@@ -6,7 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../functions/weight_input_dialog.dart';
 import 'package:collection/collection.dart';
 
-import '../providers/providers.dart';
+import '../providers/game_round_provider.dart';
 
 class WeightInputField extends ConsumerStatefulWidget {
   const WeightInputField(this.m, {super.key});

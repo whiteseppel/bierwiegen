@@ -4,7 +4,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/player.dart';
-import '../providers/providers.dart';
+import '../providers/game_round_provider.dart';
+import '../providers/player_provider.dart';
 import '../functions/weight_input_dialog.dart';
 
 class InitialInputField extends ConsumerStatefulWidget {

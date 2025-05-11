@@ -1,9 +1,10 @@
-import 'package:bierwiegen/providers/providers.dart';
 import 'package:bierwiegen/widgets/initial_input_field.dart';
 import 'package:bierwiegen/widgets/weight_input_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../providers/game_round_provider.dart';
+import '../providers/player_provider.dart';
 import '../widgets/action_button_row.dart';
 
 class GameScreen extends ConsumerStatefulWidget {
