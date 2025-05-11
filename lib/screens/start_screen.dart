@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 
 import '../models/player.dart';
+import 'options_screen.dart';
 
 class StartScreen extends ConsumerStatefulWidget {
   const StartScreen({super.key});
@@ -145,30 +146,29 @@ class _StartScreenState extends ConsumerState<StartScreen> {
                 const SizedBox(height: 60),
                 // NOTE: Button for the bluetooth connectivity
                 //       comment in if bluetooth is further developed
-                // Container(
-                //   width: double.infinity,
-                //   decoration: BoxDecoration(
-                //     borderRadius: BorderRadius.circular(12.0),
-                //   ),
-                //   child: MaterialButton(
-                //     color: Colors.blue,
-                //     textColor: Colors.white,
-                //     padding: const EdgeInsets.symmetric(vertical: 16.0),
-                //     shape: RoundedRectangleBorder(
-                //       borderRadius: BorderRadius.circular(12.0),
-                //     ),
-                //     child: const Text("Bluetooth Wage verbinden"),
-                //
-                //     onPressed: () {
-                //       Navigator.of(context).push(
-                //         MaterialPageRoute(
-                //           builder:
-                //               (context) => const BluetoothConnectionScreen(),
-                //         ),
-                //       );
-                //     },
-                //   ),
-                // ),
+                Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12.0),
+                  ),
+                  child: MaterialButton(
+                    color: Colors.blue,
+                    textColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16.0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    child: const Text("Einstellungen"),
+
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const OptionsScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                ),
               ],
             ),
           ),

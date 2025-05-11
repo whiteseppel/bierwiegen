@@ -2,7 +2,6 @@ import 'package:bierwiegen/models/measurement.dart';
 import 'package:bierwiegen/sizes/sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../functions/weight_input_dialog.dart';
 import 'package:collection/collection.dart';
