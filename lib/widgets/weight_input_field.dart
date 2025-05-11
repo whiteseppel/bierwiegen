@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:bierwiegen/models/measurement.dart';
+import 'package:bierwiegen/providers/scale_state_provider.dart';
 import 'package:bierwiegen/sizes/sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -6,10 +9,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../functions/weight_input_dialog.dart';
 import 'package:collection/collection.dart';
 
+import '../models/scale_state.dart';
 import '../providers/game_round_provider.dart';
 
 class WeightInputField extends ConsumerStatefulWidget {
   const WeightInputField(this.m, {super.key});
+
   final Measurement m;
 
   @override
@@ -17,8 +22,67 @@ class WeightInputField extends ConsumerStatefulWidget {
 }
 
 class _WeightInputFieldState extends ConsumerState<WeightInputField> {
+  Timer? validationTimer;
+
+  void onChanged(String result) {
+    print('onchanged triggered');
+    // if (result.isEmpty){
+    //   result = "0";
+    // }
+
+    final r = double.tryParse(result);
+
+    if (r == null) {
+      print('value could not be converted');
+      return;
+    }
+
+    print('setting value for round: $r');
+
+    widget.m.value = r;
+    print(
+      'new round is finished: ${ref.read(gameRoundProvider).last.isFinished}',
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    ref.listen(scaleStateProvider, (previous, next) {
+      if (!widget.m.node.hasFocus) {
+        return;
+      }
+
+      if (widget.m.value != 0) {
+        return;
+      }
+
+      validationTimer?.cancel();
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+      if (next.weight == 0 || next.weight == null) {
+        return;
+      }
+
+      validationTimer = Timer(Duration(seconds: 2), () {
+        final String result = next.weight.toString();
+        widget.m.controller.value = TextEditingValue(text: result);
+        onChanged(result);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Dein Bier hat $result Gramm!'),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Biermessung erfolgt ..'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    });
+
     return TextField(
       controller: widget.m.controller,
       focusNode: widget.m.node,
@@ -36,21 +100,7 @@ class _WeightInputFieldState extends ConsumerState<WeightInputField> {
       textAlign: TextAlign.center,
       // NOTE: after submitting we can check if  we want to add a new round
       // onEditingComplete:,
-      onChanged: (result) async {
-        final r = double.tryParse(result);
-
-        if (r == null) {
-          print('value could not be converted');
-          return;
-        }
-
-        print('setting value for round: $r');
-
-        widget.m.value = r;
-        print(
-          'new round is finished: ${ref.read(gameRoundProvider).last.isFinished}',
-        );
-      },
+      onChanged: onChanged,
       onSubmitted: (result) async {
         if (ref.read(gameRoundProvider).last.isFinished) {
           ref.read(gameRoundProvider.notifier).forceRefresh();

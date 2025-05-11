@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/game_round_provider.dart';
 import '../providers/player_provider.dart';
+import '../screens/options_screen.dart';
 
 class ActionButtonRow extends ConsumerStatefulWidget {
   const ActionButtonRow({super.key});
@@ -60,7 +61,10 @@ class _ActionButtonRowState extends ConsumerState<ActionButtonRow> {
           key: Key("toggleButton"),
           onPressed: () {
             setState(() {
-              _isExpanded = !_isExpanded;
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => const OptionsScreen()),
+              );
+              // _isExpanded = !_isExpanded;
             });
           },
           heroTag: "toggle",
