@@ -1,6 +1,8 @@
 import 'package:bierwiegen/models/measurement.dart';
 import 'package:bierwiegen/screens/game_screen.dart';
+import 'package:bierwiegen/screens/introduction_screen.dart';
 import 'package:bierwiegen/sizes/sizes.dart';
+import 'package:bierwiegen/widgets/game_info_widget.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 
@@ -93,18 +95,10 @@ class _StartScreenState extends ConsumerState<StartScreen> {
                     ),
                   );
                 }),
-                Container(
+                SizedBox(
                   width: double.infinity,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12.0),
-                  ),
-                  child: MaterialButton(
-                    color: Colors.blue,
-                    textColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16.0),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12.0),
-                    ),
+                  child: FilledButton(
+                    style: ButtonStyles.regular,
                     child: const Text("Spiel starten"),
                     onPressed: () {
                       ref.read(gameRoundProvider.notifier).clearRounds();
@@ -139,26 +133,16 @@ class _StartScreenState extends ConsumerState<StartScreen> {
                   ),
                 ),
                 const SizedBox(height: 40),
-                const Text(
-                  "Passende Digitalwagen für die Verbindung zur App gibt es auf unserer Website.",
-                  textAlign: TextAlign.center,
-                ),
+
+                const GameInfoWidget(),
 
                 const SizedBox(height: 60),
                 // NOTE: Button for the bluetooth connectivity
                 //       comment in if bluetooth is further developed
-                Container(
+                SizedBox(
                   width: double.infinity,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12.0),
-                  ),
-                  child: MaterialButton(
-                    color: Colors.blue,
-                    textColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16.0),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12.0),
-                    ),
+                  child: FilledButton(
+                    style: ButtonStyles.regular,
                     child: const Text("Einstellungen"),
 
                     onPressed: () {

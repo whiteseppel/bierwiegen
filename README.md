@@ -20,7 +20,14 @@ This is a project digitalizing a party drinking game.
 - [x] Launch Screen
 - [ ] Color Scheme
 - [ ] Last layout rework
+- [ ] Screen always on
+- [ ] Initial Weight input also with scale
 - [x] Fix row height based on players and screen orientation
+- [ ] Game rule description
+
+## Nice to haves
+- [ ] Multiple winners if they have the same weight
+- [ ] Adapt target weight (if someone misclicks)
 
 ## Technical improvements
 - [ ] Upgrade Kotlin version of project
@@ -43,3 +50,12 @@ started.
 
 ### Configure players
 I want to configure players to enter the name (and the game should remember previous players)
+
+### Teammode
+I want to have a mode where players are in a team and play together against another team - a 
+team wins the round if all people have a combined lower offset as the other team.
+
+
+## Further Ideas
+Easy Mode for beginner players - when you start with the game you do not have to be exactly on 
+the weight to get better results compared to users that have played the game for some time.

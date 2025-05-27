@@ -30,7 +30,7 @@ class _InitialInputFieldState extends ConsumerState<InitialInputField> {
       inputFormatters: [
         FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
       ],
-      style: regularFont,
+      style: Fonts.regularFont,
       textAlign: TextAlign.center,
       onSubmitted: (result) async {
         print('Result Einwiegen: $result');
