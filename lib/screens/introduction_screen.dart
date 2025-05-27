@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../sizes/sizes.dart';
+
 class IntroductionScreen extends ConsumerStatefulWidget {
   const IntroductionScreen({super.key});
 
@@ -20,17 +22,23 @@ class _IntroductionScreenState extends ConsumerState<IntroductionScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Was ist Bierwiegen?'),
+                Text('Was ist Bierwiegen?', style: TextStyles.subheading),
                 Text('''
             Bierwiegen ist ein Schätzspiel, welches nicht zwingend mit alkoholischen Getränken gespielt werden muss.
             Es geht um das Abschätzen von Inhalt, der in deinem Getränk übrig bleibt und wer am nähesten am Zielwert angekommen ist.
                   '''),
 
-                Text('Was brauche ich für Bierwiegen?'),
+                Text(
+                  'Was brauche ich für Bierwiegen?',
+                  style: TextStyles.subheading,
+                ),
                 Text('''
             Um Bierwiegen zu spielen brauchst du eine Digitalwage und ein Getränk für jeden Mitspieler. Die Getränke sollten ein ähnliches Gewicht haben.
                   '''),
-                Text('Wie spiele ich Bierwiegen?'),
+                Text(
+                  'Wie spiele ich Bierwiegen?',
+                  style: TextStyles.subheading,
+                ),
                 Text('''
                   Zuerst wird das Gewicht für alle Getränke gewogen, damit jeder weiß, wie man startet (Einwiegen).
                   Anschließend beginnt die erste Runde:

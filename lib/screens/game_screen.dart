@@ -27,49 +27,54 @@ class _GameScreenState extends ConsumerState<GameScreen> {
 
     final itemWidth =
         (screenWidth - (spacing * (crossAxisCount - 1))) / crossAxisCount;
-    final itemHeight = 80.0;
+    final itemHeight = 60.0;
 
     final childAspectRatio = itemWidth / itemHeight;
 
     return Scaffold(
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
+          padding: const EdgeInsets.all(20),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               // NOTE: players
-              GridView.count(
-                padding: const EdgeInsets.only(top: 32, bottom: 12),
-                crossAxisCount: crossAxisCount,
-                shrinkWrap: true,
-                childAspectRatio: childAspectRatio,
-                physics: const NeverScrollableScrollPhysics(),
-                children: [
-                  const Text("Ziel", textAlign: TextAlign.center),
-                  ...List.generate(ref.read(playerProvider).length, (i) {
-                    int winsByPlayer = 0;
-                    for (final r in ref.read(gameRoundProvider)) {
-                      if (r.winningIndex == i) {
-                        winsByPlayer++;
+              Container(
+                // color: Colors.red,
+                child: GridView.count(
+                  // padding: const EdgeInsets.only(top: 32, bottom: 12),
+                  crossAxisCount: crossAxisCount,
+                  shrinkWrap: true,
+                  childAspectRatio: childAspectRatio,
+                  physics: const NeverScrollableScrollPhysics(),
+                  children: [
+                    const Text("Ziel", textAlign: TextAlign.center),
+                    ...List.generate(ref.read(playerProvider).length, (i) {
+                      int winsByPlayer = 0;
+                      for (final r in ref.read(gameRoundProvider)) {
+                        if (r.winningIndex == i) {
+                          winsByPlayer++;
+                        }
                       }
-                    }
-                    return Column(
-                      children: [
-                        Text(
-                          ref.read(playerProvider)[i].name,
-                          style: const TextStyle(fontWeight: FontWeight.w600),
-                        ),
-                        if (winsByPlayer > 0) ...[
+                      return Column(
+                        children: [
                           Text(
-                            winsByPlayer.toString(),
+                            ref.read(playerProvider)[i].name,
                             style: const TextStyle(fontWeight: FontWeight.w600),
                           ),
+                          if (winsByPlayer > 0) ...[
+                            Text(
+                              winsByPlayer.toString(),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
                         ],
-                      ],
-                    );
-                  }),
-                ],
+                      );
+                    }),
+                  ],
+                ),
               ),
               Flexible(
                 fit: FlexFit.loose,

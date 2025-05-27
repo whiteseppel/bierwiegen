@@ -22,7 +22,7 @@ class ButtonStyles {
   );
 }
 
-class Fonts {
+class TextStyles {
   static const TextStyle regularFont = TextStyle(
     fontSize: 18,
     color: Colors.black87,

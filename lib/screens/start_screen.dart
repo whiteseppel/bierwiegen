@@ -101,6 +101,7 @@ class _StartScreenState extends ConsumerState<StartScreen> {
                     style: ButtonStyles.regular,
                     child: const Text("Spiel starten"),
                     onPressed: () {
+                      // TODO: Button should only be activated if at least one player is entered
                       ref.read(gameRoundProvider.notifier).clearRounds();
                       ref.read(playerProvider.notifier).clearPlayers();
                       List<String> players = [];
@@ -136,7 +137,7 @@ class _StartScreenState extends ConsumerState<StartScreen> {
 
                 const GameInfoWidget(),
 
-                const SizedBox(height: 60),
+                const SizedBox(height: 40),
                 // NOTE: Button for the bluetooth connectivity
                 //       comment in if bluetooth is further developed
                 SizedBox(
@@ -154,6 +155,7 @@ class _StartScreenState extends ConsumerState<StartScreen> {
                     },
                   ),
                 ),
+                const SizedBox(height: 40),
               ],
             ),
           ),

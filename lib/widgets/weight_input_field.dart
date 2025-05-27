@@ -96,7 +96,7 @@ class _WeightInputFieldState extends ConsumerState<WeightInputField> {
         border: InputBorder.none,
         hintText: "...",
       ),
-      style: Fonts.regularFont,
+      style: TextStyles.regularFont,
       textAlign: TextAlign.center,
       // NOTE: after submitting we can check if  we want to add a new round
       // onEditingComplete:,

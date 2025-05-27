@@ -29,12 +29,12 @@ class _OptionsScreenState extends ConsumerState<OptionsScreen> {
                   Text(
                     'Bluetooth-Digitalwage',
                     textAlign: TextAlign.start,
-                    style: Fonts.subheading,
+                    style: TextStyles.subheading,
                   ),
                   SizedBox(height: 8),
                   Text(
                     'Man kann ausgewählte Bluetooth Küchenwagen mit der App verbinden. Die Werte der Spieler werden danach automatisch von der Wage in die Wertung übernommen.',
-                    style: Fonts.regular,
+                    style: TextStyles.regular,
                   ),
                   SizedBox(height: 16),
                   Container(
@@ -43,7 +43,7 @@ class _OptionsScreenState extends ConsumerState<OptionsScreen> {
                       borderRadius: BorderRadius.circular(12.0),
                     ),
                     child: FilledButton(
-                      style: ButtonStyles.regular, // color: Colors.blue,
+                      style: ButtonStyles.regular,
                       onPressed:
                           ref.watch(scaleStateProvider).connectionState ==
                                   ScaleConnectionState.disconnected
