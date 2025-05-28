@@ -39,42 +39,47 @@ class _GameScreenState extends ConsumerState<GameScreen> {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               // NOTE: players
-              Container(
-                // color: Colors.red,
-                child: GridView.count(
-                  // padding: const EdgeInsets.only(top: 32, bottom: 12),
-                  crossAxisCount: crossAxisCount,
-                  shrinkWrap: true,
-                  childAspectRatio: childAspectRatio,
-                  physics: const NeverScrollableScrollPhysics(),
-                  children: [
-                    const Text("Ziel", textAlign: TextAlign.center),
-                    ...List.generate(ref.read(playerProvider).length, (i) {
-                      int winsByPlayer = 0;
-                      for (final r in ref.read(gameRoundProvider)) {
-                        if (r.winningIndex == i) {
-                          winsByPlayer++;
-                        }
+              GridView.count(
+                crossAxisCount: crossAxisCount,
+                shrinkWrap: true,
+                childAspectRatio: childAspectRatio,
+                physics: const NeverScrollableScrollPhysics(),
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.more_vert),
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const OptionsScreen(),
+                        ),
+                      );
+                    },
+                  ),
+
+                  // const Text("Ziel", textAlign: TextAlign.center),
+                  ...List.generate(ref.read(playerProvider).length, (i) {
+                    int winsByPlayer = 0;
+                    for (final r in ref.read(gameRoundProvider)) {
+                      if (r.winningIndex == i) {
+                        winsByPlayer++;
                       }
-                      return Column(
-                        children: [
+                    }
+                    return Column(
+                      children: [
+                        Text(
+                          ref.read(playerProvider)[i].name,
+                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                        if (winsByPlayer > 0) ...[
                           Text(
-                            ref.read(playerProvider)[i].name,
+                            winsByPlayer.toString(),
                             style: const TextStyle(fontWeight: FontWeight.w600),
                           ),
-                          if (winsByPlayer > 0) ...[
-                            Text(
-                              winsByPlayer.toString(),
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
                         ],
-                      );
-                    }),
-                  ],
-                ),
+                      ],
+                    );
+                  }),
+                ],
               ),
               Flexible(
                 fit: FlexFit.loose,
@@ -96,6 +101,10 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                             Container(
                               alignment: Alignment.center,
                               margin: EdgeInsets.all(spacing / 2),
+                              child: const Text(
+                                "Ziel",
+                                textAlign: TextAlign.center,
+                              ),
                             ),
                             ...ref
                                 .read(playerProvider)
@@ -168,7 +177,6 @@ class _GameScreenState extends ConsumerState<GameScreen> {
           ),
         ),
       ),
-      floatingActionButton: const ActionButtonRow(),
     );
   }
 }

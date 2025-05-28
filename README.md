@@ -25,9 +25,9 @@ This is a project digitalizing a party drinking game.
   - [x] Add padding to bottom of game screen
 - [ ] Screen always on
 - [ ] Initial Weight input also with scale
-- [ ] Game rule description
+- [x] Game rule description
 - [ ] Error messages for Bluetooth connections
-- [ ] Settings button in app bar - remove FAB
+- [x] Settings button in app bar - remove FAB
 - [ ] Privacy policy
 - [ ] Impressum
 

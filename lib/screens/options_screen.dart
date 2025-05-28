@@ -1,5 +1,6 @@
 import 'package:bierwiegen/models/scale_state.dart';
 import 'package:bierwiegen/widgets/game_info_widget.dart';
+import 'package:bierwiegen/widgets/privacy_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -58,33 +59,6 @@ class _OptionsScreenState extends ConsumerState<OptionsScreen> {
                       }),
                     ),
                   ),
-                  // Row(
-                  //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  //   children: [
-                  //     ElevatedButton(
-                  //       onPressed:
-                  //           ref.watch(scaleStateProvider).connectionState ==
-                  //                   ScaleConnectionState.disconnected
-                  //               ? ref
-                  //                   .read(scaleStateProvider.notifier)
-                  //                   .tryConnect
-                  //               : null,
-                  //       child: Text(switch (ref
-                  //           .watch(scaleStateProvider)
-                  //           .connectionState) {
-                  //         ScaleConnectionState.disconnected => 'Verbinden',
-                  //         ScaleConnectionState.connecting => 'Verbinde ...',
-                  //         ScaleConnectionState.connected => 'Verbunden',
-                  //       }),
-                  //     ),
-                  //     switch (ref.watch(scaleStateProvider).connectionState) {
-                  //       ScaleConnectionState.disconnected => Icon(Icons.close),
-                  //       ScaleConnectionState.connecting =>
-                  //         CircularProgressIndicator(),
-                  //       ScaleConnectionState.connected => Icon(Icons.done),
-                  //     },
-                  //   ],
-                  // ),
                   const SizedBox(height: 20),
                   if (ref.watch(scaleStateProvider).connectionState ==
                       ScaleConnectionState.connected)
@@ -102,6 +76,8 @@ class _OptionsScreenState extends ConsumerState<OptionsScreen> {
               //    - is the scale around and can i connect
               //    - does the input of the weight work?
               GameInfoWidget(),
+              SizedBox(height: 32),
+              PrivacyWidget(),
             ],
           ),
         ),
