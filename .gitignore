@@ -11,6 +11,7 @@
 migrate_working_dir/
 *.bin
 *.jks
+android/key.properties
 
 # IntelliJ related
 *.iml
