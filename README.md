@@ -19,12 +19,12 @@ This is a project digitalizing a party drinking game.
 - [x] App Icon
 - [x] Launch Screen
 - [x] Fix row height based on players and screen orientation
-- [ ] Color Scheme
-- [ ] Last layout rework
+- [x] Color Scheme
+- [x] Last layout rework
   - [x] Area for displaying current points is too big
   - [x] Add padding to bottom of game screen
-- [ ] Screen always on
-- [ ] Initial Weight input also with scale
+- [x] Screen always on
+- [x] Initial Weight input also with scale
 - [x] Game rule description
 - [ ] Error messages for Bluetooth connections
 - [x] Settings button in app bar - remove FAB

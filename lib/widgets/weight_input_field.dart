@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:bierwiegen/models/measurement.dart';
+import 'package:bierwiegen/providers/player_provider.dart';
 import 'package:bierwiegen/providers/scale_state_provider.dart';
 import 'package:bierwiegen/sizes/sizes.dart';
 import 'package:flutter/material.dart';
@@ -9,7 +10,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../functions/weight_input_dialog.dart';
 import 'package:collection/collection.dart';
 
-import '../models/scale_state.dart';
 import '../providers/game_round_provider.dart';
 
 class WeightInputField extends ConsumerStatefulWidget {
@@ -102,10 +102,24 @@ class _WeightInputFieldState extends ConsumerState<WeightInputField> {
       // onEditingComplete:,
       onChanged: onChanged,
       onSubmitted: (result) async {
+        if (ref.read(gameRoundProvider).isEmpty &&
+            !ref
+                .read(playerProvider)
+                .any((player) => player.initialWeight.value == 0)) {
+          final weight = await showWeightInputDialog(context);
+
+          if (weight == null) {
+            print('weight must be added to add a new game round');
+            return;
+          }
+
+          ref.read(gameRoundProvider.notifier).addRound(weight);
+          return;
+        }
+
         if (ref.read(gameRoundProvider).last.isFinished) {
           ref.read(gameRoundProvider.notifier).forceRefresh();
           print('adding new round');
-          // after evaluation add new round to the game
           final weight = await showWeightInputDialog(context);
 
           if (weight == null) {
@@ -115,6 +129,7 @@ class _WeightInputFieldState extends ConsumerState<WeightInputField> {
 
           ref.read(gameRoundProvider.notifier).addRound(weight);
         }
+
 
         Measurement? m = ref
             .read(gameRoundProvider)

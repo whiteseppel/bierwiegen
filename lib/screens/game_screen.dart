@@ -1,12 +1,10 @@
 import 'package:bierwiegen/screens/options_screen.dart';
-import 'package:bierwiegen/widgets/initial_input_field.dart';
 import 'package:bierwiegen/widgets/weight_input_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/game_round_provider.dart';
 import '../providers/player_provider.dart';
-import '../widgets/action_button_row.dart';
 
 class GameScreen extends ConsumerStatefulWidget {
   const GameScreen({super.key});
@@ -16,9 +14,6 @@ class GameScreen extends ConsumerStatefulWidget {
 }
 
 class _GameScreenState extends ConsumerState<GameScreen> {
-  // TODO:
-  //    - when i tap next on my phone input i want to get to the next input field
-  //    - all Options from the floating action buttons need to be in a menu where i can do the rest of the necesssary tasks
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -56,7 +51,6 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                     },
                   ),
 
-                  // const Text("Ziel", textAlign: TextAlign.center),
                   ...List.generate(ref.read(playerProvider).length, (i) {
                     int winsByPlayer = 0;
                     for (final r in ref.read(gameRoundProvider)) {
@@ -112,7 +106,9 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                                   (player) => Container(
                                     alignment: Alignment.center,
                                     margin: EdgeInsets.all(spacing / 2),
-                                    child: InitialInputField(player),
+                                    child: WeightInputField(
+                                      player.initialWeight,
+                                    ),
                                   ),
                                 ),
                           ],
