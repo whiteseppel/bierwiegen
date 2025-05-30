@@ -28,8 +28,8 @@ This is a project digitalizing a party drinking game.
 - [x] Game rule description
 - [ ] Error messages for Bluetooth connections
 - [x] Settings button in app bar - remove FAB
-- [ ] Privacy policy
-- [ ] Impressum
+- [x] Privacy policy
+- [x] Impressum
 
 ## Nice to haves
 - [ ] Multiple winners if they have the same weight

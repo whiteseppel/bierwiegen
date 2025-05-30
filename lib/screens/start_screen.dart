@@ -1,10 +1,10 @@
 import 'package:bierwiegen/models/measurement.dart';
 import 'package:bierwiegen/screens/game_screen.dart';
-import 'package:bierwiegen/screens/introduction_screen.dart';
 import 'package:bierwiegen/sizes/sizes.dart';
 import 'package:bierwiegen/widgets/game_info_widget.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../models/player.dart';
 import '../providers/game_round_provider.dart';
@@ -100,37 +100,10 @@ class _StartScreenState extends ConsumerState<StartScreen> {
                   child: FilledButton(
                     style: ButtonStyles.regular,
                     child: const Text("Spiel starten"),
-                    onPressed: () {
-                      // TODO: Button should only be activated if at least one player is entered
-                      ref.read(gameRoundProvider.notifier).clearRounds();
-                      ref.read(playerProvider.notifier).clearPlayers();
-                      List<String> players = [];
-                      for (final controller in _playerControllers) {
-                        if (controller.value.text.isNotEmpty) {
-                          players.add(controller.value.text);
-                          ref
-                              .read(playerProvider.notifier)
-                              .addPlayer(
-                                Player(
-                                  controller.value.text,
-                                  Measurement.empty(),
-                                ),
-                              );
-                        }
-                      }
-
-                      if (players.isEmpty) {
-                        // TODO: also provide the player a noticable result
-                        print('You cannot start without players');
-                        return;
-                      }
-
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => const GameScreen(),
-                        ),
-                      );
-                    },
+                    onPressed:
+                        _playerControllers.any((c) => c.text.isNotEmpty)
+                            ? startGame
+                            : null,
                   ),
                 ),
                 const SizedBox(height: 40),
@@ -138,8 +111,7 @@ class _StartScreenState extends ConsumerState<StartScreen> {
                 const GameInfoWidget(),
 
                 const SizedBox(height: 40),
-                // NOTE: Button for the bluetooth connectivity
-                //       comment in if bluetooth is further developed
+
                 SizedBox(
                   width: double.infinity,
                   child: FilledButton(
@@ -162,5 +134,34 @@ class _StartScreenState extends ConsumerState<StartScreen> {
         ),
       ),
     );
+  }
+
+  @override
+  void initState() {
+    WakelockPlus.enable();
+    super.initState();
+  }
+
+  void startGame() {
+    ref.read(gameRoundProvider.notifier).clearRounds();
+    ref.read(playerProvider.notifier).clearPlayers();
+    List<String> players = [];
+    for (final controller in _playerControllers) {
+      if (controller.value.text.isNotEmpty) {
+        players.add(controller.value.text);
+        ref
+            .read(playerProvider.notifier)
+            .addPlayer(Player(controller.value.text, Measurement.empty()));
+      }
+    }
+
+    if (players.isEmpty) {
+      print('You cannot start without players');
+      return;
+    }
+
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (context) => const GameScreen()));
   }
 }

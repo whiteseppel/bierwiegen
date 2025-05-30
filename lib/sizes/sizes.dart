@@ -10,7 +10,7 @@ class ButtonStyles {
       if (states.contains(WidgetState.disabled)) {
         return Colors.grey;
       }
-      return Colors.blue;
+      return CustomColors.seocndaryColor;
     }),
     foregroundColor: WidgetStatePropertyAll<Color>(Colors.white),
     shape: WidgetStatePropertyAll<RoundedRectangleBorder>(
@@ -20,6 +20,11 @@ class ButtonStyles {
     ),
     padding: WidgetStatePropertyAll(EdgeInsets.symmetric(vertical: 16)),
   );
+}
+
+class CustomColors {
+  static const Color primaryColor = Color(0xFFfead2e);
+  static const Color seocndaryColor = Color(0xFF789283);
 }
 
 class TextStyles {
