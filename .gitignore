@@ -12,6 +12,7 @@ migrate_working_dir/
 *.bin
 *.jks
 android/key.properties
+encryption_public_key.pem
 
 # IntelliJ related
 *.iml
