@@ -8,6 +8,21 @@ class GameRound {
     return measurements.every((m) => m.value != 0.0);
   }
 
+  // minimal absolute distance
+  double? get closestAbsValue {
+    if (!isFinished) {
+      return null;
+    }
+
+    double closest =
+        measurements.reduce((value, element) {
+          return (target - element.value).abs() < (target - value.value).abs()
+              ? element
+              : value;
+        }).value;
+    return (closest - target).abs();
+  }
+
   int? get winningIndex {
     if (!isFinished) {
       return null;

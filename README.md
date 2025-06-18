@@ -2,19 +2,38 @@
 
 This is a project digitalizing a party drinking game. 
 
-## Improvements
+## Tasks
 
-### Integration Bluetooth Scale
-- sensoDroid Bluetooth Scale is compatible and integrated
+### Next Steps
+- [ ] Continue to next fiel with "next" button
+- [x] Multiple winners if they have the same weight
+- [x] Rework caluclation for winning player (so that multiple can win)
+- [ ] 2 Gamemodes (Standard, Points)
+- [ ] Max weight - max value should be 10000 (or 5 digits)
+- [ ] create optical secondayr button - options should be secondary, not primary
+- [ ] Game Screen
+  - [ ] Disable widescreen
+  - [ ] Add header (back button, title, options button)
+  - [ ] move "Ziel" back to top row
+- [ ] Rearrange players (with keeping the state of the game)
+- [ ] Options screen should be able to reset game - going back should not start a new game
+- [ ] Splash Screen for Android 12 and higher, retain splash screen for 1 second
 
-### Usability
+### Nice to have
+- [ ] Join game
+- [ ] Rework Bluetooth connection process (scan, then confirm on popup, then connect)
+- [ ] Rework bluetooth connection error messages and connection process
+- [ ] Adapt target weight (if someone misclicks) or delete row 
+- [ ] Update Visuals
+  - [ ] Better visual star
+- [ ] Save games and see history of game
 
-### Layout
+### Release for Apple Appstore
+- [ ] Create Apple App Store account
 
-## TODOs for App Launch
-- [ ] Create App Store Accounts
-  - [ ] Apple App Store
-  - [x] Google Play Store
+## Changelog
+
+### Version 0.1.0
 
 - [x] App Icon
 - [x] Launch Screen
@@ -26,17 +45,10 @@ This is a project digitalizing a party drinking game.
 - [x] Screen always on
 - [x] Initial Weight input also with scale
 - [x] Game rule description
-- [ ] Error messages for Bluetooth connections
 - [x] Settings button in app bar - remove FAB
 - [x] Privacy policy
 - [x] Impressum
-
-## Nice to haves
-- [ ] Multiple winners if they have the same weight
-- [ ] Adapt target weight (if someone misclicks)
-
-## Technical improvements
-- [ ] Upgrade Kotlin version of project
+- [x] Google Play Store test release
 
 ## Ideas for project improvement
 
@@ -60,7 +72,6 @@ I want to configure players to enter the name (and the game should remember prev
 ### Teammode
 I want to have a mode where players are in a team and play together against another team - a 
 team wins the round if all people have a combined lower offset as the other team.
-
 
 ## Further Ideas
 Easy Mode for beginner players - when you start with the game you do not have to be exactly on 

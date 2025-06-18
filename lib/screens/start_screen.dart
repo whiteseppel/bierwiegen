@@ -99,17 +99,13 @@ class _StartScreenState extends ConsumerState<StartScreen> {
                   width: double.infinity,
                   child: FilledButton(
                     style: ButtonStyles.regular,
-                    child: const Text("Spiel starten"),
                     onPressed:
                         _playerControllers.any((c) => c.text.isNotEmpty)
                             ? startGame
                             : null,
+                    child: const Text("Spiel starten"),
                   ),
                 ),
-                const SizedBox(height: 40),
-
-                const GameInfoWidget(),
-
                 const SizedBox(height: 40),
 
                 SizedBox(
@@ -127,6 +123,10 @@ class _StartScreenState extends ConsumerState<StartScreen> {
                     },
                   ),
                 ),
+                const SizedBox(height: 40),
+
+                const GameInfoWidget(),
+
                 const SizedBox(height: 40),
               ],
             ),

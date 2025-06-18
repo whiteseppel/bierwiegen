@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/game_round_provider.dart';
 import '../providers/player_provider.dart';
+import '../providers/score_provider.dart';
 
 class GameScreen extends ConsumerStatefulWidget {
   const GameScreen({super.key});
@@ -27,9 +28,33 @@ class _GameScreenState extends ConsumerState<GameScreen> {
     final childAspectRatio = itemWidth / itemHeight;
 
     return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          icon: Icon(Icons.arrow_back),
+        ),
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => const OptionsScreen()),
+              );
+            },
+            icon: Icon(Icons.more_horiz),
+          ),
+        ],
+        title: Text('Bierwiegen'),
+      ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.only(
+            left: 20,
+            right: 20,
+            bottom: 20,
+            top: 10,
+          ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
@@ -40,24 +65,15 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                 childAspectRatio: childAspectRatio,
                 physics: const NeverScrollableScrollPhysics(),
                 children: [
-                  IconButton(
-                    icon: Icon(Icons.more_vert),
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => const OptionsScreen(),
-                        ),
-                      );
-                    },
-                  ),
+                  Center(child: Text('Ziel')),
 
                   ...List.generate(ref.read(playerProvider).length, (i) {
+                    final providedScore = ref.read(scoreProvider);
                     int winsByPlayer = 0;
-                    for (final r in ref.read(gameRoundProvider)) {
-                      if (r.winningIndex == i) {
-                        winsByPlayer++;
-                      }
+                    if (providedScore.isNotEmpty) {
+                      winsByPlayer = providedScore[i];
                     }
+
                     return Column(
                       children: [
                         Text(
@@ -92,14 +108,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                           childAspectRatio: childAspectRatio,
                           physics: const NeverScrollableScrollPhysics(),
                           children: [
-                            Container(
-                              alignment: Alignment.center,
-                              margin: EdgeInsets.all(spacing / 2),
-                              child: const Text(
-                                "Ziel",
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
+                            SizedBox.shrink(),
                             ...ref
                                 .read(playerProvider)
                                 .map(
@@ -147,7 +156,10 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                                   alignment: Alignment.center,
                                   child: Stack(
                                     children: [
-                                      if (round.winningIndex == j)
+                                      if (round.closestAbsValue ==
+                                          (round.measurements[j].value -
+                                                  round.target)
+                                              .abs())
                                         Icon(
                                           Icons.star,
                                           // NOTE: when we use a scale we have to calculate the exact number by grams
