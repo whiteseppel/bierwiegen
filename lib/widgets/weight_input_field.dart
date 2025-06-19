@@ -63,6 +63,7 @@ class _WeightInputFieldState extends ConsumerState<WeightInputField> {
         return;
       }
 
+      // NOTE: we need to rework this whole process
       validationTimer = Timer(Duration(seconds: 2), () {
         final String result = next.weight.toString();
         widget.m.controller.value = TextEditingValue(text: result);
@@ -91,6 +92,7 @@ class _WeightInputFieldState extends ConsumerState<WeightInputField> {
       textInputAction: TextInputAction.next,
       inputFormatters: [
         FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+        LengthLimitingTextInputFormatter(5),
       ],
       decoration: const InputDecoration(
         border: InputBorder.none,
@@ -98,8 +100,6 @@ class _WeightInputFieldState extends ConsumerState<WeightInputField> {
       ),
       style: TextStyles.regularFont,
       textAlign: TextAlign.center,
-      // NOTE: after submitting we can check if  we want to add a new round
-      // onEditingComplete:,
       onChanged: onChanged,
       onSubmitted: (result) async {
         if (ref.read(gameRoundProvider).isEmpty &&
@@ -130,16 +130,7 @@ class _WeightInputFieldState extends ConsumerState<WeightInputField> {
           ref.read(gameRoundProvider.notifier).addRound(weight);
         }
 
-
-        Measurement? m = ref
-            .read(gameRoundProvider)
-            .last
-            .measurements
-            .firstWhereOrNull((m) => m.value == 0);
-
-        if (m != null) {
-          m.node.requestFocus();
-        }
+        ref.read(gameRoundProvider).last.focusNextEmptyInputField();
       },
     );
   }

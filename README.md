@@ -5,25 +5,16 @@ This is a project digitalizing a party drinking game.
 ## Tasks
 
 ### Next Steps
-- [ ] Continue to next fiel with "next" button
-- [x] Multiple winners if they have the same weight
-- [x] Rework caluclation for winning player (so that multiple can win)
-- [ ] 2 Gamemodes (Standard, Points)
-- [ ] Max weight - max value should be 10000 (or 5 digits)
-- [ ] create optical secondayr button - options should be secondary, not primary
+- [ ] 2 Game modes (Standard, Points)
+- [ ] create optical secondary button - options should be secondary, not primary
 - [ ] Game Screen
   - [ ] Disable widescreen
-  - [ ] Add header (back button, title, options button)
-  - [ ] move "Ziel" back to top row
 - [ ] Rearrange players (with keeping the state of the game)
-- [ ] Options screen should be able to reset game - going back should not start a new game
-- [ ] Splash Screen for Android 12 and higher, retain splash screen for 1 second
 
 ### Nice to have
 - [ ] Join game
 - [ ] Rework Bluetooth connection process (scan, then confirm on popup, then connect)
 - [ ] Rework bluetooth connection error messages and connection process
-- [ ] Adapt target weight (if someone misclicks) or delete row 
 - [ ] Update Visuals
   - [ ] Better visual star
 - [ ] Save games and see history of game
@@ -32,6 +23,20 @@ This is a project digitalizing a party drinking game.
 - [ ] Create Apple App Store account
 
 ## Changelog
+
+### Unreleased
+
+- [x] Optical improvements
+  - [x] Add header (back button, title, options button)
+  - [x] move "Ziel" back to top row
+- [x] Splash Screen for Android 12 and higher
+- [x] Adapt target weight (if someone misclicks)
+- [x] Retain splash screen for 1 sec
+- [x] Continue to next field with "next" button
+- [x] Multiple winners if they have the same weight
+- [x] Rework calculation for winning player (so that multiple can win)
+- [x] Options screen should be able to reset game - going back should not start a new game
+- [x] Max weight - max value should be 10000 (or 5 digits)
 
 ### Version 0.1.0
 

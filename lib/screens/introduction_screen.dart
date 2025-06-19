@@ -36,6 +36,8 @@ class _IntroductionScreenState extends ConsumerState<IntroductionScreen> {
                   style: TextStyles.subheading,
                 ),
                 Text(AppStrings.bierwiegenGameRules),
+                Text('Möglichkeiten in der App', style: TextStyles.subheading),
+                Text(AppStrings.appFunctionality),
               ],
             ),
           ),

@@ -3,6 +3,7 @@ import 'package:bierwiegen/widgets/weight_input_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../functions/weight_input_dialog.dart';
 import '../providers/game_round_provider.dart';
 import '../providers/player_provider.dart';
 import '../providers/score_provider.dart';
@@ -129,25 +130,41 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                         ) {
                           final round = ref.watch(gameRoundProvider)[i];
 
-                          // NOTE: single game round
-                          String target = round.target.toString();
-                          target = target.substring(0, target.length - 2);
                           return GridView.count(
                             crossAxisCount: ref.read(playerProvider).length + 1,
                             shrinkWrap: true,
                             childAspectRatio: childAspectRatio,
                             physics: const NeverScrollableScrollPhysics(),
                             children: [
-                              Container(
-                                alignment: Alignment.center,
-                                child: TextField(
-                                  textAlign: TextAlign.center,
-                                  decoration: const InputDecoration(
-                                    border: InputBorder.none,
+                              GestureDetector(
+                                onLongPress: () async {
+                                  double? newWeight =
+                                      await showWeightInputDialog(context);
+                                  if (newWeight != null) {
+                                    round.target = newWeight;
+                                    ref
+                                        .read(gameRoundProvider.notifier)
+                                        .forceRefresh();
+                                  }
+                                },
+                                child: Container(
+                                  alignment: Alignment.center,
+                                  child: TextField(
+                                    textAlign: TextAlign.center,
+                                    decoration: const InputDecoration(
+                                      border: InputBorder.none,
+                                    ),
+                                    enabled: false,
+                                    controller:
+                                        TextEditingController()
+                                          ..text = round.target
+                                              .toString()
+                                              .substring(
+                                                0,
+                                                round.target.toString().length -
+                                                    2,
+                                              ),
                                   ),
-                                  enabled: false,
-                                  controller:
-                                      TextEditingController()..text = target,
                                 ),
                               ),
                               ...List.generate(round.measurements.length, (j) {

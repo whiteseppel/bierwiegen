@@ -2,7 +2,7 @@ name: bierwiegen
 description: "A new Flutter project."
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 0.1.0+1
+version: 0.2.0+2
 
 environment:
   sdk: '>=3.7.0 <4.0.0'
@@ -67,13 +67,13 @@ flutter_native_splash:
     # 768 pixels in diameter.  To fit a 1152x1152 image within a circle with a 768 diameter, simply 
     # ensure that the most important design elements of your image are placed within a circular area
     # with a 768 diameter at the center of the 1152x1152 canvas.
-    #image: assets/android12splash.png
+    image: assets/images/logo.png
 
     # Splash screen background color.
-    #color: "#42a5f5"
+    color: "#789283"
 
     # App icon background color.
-    #icon_background_color: "#111111"
+    icon_background_color: "#789283"
 
     # The branding property allows you to specify an image used as branding in the splash screen.
     #branding: assets/dart.png

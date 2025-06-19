@@ -13,6 +13,15 @@ Zuerst wird das Gewicht für alle Getränke gewogen, damit jeder weiß, wie man 
 Das Spiel gewinnt der mit den meisten Rundensiegen.
 ''';
 
+  static const String appFunctionality = '''
+Neues Spiel mit selben Spielern:
+Ein neues Spiel kann über die Einstellungen (-> Neues Spiel starten) gestartet werden.
+
+Ändern von Zielgewicht einer Runde:
+Beim langen Drücken auf das Zielgewicht lässt sich ein neuer Wert eingeben.
+
+''';
+
   static const String privacy = '''
 Es werden keine Daten gesammelt. Es werdn keine Daten auf dem Gerät gespreichert oder versendet.
 ''';
