@@ -31,30 +31,31 @@ class _GameScreenState extends ConsumerState<GameScreen> {
 
     final childAspectRatio = itemWidth / itemHeight;
 
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-          icon: Icon(Icons.arrow_back),
-        ),
-        actions: [
-          IconButton(
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const OptionsScreen()),
-              );
-            },
-            icon: Icon(Icons.more_horiz),
+    return Stack(
+      children: [
+        Scaffold(
+          appBar: AppBar(
+            leading: IconButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              icon: Icon(Icons.arrow_back),
+            ),
+            actions: [
+              IconButton(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const OptionsScreen(),
+                    ),
+                  );
+                },
+                icon: Icon(Icons.more_horiz),
+              ),
+            ],
+            title: Text('Bierwiegen'),
           ),
-        ],
-        title: Text('Bierwiegen'),
-      ),
-      body: Stack(
-        children: [
-          WinnerConfetti(key: WinnerConfetti.globalKey),
-          SafeArea(
+          body: SafeArea(
             child: Padding(
               padding: const EdgeInsets.only(
                 left: 20,
@@ -228,8 +229,6 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                         style: ButtonStyles.secondary,
                         onPressed: () async {
                           await Dialogs.finishGameDialog(context, ref);
-                          // NOTE: danach anzeigen von gewinner unter der runde - darunter die 2
-                          // Buttons für neues spiel oder zurück zur Spielerauswahl
                         },
                         child: Text("Spiel beenden"),
                       ),
@@ -266,8 +265,9 @@ class _GameScreenState extends ConsumerState<GameScreen> {
               ),
             ),
           ),
-        ],
-      ),
+        ),
+        WinnerConfetti(key: WinnerConfetti.globalKey),
+      ],
     );
   }
 }

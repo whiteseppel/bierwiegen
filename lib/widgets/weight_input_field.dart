@@ -116,7 +116,6 @@ class _WeightInputFieldState extends ConsumerState<WeightInputField> {
 
           Future.microtask(() {
             ref.read(gameRoundProvider).last.focusNextEmptyInputField();
-            print('running microtask');
           });
 
           return;
@@ -135,10 +134,7 @@ class _WeightInputFieldState extends ConsumerState<WeightInputField> {
           ref.read(gameRoundProvider.notifier).addRound(weight);
         }
 
-        Future.microtask(() {
-          ref.read(gameRoundProvider).last.focusNextEmptyInputField();
-          print('running microtask');
-        });
+        ref.read(gameRoundProvider).last.focusNextEmptyInputField();
       },
     );
   }
