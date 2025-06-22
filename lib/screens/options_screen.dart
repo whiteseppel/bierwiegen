@@ -1,6 +1,4 @@
 import 'package:bierwiegen/models/scale_state.dart';
-import 'package:bierwiegen/providers/game_round_provider.dart';
-import 'package:bierwiegen/providers/player_provider.dart';
 import 'package:bierwiegen/widgets/game_info_widget.dart';
 import 'package:bierwiegen/widgets/privacy_widget.dart';
 import 'package:flutter/material.dart';
@@ -26,23 +24,6 @@ class _OptionsScreenState extends ConsumerState<OptionsScreen> {
           padding: const EdgeInsets.all(28.0),
           child: Column(
             children: [
-              // if player has no active game dont show this button
-              if (ref.read(playerProvider).isNotEmpty &&
-                  ref.read(gameRoundProvider).isNotEmpty) ...[
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton(
-                    style: ButtonStyles.regular,
-                    onPressed: () {
-                      ref.read(gameRoundProvider.notifier).clearRounds();
-                      ref.read(playerProvider.notifier).resetInitialWeight();
-                      Navigator.of(context).pop();
-                    },
-                    child: Text("Neues Spiel starten"),
-                  ),
-                ),
-                SizedBox(height: 32),
-              ],
               Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
@@ -63,7 +44,7 @@ class _OptionsScreenState extends ConsumerState<OptionsScreen> {
                       borderRadius: BorderRadius.circular(12.0),
                     ),
                     child: FilledButton(
-                      style: ButtonStyles.regular,
+                      style: ButtonStyles.primary,
                       onPressed:
                           ref.watch(scaleStateProvider).connectionState ==
                                   ScaleConnectionState.disconnected

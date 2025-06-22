@@ -7,8 +7,7 @@ import 'package:bierwiegen/sizes/sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../functions/weight_input_dialog.dart';
-import 'package:collection/collection.dart';
+import '../functions/dialogs.dart';
 
 import '../providers/game_round_provider.dart';
 
@@ -106,7 +105,7 @@ class _WeightInputFieldState extends ConsumerState<WeightInputField> {
             !ref
                 .read(playerProvider)
                 .any((player) => player.initialWeight.value == 0)) {
-          final weight = await showWeightInputDialog(context);
+          final weight = await Dialogs.showWeightInputDialog(context);
 
           if (weight == null) {
             print('weight must be added to add a new game round');
@@ -114,13 +113,19 @@ class _WeightInputFieldState extends ConsumerState<WeightInputField> {
           }
 
           ref.read(gameRoundProvider.notifier).addRound(weight);
+
+          Future.microtask(() {
+            ref.read(gameRoundProvider).last.focusNextEmptyInputField();
+            print('running microtask');
+          });
+
           return;
         }
 
         if (ref.read(gameRoundProvider).last.isFinished) {
           ref.read(gameRoundProvider.notifier).forceRefresh();
           print('adding new round');
-          final weight = await showWeightInputDialog(context);
+          final weight = await Dialogs.showWeightInputDialog(context);
 
           if (weight == null) {
             print('weight must be added to add a new game round');
@@ -130,7 +135,10 @@ class _WeightInputFieldState extends ConsumerState<WeightInputField> {
           ref.read(gameRoundProvider.notifier).addRound(weight);
         }
 
-        ref.read(gameRoundProvider).last.focusNextEmptyInputField();
+        Future.microtask(() {
+          ref.read(gameRoundProvider).last.focusNextEmptyInputField();
+          print('running microtask');
+        });
       },
     );
   }

@@ -7,9 +7,13 @@ This is a project digitalizing a party drinking game.
 ### Next Steps
 - [ ] 2 Game modes (Standard, Points)
 - [ ] create optical secondary button - options should be secondary, not primary
-- [ ] Game Screen
-  - [ ] Disable widescreen
-- [ ] Rearrange players (with keeping the state of the game)
+- [ ] "Spiel beenden"
+  - [x] Create button to end the game
+  - [x] Button only available after at least one round is played
+  - [ ] Freeze game input and changes when current game is finished
+  - [x] Add winning player widget on Bottom
+  - [x] Add animation (confetti) when game finishes
+  - [x] Below the winner Widget should be a "Neues Spiel starten" button
 
 ### Nice to have
 - [ ] Join game
@@ -18,6 +22,7 @@ This is a project digitalizing a party drinking game.
 - [ ] Update Visuals
   - [ ] Better visual star
 - [ ] Save games and see history of game
+- [ ] Rearrange players - do i really need this? switching between players is very easy now
 
 ### Release for Apple Appstore
 - [ ] Create Apple App Store account
@@ -25,6 +30,11 @@ This is a project digitalizing a party drinking game.
 ## Changelog
 
 ### Unreleased
+
+- [x] Screen orientation only portrait
+- [x] Limit number input for new round to 5
+
+### Version 0.2.0
 
 - [x] Optical improvements
   - [x] Add header (back button, title, options button)

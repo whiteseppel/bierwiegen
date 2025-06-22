@@ -1,4 +1,5 @@
 import 'package:bierwiegen/models/measurement.dart';
+import 'package:bierwiegen/providers/game_meta_data_provider.dart';
 import 'package:bierwiegen/screens/game_screen.dart';
 import 'package:bierwiegen/sizes/sizes.dart';
 import 'package:bierwiegen/widgets/game_info_widget.dart';
@@ -98,7 +99,7 @@ class _StartScreenState extends ConsumerState<StartScreen> {
                 SizedBox(
                   width: double.infinity,
                   child: FilledButton(
-                    style: ButtonStyles.regular,
+                    style: ButtonStyles.primary,
                     onPressed:
                         _playerControllers.any((c) => c.text.isNotEmpty)
                             ? startGame
@@ -111,7 +112,7 @@ class _StartScreenState extends ConsumerState<StartScreen> {
                 SizedBox(
                   width: double.infinity,
                   child: FilledButton(
-                    style: ButtonStyles.regular,
+                    style: ButtonStyles.primary,
                     child: const Text("Einstellungen"),
 
                     onPressed: () {
@@ -145,6 +146,7 @@ class _StartScreenState extends ConsumerState<StartScreen> {
   void startGame() {
     ref.read(gameRoundProvider.notifier).clearRounds();
     ref.read(playerProvider.notifier).clearPlayers();
+    ref.read(gameMetaDataProvider.notifier).createNewGame();
     List<String> players = [];
     for (final controller in _playerControllers) {
       if (controller.value.text.isNotEmpty) {

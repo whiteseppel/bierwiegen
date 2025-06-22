@@ -36,6 +36,43 @@ class ScoreNotifier extends StateNotifier<List<int>> {
 
     state = scoreList;
   }
+
+  String get winners {
+    if (winningPlayers.isEmpty) {
+      return '';
+    }
+
+    if (winningPlayers.length == 1) {
+      return winningPlayers.first.name;
+    }
+
+    if (winningPlayers.length == 2) {
+      return '${winningPlayers[0].name} und ${winningPlayers[1].name}';
+    }
+
+    final allButLast = winningPlayers
+        .sublist(0, winningPlayers.length - 1)
+        .map((p) => p.name)
+        .join(', ');
+    return '$allButLast, und ${winningPlayers.last.name}';
+  }
+
+  List<Player> get winningPlayers {
+    if (state.isEmpty) {
+      return [];
+    }
+
+    final maxValue = state.reduce((a, b) => a > b ? a : b);
+    final List<Player> indices = [];
+
+    for (int i = 0; i < state.length; i++) {
+      if (state[i] == maxValue) {
+        indices.add(ref.read(playerProvider)[i]);
+      }
+    }
+
+    return indices;
+  }
 }
 
 final scoreProvider = StateNotifierProvider<ScoreNotifier, List<int>>(

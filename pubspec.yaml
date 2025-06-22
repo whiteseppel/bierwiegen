@@ -16,6 +16,7 @@ dependencies:
   flutter_blue_plus: ^1.35.5
   collection: ^1.19.1
   wakelock_plus: ^1.3.2
+  confetti: 0.8.0
 
 dev_dependencies:
   flutter_test:
