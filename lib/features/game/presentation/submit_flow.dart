@@ -28,12 +28,12 @@ Future<void> handleCellSubmitted(
       return;
     }
 
-    await _startNewRound(context, ref);
+    await startNewRound(context, ref);
     return;
   }
 
   if (game.rounds.last.isFinished) {
-    await _startNewRound(context, ref);
+    await startNewRound(context, ref);
     return;
   }
 
@@ -44,8 +44,24 @@ Future<void> handleCellSubmitted(
   }
 }
 
-Future<void> _startNewRound(BuildContext context, WidgetRef ref) async {
-  final target = await Dialogs.showWeightInputDialog(context);
+Future<void> startNewRound(BuildContext context, WidgetRef ref) async {
+  final game = ref.read(gameProvider);
+  if (game == null || game.isFinished) {
+    return;
+  }
+
+  final lastTarget = game.rounds.isEmpty ? null : game.rounds.last.target;
+  final suggested = lastTarget == null
+      ? 400.0
+      : (lastTarget - 100).clamp(0.0, double.infinity);
+
+  final target = await Dialogs.weightInputDialog(
+    context,
+    title: 'Neue Runde',
+    body: 'Zielgewicht in Gramm festlegen.',
+    confirmLabel: 'Hinzufügen',
+    initialValue: suggested,
+  );
   if (target == null) {
     return;
   }

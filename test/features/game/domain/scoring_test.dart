@@ -6,11 +6,11 @@ import 'package:bierwiegen/features/game/domain/player.dart';
 import 'package:bierwiegen/features/game/domain/scoring.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Game _game(List<GameRound> rounds) {
+Game _game(List<GameRound> rounds, {GameMode mode = GameMode.standard}) {
   return Game(
     players: const [Player('Anna'), Player('Ben'), Player('Cleo')],
     rounds: rounds,
-    config: const GameConfig(),
+    config: GameConfig(mode: mode),
     meta: GameMetaData(createdAt: DateTime(2026)),
   );
 }
@@ -49,5 +49,38 @@ void main() {
     ]);
 
     expect(calculateScores(game), [2, 1, 0]);
+  });
+
+  test('points mode ranks players 3/2/1', () {
+    final game = _game(
+      [
+        const GameRound(500, [498, 490, 515]),
+      ],
+      mode: GameMode.points,
+    );
+
+    expect(calculateScores(game), [3, 2, 1]);
+  });
+
+  test('points mode gives 5 for an exact hit', () {
+    final game = _game(
+      [
+        const GameRound(500, [500, 502, 510]),
+      ],
+      mode: GameMode.points,
+    );
+
+    expect(calculateScores(game), [5, 2, 1]);
+  });
+
+  test('points mode lets tied players share the better rank', () {
+    final game = _game(
+      [
+        const GameRound(500, [498, 502, 510]),
+      ],
+      mode: GameMode.points,
+    );
+
+    expect(calculateScores(game), [3, 3, 1]);
   });
 }

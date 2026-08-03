@@ -69,6 +69,15 @@ class GameNotifier extends StateNotifier<Game?> {
     state = game.copyWith(rounds: rounds);
   }
 
+  void setMode(GameMode mode) {
+    final game = state;
+    if (game == null) {
+      return;
+    }
+
+    state = game.copyWith(config: game.config.copyWith(mode: mode));
+  }
+
   void finishGame() {
     final game = state;
     if (game == null) {

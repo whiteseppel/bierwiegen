@@ -25,6 +25,7 @@ class _OptionsScreenState extends ConsumerState<OptionsScreen> {
       ScaleConnectionState.error => true,
       ScaleConnectionState.scanning ||
       ScaleConnectionState.connecting ||
+      ScaleConnectionState.reconnecting ||
       ScaleConnectionState.connected => false,
     };
 
@@ -62,6 +63,8 @@ class _OptionsScreenState extends ConsumerState<OptionsScreen> {
                         ScaleConnectionState.error => 'Verbinden',
                         ScaleConnectionState.scanning => 'Suche Waage ...',
                         ScaleConnectionState.connecting => 'Verbinde ...',
+                        ScaleConnectionState.reconnecting =>
+                          'Verbindung verloren, verbinde neu ...',
                         ScaleConnectionState.connected => 'Verbunden',
                       }),
                     ),

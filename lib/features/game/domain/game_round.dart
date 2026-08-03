@@ -25,6 +25,22 @@ class GameRound {
 
   bool isExact(int playerIndex) => measurements[playerIndex] == target;
 
+  /// Closest distance among the measurements entered so far; unlike
+  /// [closestDistance] it does not require the round to be finished.
+  double? get closestDistanceSoFar {
+    final entered = measurements.where((m) => m != 0);
+    if (entered.isEmpty) {
+      return null;
+    }
+
+    return entered.map((m) => (m - target).abs()).reduce((a, b) => a < b ? a : b);
+  }
+
+  bool isClosestSoFar(int playerIndex) {
+    return measurements[playerIndex] != 0 &&
+        (measurements[playerIndex] - target).abs() == closestDistanceSoFar;
+  }
+
   /// Next player without a measurement, searching after [after] and wrapping
   /// around; null when the round is finished.
   int? nextEmptyIndex({required int after}) {

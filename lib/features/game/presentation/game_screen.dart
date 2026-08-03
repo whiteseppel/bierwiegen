@@ -1,185 +1,107 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../ui/button_styles.dart';
-import '../../../ui/text_styles.dart';
-import '../../settings/options_screen.dart';
+import '../../../ui/tokens.dart';
+import '../../scale/scale_provider.dart';
+import '../../scale/scale_state.dart';
 import '../domain/player.dart';
 import '../state/game_providers.dart';
-import 'cell_registry.dart';
+import '../state/game_ui_providers.dart';
 import 'dialogs.dart';
 import 'submit_flow.dart';
 import 'widgets/confetti_widget.dart';
-import 'widgets/measurement_cell.dart';
+import 'widgets/options_sheet.dart';
 import 'widgets/player_header_cell.dart';
-import 'widgets/target_cell.dart';
-import 'widgets/weight_input_field.dart';
+import 'widgets/round_label_cell.dart';
+import 'widgets/scale_chip.dart';
+import 'widgets/scale_panel.dart';
+import 'widgets/weight_cell.dart';
 
-class GameScreen extends ConsumerWidget {
+class GameScreen extends ConsumerStatefulWidget {
   const GameScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<GameScreen> createState() => _GameScreenState();
+}
+
+class _GameScreenState extends ConsumerState<GameScreen> {
+  final _headerScroll = ScrollController();
+  final _bodyScroll = ScrollController();
+  bool _syncingScroll = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _headerScroll.addListener(() => _syncScroll(_headerScroll, _bodyScroll));
+    _bodyScroll.addListener(() => _syncScroll(_bodyScroll, _headerScroll));
+  }
+
+  void _syncScroll(ScrollController from, ScrollController to) {
+    if (_syncingScroll || !to.hasClients || to.offset == from.offset) {
+      return;
+    }
+    _syncingScroll = true;
+    to.jumpTo(from.offset);
+    _syncingScroll = false;
+  }
+
+  @override
+  void dispose() {
+    _headerScroll.dispose();
+    _bodyScroll.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final game = ref.watch(gameProvider);
     if (game == null) {
       return const SizedBox.shrink();
     }
 
-    final screenWidth = MediaQuery.of(context).size.width;
-    final crossAxisCount = game.players.length + 1;
-    final spacing = 8.0;
-
-    final itemWidth =
-        (screenWidth - (spacing * (crossAxisCount - 1))) / crossAxisCount;
-    final itemHeight = 60.0;
-
-    final childAspectRatio = itemWidth / itemHeight;
+    final panelOpen =
+        ref.watch(focusedCellProvider) != null && !game.isFinished;
+    final showBottomBar =
+        !panelOpen && (game.isFinished || game.hasFinishedRound);
 
     return Stack(
       children: [
         Scaffold(
-          appBar: AppBar(
-            leading: IconButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              icon: Icon(Icons.arrow_back),
-            ),
-            actions: [
-              IconButton(
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => const OptionsScreen(),
-                    ),
-                  );
-                },
-                icon: Icon(Icons.more_horiz),
-              ),
-            ],
-            title: Text('Bierwiegen'),
-          ),
+          backgroundColor: CustomColors.background,
           body: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.only(
-                left: 20,
-                right: 20,
-                bottom: 20,
-                top: 10,
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  GridView.count(
-                    crossAxisCount: crossAxisCount,
-                    shrinkWrap: true,
-                    childAspectRatio: childAspectRatio,
-                    physics: const NeverScrollableScrollPhysics(),
-                    children: [
-                      Center(child: Text('Ziel')),
-                      ...List.generate(
-                        game.players.length,
-                        (i) => PlayerHeaderCell(playerIndex: i),
-                      ),
-                    ],
-                  ),
-                  Flexible(
-                    fit: FlexFit.loose,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFE0E0E0),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: SingleChildScrollView(
-                        child: Column(
-                          children: [
-                            GridView.count(
-                              crossAxisCount: crossAxisCount,
-                              shrinkWrap: true,
-                              childAspectRatio: childAspectRatio,
-                              physics: const NeverScrollableScrollPhysics(),
+            child: Column(
+              children: [
+                _buildTopBar(),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: Column(
+                      children: [
+                        _buildHeaderRow(game.players.length),
+                        const SizedBox(height: 8),
+                        Expanded(
+                          child: SingleChildScrollView(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                                SizedBox.shrink(),
-                                ...List.generate(game.players.length, (i) {
-                                  return Container(
-                                    alignment: Alignment.center,
-                                    margin: EdgeInsets.all(spacing / 2),
-                                    child: WeightInputField(
-                                      cellKey: CellRegistry.initialWeightKey(i),
-                                      value: game.players[i].initialWeight,
-                                      onValueChanged: (value) => ref
-                                          .read(gameProvider.notifier)
-                                          .setInitialWeight(i, value),
-                                      onSubmitted: () => handleCellSubmitted(
-                                        context,
-                                        ref,
-                                        isInitialWeight: true,
-                                        playerIndex: i,
-                                      ),
-                                    ),
-                                  );
-                                }),
+                                _buildRounds(game.players.length,
+                                    game.rounds.length),
+                                if (!game.isFinished) ...[
+                                  const SizedBox(height: 8),
+                                  _buildNewRoundButton(),
+                                ],
+                                const SizedBox(height: 24),
                               ],
                             ),
-                            ...List.generate(game.rounds.length, (i) {
-                              return GridView.count(
-                                crossAxisCount: crossAxisCount,
-                                shrinkWrap: true,
-                                childAspectRatio: childAspectRatio,
-                                physics: const NeverScrollableScrollPhysics(),
-                                children: [
-                                  TargetCell(roundIndex: i),
-                                  ...List.generate(
-                                    game.players.length,
-                                    (j) => MeasurementCell(
-                                      roundIndex: i,
-                                      playerIndex: j,
-                                    ),
-                                  ),
-                                ],
-                              );
-                            }),
-                          ],
+                          ),
                         ),
-                      ),
+                      ],
                     ),
                   ),
-                  SizedBox(height: 20),
-                  if (!game.isFinished && game.hasFinishedRound)
-                    SizedBox(
-                      width: double.infinity,
-                      child: FilledButton(
-                        style: ButtonStyles.secondary,
-                        onPressed: () async {
-                          await Dialogs.finishGameDialog(context, ref);
-                        },
-                        child: Text("Spiel beenden"),
-                      ),
-                    ),
-                  if (game.isFinished) ...[
-                    Text(
-                      ref.watch(winningPlayersProvider).length == 1
-                          ? 'Der Gewinner ist'
-                          : 'Die Gewinner sind',
-                    ),
-                    Text(
-                      _winnerNames(ref.watch(winningPlayersProvider)),
-                      style: TextStyles.heading,
-                    ),
-                    SizedBox(height: 20),
-                    SizedBox(
-                      width: double.infinity,
-                      child: FilledButton(
-                        style: ButtonStyles.primary,
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                        child: Text("Neues Spiel starten"),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
+                ),
+                const ScalePanel(),
+                if (showBottomBar) _buildBottomBar(game.isFinished),
+              ],
             ),
           ),
         ),
@@ -188,23 +110,294 @@ class GameScreen extends ConsumerWidget {
     );
   }
 
+  Widget _buildTopBar() {
+    final scale = ref.watch(scaleProvider);
+    final paused = ref.watch(scalePausedProvider);
+    final chip = ScaleChipData.of(scale, paused: paused);
+    final connecting = switch (scale.connectionState) {
+      ScaleConnectionState.scanning ||
+      ScaleConnectionState.connecting ||
+      ScaleConnectionState.reconnecting => true,
+      _ => false,
+    };
+
+    return Container(
+      height: 56,
+      padding: const EdgeInsets.symmetric(horizontal: 6),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(color: CustomColors.hairline, offset: Offset(0, 1)),
+        ],
+      ),
+      child: Row(
+        children: [
+          const Padding(
+            padding: EdgeInsets.only(left: 12),
+            child: Text(
+              'Bierwiegen',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w500,
+                letterSpacing: 0.1,
+                color: CustomColors.textPrimary,
+              ),
+            ),
+          ),
+          const Spacer(),
+          ScaleChip(
+            data: chip,
+            onTap: connecting
+                ? null
+                : () {
+                    if (chip.connected) {
+                      ref.read(scalePausedProvider.notifier).state = !paused;
+                    } else {
+                      ref.read(scaleProvider.notifier).tryConnect();
+                    }
+                  },
+          ),
+          SizedBox(
+            width: 44,
+            height: 44,
+            child: IconButton(
+              onPressed: () => showOptionsSheet(context),
+              icon: const Icon(
+                Icons.more_vert,
+                size: 22,
+                color: CustomColors.textPrimary,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeaderRow(int playerCount) {
+    return SizedBox(
+      height: playerHeaderHeight,
+      child: Row(
+        children: [
+          Container(
+            width: roundLabelWidth,
+            decoration: const BoxDecoration(
+              color: CustomColors.secondaryColor,
+              borderRadius: BorderRadius.horizontal(left: Radius.circular(13)),
+              boxShadow: [
+                BoxShadow(
+                  color: Color(0x33000000),
+                  offset: Offset(3, 0),
+                  blurRadius: 6,
+                  spreadRadius: -4,
+                ),
+              ],
+            ),
+            alignment: Alignment.center,
+            child: const Text(
+              'Ziel',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.3,
+                color: Colors.white,
+              ),
+            ),
+          ),
+          Expanded(
+            child: SingleChildScrollView(
+              controller: _headerScroll,
+              scrollDirection: Axis.horizontal,
+              child: Container(
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius:
+                      BorderRadius.horizontal(right: Radius.circular(14)),
+                ),
+                child: Row(
+                  children: [
+                    for (int i = 0; i < playerCount; i++)
+                      PlayerHeaderCell(playerIndex: i),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRounds(int playerCount, int roundCount) {
+    // Row -1 holds the initial weights; the label column stays fixed while
+    // the cells scroll horizontally in sync with the header.
+    final rowIndices = [-1, for (int i = 0; i < roundCount; i++) i];
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Column(
+          children: [
+            for (final index in rowIndices) ...[
+              if (index != rowIndices.first) const SizedBox(height: 8),
+              RoundLabelCell(roundIndex: index),
+            ],
+          ],
+        ),
+        Expanded(
+          child: SingleChildScrollView(
+            controller: _bodyScroll,
+            scrollDirection: Axis.horizontal,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (final index in rowIndices) ...[
+                  if (index != rowIndices.first) const SizedBox(height: 8),
+                  Container(
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      borderRadius:
+                          BorderRadius.horizontal(right: Radius.circular(14)),
+                    ),
+                    child: Row(
+                      children: [
+                        for (int p = 0; p < playerCount; p++)
+                          WeightCell(roundIndex: index, playerIndex: p),
+                      ],
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildNewRoundButton() {
+    return GestureDetector(
+      onTap: () => startNewRound(context, ref),
+      child: Container(
+        height: 44,
+        decoration: BoxDecoration(
+          border: Border.all(color: const Color(0x2E000000)),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        alignment: Alignment.center,
+        child: const Text(
+          '+ Neue Runde',
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+            color: CustomColors.textMuted,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBottomBar(bool finished) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(color: CustomColors.hairline, offset: Offset(0, -1)),
+        ],
+      ),
+      child: finished ? _buildWinnerSection() : _buildEndGameButton(),
+    );
+  }
+
+  Widget _buildEndGameButton() {
+    return GestureDetector(
+      onTap: () => Dialogs.finishGameDialog(context, ref),
+      child: Container(
+        height: 48,
+        decoration: BoxDecoration(
+          border: Border.all(color: CustomColors.secondaryColor),
+          borderRadius: BorderRadius.circular(24),
+        ),
+        alignment: Alignment.center,
+        child: const Text(
+          'Spiel beenden',
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w500,
+            color: CustomColors.greenDark,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWinnerSection() {
+    final winners = ref.watch(winningPlayersProvider);
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          winners.length > 1 ? 'Die Gewinner sind' : 'Der Gewinner ist',
+          style: const TextStyle(
+            fontSize: 13,
+            color: CustomColors.textMuted,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          _winnerNames(winners),
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.w700,
+            color: CustomColors.textPrimary,
+          ),
+        ),
+        const SizedBox(height: 10),
+        GestureDetector(
+          onTap: () => Navigator.of(context).pop(),
+          child: Container(
+            height: 52,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: CustomColors.primaryColor,
+              borderRadius: BorderRadius.circular(26),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x73FEAD2E),
+                  offset: Offset(0, 2),
+                  blurRadius: 6,
+                ),
+              ],
+            ),
+            alignment: Alignment.center,
+            child: const Text(
+              'Neues Spiel starten',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: CustomColors.onPrimaryDark,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   String _winnerNames(List<Player> winners) {
     if (winners.isEmpty) {
-      return '';
+      return '—';
     }
-
     if (winners.length == 1) {
       return winners.first.name;
     }
 
-    if (winners.length == 2) {
-      return '${winners[0].name} und ${winners[1].name}';
-    }
-
-    final allButLast = winners
-        .sublist(0, winners.length - 1)
-        .map((p) => p.name)
-        .join(', ');
-    return '$allButLast, und ${winners.last.name}';
+    final allButLast =
+        winners.sublist(0, winners.length - 1).map((p) => p.name).join(', ');
+    return '$allButLast und ${winners.last.name}';
   }
 }

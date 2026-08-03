@@ -4,10 +4,14 @@ plugins {
     id "dev.flutter.flutter-gradle-plugin"
 }
 
-// for adding keystore
+// Release signing keystore; not in git, so only present on the release machine.
 def keystoreProperties = new Properties()
 def keystorePropertiesFile = rootProject.file("key.properties")
-keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+if (keystorePropertiesFile.exists()) {
+    keystorePropertiesFile.withReader('UTF-8') { reader ->
+        keystoreProperties.load(reader)
+    }
+}
 
 def localProperties = new Properties()
 def localPropertiesFile = rootProject.file('local.properties')
@@ -30,7 +34,7 @@ if (flutterVersionName == null) {
 android {
     namespace "com.example.bierwiegen"
     compileSdk flutter.compileSdkVersion
-    ndkVersion flutter.ndkVersion
+    ndkVersion "28.2.13676358"
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
@@ -56,17 +60,23 @@ android {
     }
 
     signingConfigs {
-        release {
-            keyAlias keystoreProperties['keyAlias']
-            keyPassword keystoreProperties['keyPassword']
-            storeFile file(keystoreProperties['storeFile'])
-            storePassword keystoreProperties['storePassword']
+        if (keystorePropertiesFile.exists()) {
+            release {
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+                storeFile file(keystoreProperties['storeFile'])
+                storePassword keystoreProperties['storePassword']
+            }
         }
     }
- 
+
     buildTypes {
         release {
-            signingConfig signingConfigs.release
+            // Without the keystore (dev machines) release builds are
+            // debug-signed; Play Store uploads need key.properties.
+            signingConfig keystorePropertiesFile.exists()
+                    ? signingConfigs.release
+                    : signingConfigs.debug
         }
     }
 }

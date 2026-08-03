@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&amp;family=Roboto+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#DFDDD6;font-family:Roboto,system-ui,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px;box-sizing:border-box}
+a{color:#789283}a:hover{color:#5C7466}
+input{font-family:'Roboto Mono',ui-monospace,monospace}
+@keyframes bw-fall{0%{transform:translate3d(0,-40px,0) rotate(0deg);opacity:1}100%{transform:translate3d(0,900px,0) rotate(720deg);opacity:.85}}
+@keyframes bw-rise{from{transform:translateY(100%)}to{transform:translateY(0)}}
+@keyframes bw-fade{from{opacity:0}to{opacity:1}}
+@keyframes bw-pop{0%{transform:scale(.4)}70%{transform:scale(1.25)}100%{transform:scale(1)}}
+</style>
+</helmet>
+<x-import component-from-global-scope="AndroidDevice" from="./android-frame.jsx" hint-size="412px,892px">
+<div style="height:100%;position:relative;display:flex;flex-direction:column;background:#EFEEE9;overflow:hidden;color:#1C1B18">
+
+  <div style="height:56px;flex:none;display:flex;align-items:center;gap:2px;padding:0 6px;background:#FFFFFF;box-shadow:0 1px 0 rgba(0,0,0,.06);z-index:5">
+    <div style="flex:1;text-align:left;padding-left:12px;font-size:20px;font-weight:500;letter-spacing:.1px">Bierwiegen</div>
+    <div onClick="{{ cycleScale }}" style="height:32px;display:flex;align-items:center;gap:6px;padding:0 11px;border-radius:16px;cursor:pointer;user-select:none;font-size:12px;font-weight:500;background:{{ scaleChipBg }};color:{{ scaleChipFg }}">
+      <span style="width:8px;height:8px;border-radius:4px;background:{{ scaleDotColor }}"></span>
+      <span>{{ scaleChipLabel }}</span>
+    </div>
+    <div onClick="{{ openOptions }}" style="width:44px;height:44px;border-radius:22px;display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer;user-select:none" style-hover="background:rgba(0,0,0,.05)">⋮</div>
+  </div>
+
+  <div style="flex:1;overflow:auto;padding:8px;background:#EFEEE9">
+
+    <div style="display:flex;width:max-content;min-width:100%;position:sticky;top:0;z-index:3;margin-bottom:8px;background:#FFFFFF;border-radius:14px;border:1px solid rgba(0,0,0,.06)">
+      <div style="position:sticky;left:0;z-index:4;width:58px;flex:none;height:56px;border-radius:13px 0 0 13px;background:#789283;color:#FFFFFF;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;letter-spacing:.3px;box-shadow:6px 0 10px -8px rgba(0,0,0,.4)">Ziel</div>
+      <sc-for list="{{ players }}" as="p" hint-placeholder-count="5">
+        <div style="flex:none;width:76px;min-width:0;height:56px;border-left:1px solid rgba(0,0,0,.06);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px">
+          <div style="font-size:13px;font-weight:700;max-width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ p.name }}</div>
+          <sc-if value="{{ p.hasScore }}" hint-placeholder-val="{{ true }}">
+            <div style="font-size:11px;font-weight:500;color:#789283">{{ p.scoreLabel }}</div>
+          </sc-if>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;width:max-content;min-width:100%">
+      <sc-for list="{{ rows }}" as="row" hint-placeholder-count="4">
+        <div style="display:flex;width:max-content;min-width:100%;background:#FFFFFF;border-radius:14px;border:1px solid rgba(0,0,0,.06)">
+          <div onPointerDown="{{ row.onPressStart }}" onPointerUp="{{ row.onPressEnd }}" onPointerLeave="{{ row.onPressEnd }}" style="position:sticky;left:0;z-index:2;width:58px;flex:none;height:62px;border-radius:13px 0 0 13px;background:#EDF1EE;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;user-select:none;touch-action:none;box-shadow:6px 0 10px -8px rgba(0,0,0,.4)">
+            <div style="font-size:9px;font-weight:500;letter-spacing:.6px;color:#7C8F84;text-transform:uppercase">{{ row.tag }}</div>
+            <div style="font-size:17px;font-weight:700;font-family:'Roboto Mono',monospace;color:#3F5348">{{ row.label }}</div>
+          </div>
+          <sc-for list="{{ row.cells }}" as="cell" hint-placeholder-count="5">
+            <div style="flex:none;width:76px;min-width:0;height:62px;position:relative;border-left:1px solid rgba(0,0,0,.06)">
+              <sc-if value="{{ cell.gold }}" hint-placeholder-val="{{ false }}">
+                <div style="position:absolute;inset:0;background:rgba(254,173,46,.22);pointer-events:none"></div>
+              </sc-if>
+              <sc-if value="{{ cell.green }}" hint-placeholder-val="{{ false }}">
+                <div style="position:absolute;inset:0;background:rgba(120,146,131,.16);pointer-events:none"></div>
+              </sc-if>
+              <input value="{{ cell.value }}" onChange="{{ cell.onChange }}" onKeyDown="{{ cell.onKeyDown }}" onClick="{{ cell.onClick }}" ref="{{ cell.ref }}" inputmode="numeric" maxlength="5" placeholder="–" style="position:relative;width:100%;min-width:0;height:100%;box-sizing:border-box;border:0;background:transparent;text-align:center;font-size:19px;font-weight:400;letter-spacing:-.3px;color:#1C1B18;outline:none;padding:0 0 14px" style-focus="background:rgba(254,173,46,.12)" />
+              <sc-if value="{{ cell.hasDelta }}" hint-placeholder-val="{{ true }}">
+                <div style="position:absolute;left:0;right:0;bottom:9px;text-align:center;font-size:10px;font-family:'Roboto Mono',monospace;color:#8A877F;pointer-events:none">{{ cell.delta }}</div>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+      </sc-for>
+    </div>
+
+    
+    <div onClick="{{ askNewRound }}" style="margin-top:8px;height:44px;border-radius:12px;border:1px dashed rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center;gap:8px;font-size:13px;font-weight:500;color:#6F6C66;cursor:pointer;position:sticky;left:0" style-hover="background:rgba(0,0,0,.03)">+ Neue Runde</div>
+    <div style="height:120px"></div>
+  </div>
+
+  <sc-if value="{{ showBottom }}" hint-placeholder-val="{{ true }}">
+  <div style="flex:none;background:#FFFFFF;padding:12px 16px 16px;box-shadow:0 -1px 0 rgba(0,0,0,.06);display:flex;flex-direction:column;gap:10px;z-index:4">
+    <sc-if value="{{ showWinner }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 0 2px">
+        <div style="font-size:13px;color:#6F6C66">{{ winnerLead }}</div>
+        <div style="font-size:22px;font-weight:700;color:#1C1B18;text-align:center;text-wrap:pretty">{{ winnerNames }}</div>
+      </div>
+    </sc-if>
+    <sc-if value="{{ showEnd }}" hint-placeholder-val="{{ true }}">
+      <div onClick="{{ askEnd }}" style="height:48px;border-radius:24px;border:1px solid #789283;color:#3F5348;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:500;cursor:pointer;user-select:none" style-hover="background:#EDF1EE">Spiel beenden</div>
+    </sc-if>
+    <sc-if value="{{ gameOver }}" hint-placeholder-val="{{ false }}">
+      <div onClick="{{ newGame }}" style="height:52px;border-radius:26px;background:#FEAD2E;color:#2B2205;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;cursor:pointer;user-select:none;box-shadow:0 2px 6px rgba(254,173,46,.45)" style-hover="filter:brightness(1.05)">Neues Spiel starten</div>
+    </sc-if>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ scaleOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;left:0;right:0;bottom:0;z-index:30;display:flex;flex-direction:column;animation:bw-rise .22s ease-out">
+    <div style="background:#FFFFFF;border-radius:28px 28px 0 0;padding:16px 20px 18px;box-shadow:0 -8px 30px rgba(0,0,0,.18)">
+      <div style="width:32px;height:4px;border-radius:2px;background:rgba(0,0,0,.15);margin:0 auto 12px"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:2px">
+        <div style="font-size:15px;font-weight:700;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ scalePlayer }}</div>
+        <div onClick="{{ toggleScaleInput }}" onPointerDown="{{ keepFocus }}" style="display:flex;align-items:center;gap:6px;height:30px;padding:0 10px;border-radius:15px;cursor:pointer;user-select:none;font-size:11px;font-weight:500;letter-spacing:.3px;background:{{ scaleChipBg }};color:{{ scaleChipFg }}">
+          <span style="width:7px;height:7px;border-radius:4px;background:{{ scaleDotColor }}"></span>
+          <span>{{ scaleToggleLabel }}</span>
+        </div>
+        <div onClick="{{ toggleKeypad }}" onPointerDown="{{ keepFocus }}" style="display:flex;align-items:center;gap:6px;height:30px;padding:0 10px;border-radius:15px;cursor:pointer;user-select:none;font-size:11px;font-weight:500;letter-spacing:.3px;background:{{ kbChipBg }};color:{{ kbChipFg }}">{{ kbChipLabel }}</div>
+      </div>
+      <div style="display:flex;align-items:baseline;gap:6px;margin:6px 0 12px">
+        <div style="font-size:46px;font-weight:500;font-family:'Roboto Mono',monospace;line-height:1;letter-spacing:-1px">{{ liveWeight }}</div>
+        <div style="font-size:18px;color:#6F6C66">g</div>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:14px">
+        <div style="flex:1;background:#F4F3EF;border-radius:12px;padding:8px 10px">
+          <div style="font-size:10px;letter-spacing:.5px;color:#6F6C66;text-transform:uppercase">Aktuell</div>
+          <div style="font-size:15px;font-weight:500;font-family:'Roboto Mono',monospace">{{ scaleCurrent }}</div>
+        </div>
+        <div style="flex:1;background:#EDF1EE;border-radius:12px;padding:8px 10px">
+          <div style="font-size:10px;letter-spacing:.5px;color:#5C7466;text-transform:uppercase">Noch trinken</div>
+          <div style="font-size:15px;font-weight:500;font-family:'Roboto Mono',monospace;color:#3F5348">{{ scaleGoal }}</div>
+        </div>
+      </div>
+      <sc-if value="{{ scaleLiveOn }}" hint-placeholder-val="{{ true }}">
+        <div style="height:6px;border-radius:3px;background:#E7E5DE;overflow:hidden">
+          <div style="height:100%;background:#789283;border-radius:3px;transition:width .1s linear;width:{{ stabilityPct }}%"></div>
+        </div>
+      </sc-if>
+      <div style="margin-top:8px;font-size:12px;color:#6F6C66;text-align:center">{{ scaleHint }}</div>
+    </div>
+    <sc-if value="{{ kbOpen }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#E9E7E1;padding:8px 6px 10px;display:grid;grid-template-columns:repeat(3,1fr);gap:7px">
+        <sc-for list="{{ keys }}" as="k" hint-placeholder-count="12">
+          <div onClick="{{ k.onClick }}" onPointerDown="{{ k.onDown }}" style="height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:500;cursor:pointer;user-select:none;background:{{ k.bg }};color:{{ k.fg }};box-shadow:0 1px 1px rgba(0,0,0,.12)">{{ k.label }}</div>
+        </sc-for>
+      </div>
+    </sc-if>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ dialogOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;background:rgba(0,0,0,.34);display:flex;align-items:center;justify-content:center;z-index:40;animation:bw-fade .15s ease-out">
+      <div style="width:288px;background:#FFFFFF;border-radius:28px;padding:24px">
+        <div style="font-size:22px;font-weight:500;margin-bottom:8px">{{ dialogTitle }}</div>
+        <div style="font-size:14px;color:#6F6C66;line-height:1.4">{{ dialogBody }}</div>
+        <sc-if value="{{ dialogHasInput }}" hint-placeholder-val="{{ true }}">
+          <input value="{{ dialogValue }}" onChange="{{ onDialogInput }}" inputmode="numeric" maxlength="5" autofocus="{{ true }}" style="margin-top:16px;width:100%;box-sizing:border-box;height:52px;border-radius:12px;border:1px solid rgba(0,0,0,.2);background:#FAF9F6;text-align:center;font-size:22px;font-weight:500;outline:none" style-focus="border-color:#FEAD2E;box-shadow:0 0 0 2px rgba(254,173,46,.3)" />
+        </sc-if>
+        <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:22px">
+          <div onClick="{{ closeDialog }}" style="height:40px;padding:0 14px;border-radius:20px;display:flex;align-items:center;font-size:14px;font-weight:500;color:#6F6C66;cursor:pointer" style-hover="background:rgba(0,0,0,.05)">Abbrechen</div>
+          <div onClick="{{ confirmDialog }}" style="height:40px;padding:0 18px;border-radius:20px;display:flex;align-items:center;font-size:14px;font-weight:700;color:#2B2205;background:#FEAD2E;cursor:pointer" style-hover="filter:brightness(1.05)">{{ dialogConfirm }}</div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ optionsOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeOptions }}" style="position:absolute;inset:0;background:rgba(0,0,0,.34);z-index:45;display:flex;align-items:flex-end;animation:bw-fade .15s ease-out">
+      <div style="width:100%;background:#FFFFFF;border-radius:28px 28px 0 0;padding:12px 0 20px;animation:bw-rise .22s ease-out">
+        <div style="width:32px;height:4px;border-radius:2px;background:rgba(0,0,0,.15);margin:0 auto 12px"></div>
+        <div style="padding:6px 24px 10px;font-size:13px;font-weight:500;color:#6F6C66;letter-spacing:.4px">OPTIONEN</div>
+        <sc-for list="{{ optionItems }}" as="o" hint-placeholder-count="4">
+          <div onClick="{{ o.onClick }}" style="display:flex;align-items:center;gap:16px;height:56px;padding:0 24px;cursor:pointer" style-hover="background:rgba(0,0,0,.04)">
+            <div style="width:8px;height:8px;border-radius:4px;background:{{ o.dot }}"></div>
+            <div style="flex:1;font-size:16px">{{ o.label }}</div>
+            <div style="font-size:13px;color:#6F6C66">{{ o.value }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </sc-if>
+
+  {{ confetti }}
+</div>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:460,&quot;height&quot;:940},&quot;gameMode&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;standard&quot;,&quot;points&quot;],&quot;default&quot;:&quot;standard&quot;,&quot;tsType&quot;:&quot;'standard' | 'points'&quot;,&quot;section&quot;:&quot;Spiel&quot;},&quot;scaleState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;active&quot;,&quot;paused&quot;,&quot;disconnected&quot;],&quot;default&quot;:&quot;active&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Waage&quot;},&quot;playerCount&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:5,&quot;min&quot;:3,&quot;max&quot;:6,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Spiel&quot;}}">
+const NAMES = ['Lena', 'Tobi', 'Marc', 'Sara', 'Jonas', 'Pia'];
+const PRIMARY = '#FEAD2E', SECONDARY = '#789283';
+
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    const n = props.playerCount ?? 5;
+    this.inputs = {};
+    this.state = {
+      n,
+      initial: ['498', '512', '487', '503', '521', '494'],
+      rounds: [
+        { target: 400, weights: ['402', '389', '400', '418', '', ''] },
+        { target: 300, weights: ['', '', '', '', '', ''] },
+      ],
+      gameOver: false,
+      dialog: null,
+      dialogValue: '',
+      optionsOpen: false,
+      scale: props.scaleState ?? 'active',
+      focus: null,
+      live: 0, stability: 0, scaleCommitted: null,
+      confetti: null,
+    };
+  }
+
+  componentDidUpdate(prev) {
+    if (prev.playerCount !== this.props.playerCount && this.props.playerCount)
+      this.setState({ n: this.props.playerCount });
+    if (prev.scaleState !== this.props.scaleState && this.props.scaleState)
+      this.setState({ scale: this.props.scaleState });
+  }
+  componentWillUnmount() { clearInterval(this.timer); clearTimeout(this.lp); }
+
+  // ---- data helpers -------------------------------------------------
+  players() { return NAMES.slice(0, this.state.n); }
+  num(v) { const x = parseInt(v, 10); return isNaN(x) ? null : x; }
+
+  roundResult(round) {
+    const vals = this.players().map((_, i) => this.num(round.weights[i]));
+    const diffs = vals.map(v => v == null ? null : Math.abs(v - round.target));
+    const filled = diffs.filter(d => d != null);
+    if (!filled.length) return { winners: [], exact: [], order: [] };
+    const best = Math.min.apply(null, filled);
+    const winners = [], exact = [];
+    diffs.forEach((d, i) => { if (d === best) { winners.push(i); if (d === 0) exact.push(i); } });
+    const order = diffs.map((d, i) => ({ d, i })).filter(o => o.d != null).sort((a, b) => a.d - b.d);
+    return { winners, exact, order };
+  }
+  roundComplete(round) { return this.players().every((_, i) => this.num(round.weights[i]) != null); }
+
+  scores() {
+    const pts = this.players().map(() => 0);
+    const mode = this.props.gameMode ?? 'standard';
+    this.state.rounds.forEach(r => {
+      const res = this.roundResult(r);
+      if (mode === 'points') {
+        res.order.forEach((o, rank) => {
+          if (o.d === 0) pts[o.i] += 5;
+          else if (rank === 0) pts[o.i] += 3;
+          else if (rank === 1) pts[o.i] += 2;
+          else if (rank === 2) pts[o.i] += 1;
+        });
+      } else {
+        res.winners.forEach(i => { pts[i] += 1; });
+      }
+    });
+    return pts;
+  }
+
+  prevWeight(rIdx, c) {
+    for (let k = rIdx - 1; k >= 0; k--) {
+      const v = this.num(this.state.rounds[k].weights[c]);
+      if (v != null) return v;
+    }
+    return this.num(this.state.initial[c]);
+  }
+
+  setWeight(r, c, val) {
+    this.setState(s => {
+      if (r < 0) { const init = s.initial.slice(); init[c] = val; return { initial: init }; }
+      const rounds = s.rounds.map((x, i) => i === r ? { target: x.target, weights: x.weights.slice() } : x);
+      rounds[r].weights[c] = val;
+      return { rounds };
+    });
+  }
+
+  // ---- focus / keyboard ---------------------------------------------
+  key(r, c) { return r + ':' + c; }
+  focusCell(r, c) {
+    const el = this.inputs[this.key(r, c)];
+    if (el) { el.focus(); el.select && el.select(); }
+  }
+  nextEmpty(r, from) {
+    const row = r < 0 ? this.state.initial : this.state.rounds[r].weights;
+    for (let c = from; c < this.state.n; c++) if (this.num(row[c]) == null) return c;
+    return -1;
+  }
+  advance(r, c) {
+    const next = this.nextEmpty(r, c + 1);
+    if (next >= 0) { this.focusCell(r, next); return; }
+    if (r < 0) { this.focusCell(0, this.nextEmpty(0, 0) < 0 ? 0 : this.nextEmpty(0, 0)); return; }
+    if (r === this.state.rounds.length - 1) { this.blurAll(); this.askNewRound(); }
+    else this.focusCell(r + 1, Math.max(0, this.nextEmpty(r + 1, 0)));
+  }
+  blurAll() { const el = document.activeElement; el && el.blur && el.blur(); }
+
+  // ---- scale simulation ----------------------------------------------
+  startScale(r, c) {
+    clearInterval(this.timer);
+    if (this.state.scale !== 'active' || this.state.gameOver) return;
+    const target = r < 0 ? null : this.state.rounds[r].target;
+    const prev = this.prevWeight(r < 0 ? 0 : r, c) ?? 520;
+    const settle = target == null ? prev + Math.round(Math.random() * 20) : target + Math.round((Math.random() - 0.5) * 40);
+    let t = 0;
+    this.setState({ live: prev, stability: 0, scaleCommitted: null });
+    this.timer = setInterval(() => {
+      t += 100;
+      if (t < 900) {
+        const k = t / 900;
+        this.setState({ live: Math.round(prev + (settle - prev) * k + (Math.random() - 0.5) * 30), stability: 0 });
+      } else {
+        const p = Math.min(100, ((t - 900) / 2000) * 100);
+        this.setState({ live: settle, stability: p });
+        if (p >= 100) { clearInterval(this.timer); this.commitScale(settle); }
+      }
+    }, 100);
+  }
+  commitScale(v) {
+    const f = this.state.focus;
+    if (!f) return;
+    this.setWeight(f.r, f.c, String(v));
+    this.setState({ scaleCommitted: 'Dein Bier hat ' + v + ' Gramm!' });
+    setTimeout(() => { this.advance(f.r, f.c); }, 700);
+  }
+  onCellFocus(r, c) {
+    const f = this.state.focus;
+    if (this.state.gameOver || (f && f.r === r && f.c === c)) return;
+    this.setState({ focus: { r, c }, kbOpen: this.state.scale !== 'active' }, () => this.startScale(r, c));
+  }
+  keepFocus = e => { e.preventDefault(); };
+  toggleScaleInput = () => {
+    const next = this.state.scale === 'active' ? 'paused' : 'active';
+    clearInterval(this.timer);
+    this.setState({ scale: next, stability: 0, scaleCommitted: null, kbOpen: next !== 'active' ? true : this.state.kbOpen }, () => {
+      const f = this.state.focus;
+      if (next === 'active' && f) this.startScale(f.r, f.c);
+    });
+  };
+  toggleKeypad = () => this.setState(s => ({ kbOpen: !s.kbOpen }));
+  pressKey(d) {
+    const f = this.state.focus;
+    if (!f || this.state.gameOver) return;
+    if (d === 'OK') { this.advance(f.r, f.c); return; }
+    this.cancelScale();
+    const row = f.r < 0 ? this.state.initial : this.state.rounds[f.r].weights;
+    const cur = row[f.c] || '';
+    const val = d === '⌫' ? cur.slice(0, -1) : (cur + d).slice(0, 5);
+    this.setWeight(f.r, f.c, val);
+  }
+  onCellBlur(r, c) {
+    setTimeout(() => {
+      const f = this.state.focus;
+      if (f && f.r === r && f.c === c && document.activeElement !== this.inputs[this.key(r, c)]) {
+        clearInterval(this.timer);
+        this.setState({ focus: null, stability: 0, scaleCommitted: null });
+      }
+    }, 150);
+  }
+  cancelScale() { clearInterval(this.timer); this.setState({ stability: 0, scaleCommitted: null }); }
+
+  // ---- dialogs ---------------------------------------------------------
+  askNewRound = () => {
+    if (this.state.gameOver) return;
+    const last = this.state.rounds[this.state.rounds.length - 1];
+    const suggest = last ? Math.max(0, last.target - 100) : 400;
+    this.setState({ dialog: { type: 'round' }, dialogValue: String(suggest) });
+  };
+  askEditTarget(r) { if (this.state.gameOver) return; this.setState({ dialog: { type: 'target', r }, dialogValue: String(this.state.rounds[r].target) }); }
+  askEnd = () => this.setState({ dialog: { type: 'end' } });
+  closeDialog = () => this.setState({ dialog: null });
+  onDialogInput = e => this.setState({ dialogValue: e.target.value.replace(/\D/g, '').slice(0, 5) });
+
+  confirmDialog = () => {
+    const d = this.state.dialog;
+    if (!d) return;
+    if (d.type === 'round') {
+      const t = this.num(this.state.dialogValue) ?? 0;
+      this.setState(s => ({ rounds: s.rounds.concat([{ target: t, weights: ['', '', '', '', '', ''] }]), dialog: null }),
+        () => { const r = this.state.rounds.length - 1; setTimeout(() => this.focusCell(r, 0), 60); });
+    } else if (d.type === 'target') {
+      const t = this.num(this.state.dialogValue) ?? 0;
+      this.setState(s => ({ rounds: s.rounds.map((x, i) => i === d.r ? { target: t, weights: x.weights } : x), dialog: null }));
+    } else if (d.type === 'end') {
+      this.endGame();
+    }
+  };
+
+  endGame() {
+    clearInterval(this.timer);
+    this.blurAll();
+    const colors = [PRIMARY, SECONDARY, '#E4572E', '#4A6FA5', '#F6F3EA'];
+    const pieces = [];
+    for (let i = 0; i < 70; i++) pieces.push({
+      l: Math.random() * 100, d: Math.random() * 0.6, du: 1.4 + Math.random() * 0.9,
+      c: colors[i % colors.length], w: 6 + Math.round(Math.random() * 5),
+    });
+    this.setState({ gameOver: true, dialog: null, focus: null, confetti: pieces });
+    setTimeout(() => this.setState({ confetti: null }), 2600);
+  }
+  newGame = () => this.setState({
+    gameOver: false, confetti: null,
+    initial: ['', '', '', '', '', ''],
+    rounds: [{ target: 400, weights: ['', '', '', '', '', ''] }],
+  });
+
+  cycleScale = () => {
+    const order = ['active', 'paused', 'disconnected'];
+    const next = order[(order.indexOf(this.state.scale) + 1) % 3];
+    clearInterval(this.timer);
+    this.setState({ scale: next, stability: 0 });
+  };
+  openOptions = () => this.setState({ optionsOpen: true });
+  closeOptions = () => this.setState({ optionsOpen: false });
+
+  // ---- render values ---------------------------------------------------
+  renderVals() {
+    const s = this.state, mode = this.props.gameMode ?? 'standard';
+    const names = this.players();
+    const pts = this.scores();
+    const ro = s.gameOver;
+
+    const players = names.map((name, i) => ({
+      name, hasScore: pts[i] > 0,
+      scoreLabel: mode === 'points' ? pts[i] + ' Pkt' : '★ ' + pts[i],
+    }));
+
+    const mkCells = (r, weights, res, target) => names.map((_, c) => {
+      const v = this.num(weights[c]);
+      const dv = (v == null || target == null) ? null : v - target;
+      let span = 30;
+      if (target != null) names.forEach((__, k) => {
+        const x = this.num(weights[k]);
+        if (x != null) span = Math.max(span, Math.abs(x - target));
+      });
+      const gold = !!res && res.exact.indexOf(c) >= 0;
+      const green = !!res && res.exact.indexOf(c) < 0 && res.winners.indexOf(c) >= 0;
+      const mag = dv == null ? 0 : Math.min(50, Math.abs(dv) / span * 50);
+      return {
+      value: weights[c] ?? '',
+      readOnly: ro,
+      gold, green,
+      hasDelta: dv != null,
+      delta: dv == null ? '' : (dv === 0 ? '±0' : (dv > 0 ? '+' : '−') + Math.abs(dv)),
+      barW: Math.max(dv == null ? 0 : 2, mag),
+      barLeft: dv == null ? 50 : (dv >= 0 ? 50 : 50 - mag),
+      barColor: gold ? '#FEAD2E' : (green ? '#789283' : '#CFCCC3'),
+      ref: el => {
+        this.inputs[this.key(r, c)] = el;
+        if (el) el.readOnly = ro;
+        if (el && !el._bwBound) {
+          el._bwBound = true;
+          el.addEventListener('focus', () => this.onCellFocus(r, c));
+          el.addEventListener('blur', () => this.onCellBlur(r, c));
+        }
+      },
+      onChange: e => { if (this.state.gameOver) { this.forceUpdate(); return; } this.cancelScale(); this.setWeight(r, c, e.target.value.replace(/\D/g, '').slice(0, 5)); },
+      onKeyDown: e => { if (this.state.gameOver) { e.preventDefault(); return; } if (e.key === 'Enter' || e.key === 'Tab') { e.preventDefault(); this.advance(r, c); } },
+      onClick: () => { if (!this.state.gameOver) this.onCellFocus(r, c); },
+    };
+    });
+
+    const rows = [{
+      key: 'init', tag: 'Start', label: '—', labelBg: '#E7E5DE',
+      onPressStart: () => {}, onPressEnd: () => {},
+      cells: mkCells(-1, s.initial, null, null),
+    }].concat(s.rounds.map((r, i) => {
+      const res = this.roundResult(r);
+      return {
+        key: 'r' + i, tag: 'R' + (i + 1), label: String(r.target), labelBg: '#DCE5DF',
+        onPressStart: () => { clearTimeout(this.lp); this.lp = setTimeout(() => this.askEditTarget(i), 450); },
+        onPressEnd: () => clearTimeout(this.lp),
+        cells: mkCells(i, r.weights, res, r.target),
+      };
+    }));
+
+    const anyComplete = s.rounds.some(r => this.roundComplete(r));
+    const best = Math.max.apply(null, pts.concat([0]));
+    const champs = names.filter((_, i) => pts[i] === best && best > 0);
+    const winnerNames = champs.length > 1
+      ? champs.slice(0, -1).join(', ') + ' und ' + champs[champs.length - 1]
+      : (champs[0] || '—');
+
+    const f = s.focus;
+    const scaleOpen = !!f && !ro;
+    const liveOn = s.scale === 'active';
+    const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '⌫', '0', 'OK'].map(k => ({
+      label: k,
+      bg: k === 'OK' ? '#FEAD2E' : (k === '⌫' ? '#D9D6CE' : '#FFFFFF'),
+      fg: k === 'OK' ? '#2B2205' : '#1C1B18',
+      onDown: this.keepFocus,
+      onClick: () => this.pressKey(k),
+    }));
+    let scalePlayer = '', scaleCurrent = '–', scaleGoal = '–', scaleHint = 'Ruhig halten …';
+    if (f) {
+      scalePlayer = names[f.c];
+      const prev = this.prevWeight(f.r < 0 ? 0 : f.r, f.c);
+      scaleCurrent = prev == null ? '–' : prev + ' g';
+      const tgt = f.r < 0 ? null : s.rounds[f.r].target;
+      scaleGoal = tgt == null ? 'Startgewicht' : (s.live - tgt >= 0 ? (s.live - tgt) + ' g' : (tgt - s.live) + ' g zu wenig');
+      scaleHint = s.scaleCommitted ? s.scaleCommitted
+        : (!liveOn ? (s.scale === 'paused' ? 'Waage pausiert – Eingabe per Tastatur' : 'Keine Waage verbunden – Eingabe per Tastatur')
+          : (s.stability > 0 ? 'Stabil … halten' : 'Glas auf die Waage stellen'));
+    }
+
+    const chip = {
+      active: { bg: '#EDF1EE', fg: '#3F5348', dot: SECONDARY, label: 'Waage' },
+      paused: { bg: '#FDF1DC', fg: '#6B5416', dot: PRIMARY, label: 'Pausiert' },
+      disconnected: { bg: '#F1F0EC', fg: '#8A877F', dot: '#BDBAB2', label: 'Getrennt' },
+    }[s.scale];
+
+    const d = s.dialog;
+    const dialogMeta = {
+      round: { title: 'Neue Runde', body: 'Zielgewicht in Gramm festlegen.', confirm: 'Hinzufügen', input: true },
+      target: { title: 'Ziel korrigieren', body: 'Zielgewicht dieser Runde anpassen.', confirm: 'Speichern', input: true },
+      end: { title: 'Spiel beenden?', body: 'Die Tabelle wird gesperrt und der Gewinner ermittelt.', confirm: 'Beenden', input: false },
+    }[d && d.type] || {};
+
+    const confetti = s.confetti ? React.createElement('div', {
+      key: 'confetti',
+      style: { position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none', zIndex: 60 },
+    }, s.confetti.map((p, i) => React.createElement('div', {
+      key: i,
+      style: {
+        position: 'absolute', top: 0, left: p.l + '%', width: p.w, height: p.w * 1.7,
+        background: p.c, borderRadius: 1,
+        animation: 'bw-fall ' + p.du + 's linear ' + p.d + 's forwards',
+      },
+    }))) : null;
+
+    return {
+      players, rows, confetti,
+      askNewRound: this.askNewRound, askEnd: this.askEnd, newGame: this.newGame,
+      cycleScale: this.cycleScale, openOptions: this.openOptions, closeOptions: this.closeOptions,
+      optionsOpen: s.optionsOpen,
+      optionItems: [
+        { label: 'Waage verbinden', value: chip.label, dot: chip.dot, onClick: this.cycleScale },
+        { label: 'Spielmodus', value: mode === 'points' ? 'Punkte' : 'Standard', dot: PRIMARY, onClick: () => {} },
+        { label: 'Spiel zurücksetzen', value: '', dot: '#BDBAB2', onClick: () => { this.closeOptions(); this.newGame(); } },
+      ],
+      scaleChipBg: chip.bg, scaleChipFg: chip.fg, scaleDotColor: chip.dot, scaleChipLabel: chip.label,
+      scaleOpen, scalePlayer, scaleCurrent, scaleGoal, scaleHint,
+      scaleLiveOn: liveOn, keys, kbOpen: !!s.kbOpen,
+      toggleScaleInput: this.toggleScaleInput, toggleKeypad: this.toggleKeypad,
+      scaleToggleLabel: s.scale === 'active' ? 'Waage an' : (s.scale === 'paused' ? 'Waage aus' : 'Getrennt'),
+      kbChipLabel: s.kbOpen ? 'Tastatur aus' : 'Tastatur',
+      kbChipBg: s.kbOpen ? '#FDF1DC' : '#F1F0EC',
+      kbChipFg: s.kbOpen ? '#6B5416' : '#6F6C66',
+      liveWeight: liveOn ? (s.live ? String(s.live) : '—') : '—', stabilityPct: s.stability,
+      showEnd: anyComplete && !ro, gameOver: ro, showWinner: ro,
+      showBottom: ro || (anyComplete && !ro),
+      winnerLead: champs.length > 1 ? 'Die Gewinner sind' : 'Der Gewinner ist',
+      winnerNames,
+      keepFocus: this.keepFocus,
+      dialogOpen: !!d, dialogTitle: dialogMeta.title, dialogBody: dialogMeta.body,
+      dialogConfirm: dialogMeta.confirm, dialogHasInput: !!dialogMeta.input,
+      dialogValue: s.dialogValue, onDialogInput: this.onDialogInput,
+      closeDialog: this.closeDialog, confirmDialog: this.confirmDialog,
+    };
+  }
+}
+</script>
+</body>
+</html>
