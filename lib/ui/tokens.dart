@@ -26,6 +26,4 @@ class CustomColors {
   static const Color goldFocus = Color(0x1FFEAD2E);
   static const Color tileBg = Color(0xFFF4F3EF);
   static const Color trackBg = Color(0xFFE7E5DE);
-  static const Color keypadBg = Color(0xFFE9E7E1);
-  static const Color keypadDelete = Color(0xFFD9D6CE);
 }

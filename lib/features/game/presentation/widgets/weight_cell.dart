@@ -15,8 +15,8 @@ const double weightCellWidth = 76;
 const double weightCellHeight = 62;
 
 /// One input cell of the score table; [roundIndex] is -1 for the
-/// initial-weights row. Input happens via the scale or the in-app keypad,
-/// the system keyboard stays closed.
+/// initial-weights row. While the scale delivers values the system keyboard
+/// stays hidden; it can be brought back via the scale panel's keyboard chip.
 class WeightCell extends ConsumerStatefulWidget {
   const WeightCell({
     super.key,
@@ -51,15 +51,19 @@ class _WeightCellState extends ConsumerState<WeightCell> {
       final scaleLive = ref.read(scaleProvider).connectionState ==
               ScaleConnectionState.connected &&
           !ref.read(scalePausedProvider);
-      ref.read(keypadOpenProvider.notifier).state = !scaleLive;
+      ref.read(keyboardOpenProvider.notifier).state = !scaleLive;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted && _node!.hasFocus) {
-          Scrollable.ensureVisible(
-            context,
-            alignment: 0.5,
-            duration: const Duration(milliseconds: 200),
-          );
+        if (!mounted || !_node!.hasFocus) {
+          return;
         }
+        if (scaleLive) {
+          SystemChannels.textInput.invokeMethod('TextInput.hide');
+        }
+        Scrollable.ensureVisible(
+          context,
+          alignment: 0.5,
+          duration: const Duration(milliseconds: 200),
+        );
       });
     } else {
       // Deferred so that a sibling cell gaining focus wins over this clear.
@@ -144,7 +148,8 @@ class _WeightCellState extends ConsumerState<WeightCell> {
                 focusNode: node,
                 enabled: !game.isFinished,
                 groupId: weightInputTapGroup,
-                keyboardType: TextInputType.none,
+                keyboardType: TextInputType.number,
+                textInputAction: TextInputAction.next,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   fontSize: 19,
