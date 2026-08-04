@@ -2,12 +2,13 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../state/game_providers.dart';
+import '../state/game_ui_providers.dart';
 import 'cell_registry.dart';
 import 'dialogs.dart';
 
 /// Advances the game after a cell was submitted: moves the focus to the next
-/// empty cell and starts a new round (via target dialog) when the current one
-/// is complete.
+/// empty cell in the current round. Completing a round no longer opens a new
+/// one — the player adds rounds explicitly via "+ Neue Runde".
 Future<void> handleCellSubmitted(
   BuildContext context,
   WidgetRef ref, {
@@ -28,12 +29,12 @@ Future<void> handleCellSubmitted(
       return;
     }
 
-    await startNewRound(context, ref);
+    _clearFocus(ref);
     return;
   }
 
   if (game.rounds.last.isFinished) {
-    await startNewRound(context, ref);
+    _clearFocus(ref);
     return;
   }
 
@@ -42,6 +43,12 @@ Future<void> handleCellSubmitted(
   if (next != null) {
     registry.requestFocus(CellRegistry.measurementKey(lastRoundIndex, next));
   }
+}
+
+void _clearFocus(WidgetRef ref) {
+  FocusManager.instance.primaryFocus?.unfocus();
+  ref.read(focusedCellProvider.notifier).state = null;
+  ref.read(keyboardOpenProvider.notifier).state = false;
 }
 
 Future<void> startNewRound(BuildContext context, WidgetRef ref) async {

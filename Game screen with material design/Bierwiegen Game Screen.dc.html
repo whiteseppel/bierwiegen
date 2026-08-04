@@ -55,13 +55,10 @@ input{font-family:'Roboto Mono',ui-monospace,monospace}
           </div>
           <sc-for list="{{ row.cells }}" as="cell" hint-placeholder-count="5">
             <div style="flex:none;width:76px;min-width:0;height:62px;position:relative;border-left:1px solid rgba(0,0,0,.06)">
-              <sc-if value="{{ cell.gold }}" hint-placeholder-val="{{ false }}">
-                <div style="position:absolute;inset:0;background:rgba(254,173,46,.22);pointer-events:none"></div>
+              <sc-if value="{{ cell.barShow }}" hint-placeholder-val="{{ false }}">
+                <div style="position:absolute;left:14px;right:14px;bottom:0;height:4px;border-radius:2px 2px 0 0;pointer-events:none;background:{{ cell.winColor }}"></div>
               </sc-if>
-              <sc-if value="{{ cell.green }}" hint-placeholder-val="{{ false }}">
-                <div style="position:absolute;inset:0;background:rgba(120,146,131,.16);pointer-events:none"></div>
-              </sc-if>
-              <input value="{{ cell.value }}" onChange="{{ cell.onChange }}" onKeyDown="{{ cell.onKeyDown }}" onClick="{{ cell.onClick }}" ref="{{ cell.ref }}" inputmode="numeric" maxlength="5" placeholder="–" style="position:relative;width:100%;min-width:0;height:100%;box-sizing:border-box;border:0;background:transparent;text-align:center;font-size:19px;font-weight:400;letter-spacing:-.3px;color:#1C1B18;outline:none;padding:0 0 14px" style-focus="background:rgba(254,173,46,.12)" />
+              <input value="{{ cell.value }}" onChange="{{ cell.onChange }}" onKeyDown="{{ cell.onKeyDown }}" onClick="{{ cell.onClick }}" ref="{{ cell.ref }}" inputmode="numeric" maxlength="5" placeholder="–" style="position:relative;width:100%;min-width:0;height:100%;box-sizing:border-box;border:0;background:transparent;text-align:center;font-size:19px;font-weight:400;letter-spacing:-.3px;color:#1C1B18;outline:none;padding:0 0 14px" style-focus="background:rgba(254,173,46,.16);box-shadow:inset 0 0 0 2px rgba(254,173,46,.55)" />
               <sc-if value="{{ cell.hasDelta }}" hint-placeholder-val="{{ true }}">
                 <div style="position:absolute;left:0;right:0;bottom:9px;text-align:center;font-size:10px;font-family:'Roboto Mono',monospace;color:#8A877F;pointer-events:none">{{ cell.delta }}</div>
               </sc-if>
@@ -72,25 +69,46 @@ input{font-family:'Roboto Mono',ui-monospace,monospace}
     </div>
 
     
-    <div onClick="{{ askNewRound }}" style="margin-top:8px;height:44px;border-radius:12px;border:1px dashed rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center;gap:8px;font-size:13px;font-weight:500;color:#6F6C66;cursor:pointer;position:sticky;left:0" style-hover="background:rgba(0,0,0,.03)">+ Neue Runde</div>
-    <div style="height:120px"></div>
-  </div>
-
-  <sc-if value="{{ showBottom }}" hint-placeholder-val="{{ true }}">
-  <div style="flex:none;background:#FFFFFF;padding:12px 16px 16px;box-shadow:0 -1px 0 rgba(0,0,0,.06);display:flex;flex-direction:column;gap:10px;z-index:4">
-    <sc-if value="{{ showWinner }}" hint-placeholder-val="{{ false }}">
-      <div style="display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 0 2px">
-        <div style="font-size:13px;color:#6F6C66">{{ winnerLead }}</div>
-        <div style="font-size:22px;font-weight:700;color:#1C1B18;text-align:center;text-wrap:pretty">{{ winnerNames }}</div>
+    <sc-if value="{{ playing }}" hint-placeholder-val="{{ true }}">
+      <div style="position:sticky;left:0;margin-top:10px;display:flex;flex-direction:column;gap:10px">
+        <div onClick="{{ askNewRound }}" style="height:46px;border-radius:12px;border:1px dashed rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px;font-weight:500;color:#6F6C66;cursor:pointer;user-select:none" style-hover="background:rgba(0,0,0,.03)">+ Neue Runde</div>
+        <div onClick="{{ askEnd }}" style="height:50px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;user-select:none;cursor:{{ finishCursor }};background:{{ finishBg }};color:{{ finishFg }};box-shadow:{{ finishShadow }}">Spiel beenden</div>
+        <div style="text-align:center;font-size:12px;color:#8A877F;text-wrap:pretty">{{ finishHint }}</div>
       </div>
     </sc-if>
-    <sc-if value="{{ showEnd }}" hint-placeholder-val="{{ true }}">
-      <div onClick="{{ askEnd }}" style="height:48px;border-radius:24px;border:1px solid #789283;color:#3F5348;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:500;cursor:pointer;user-select:none" style-hover="background:#EDF1EE">Spiel beenden</div>
-    </sc-if>
     <sc-if value="{{ gameOver }}" hint-placeholder-val="{{ false }}">
-      <div onClick="{{ newGame }}" style="height:52px;border-radius:26px;background:#FEAD2E;color:#2B2205;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;cursor:pointer;user-select:none;box-shadow:0 2px 6px rgba(254,173,46,.45)" style-hover="filter:brightness(1.05)">Neues Spiel starten</div>
+      <div onClick="{{ showResult }}" style="position:sticky;left:0;margin-top:10px;height:50px;border-radius:12px;background:#FEAD2E;color:#2B2205;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;cursor:pointer;user-select:none;box-shadow:0 2px 6px rgba(254,173,46,.45)">Endstand ansehen</div>
     </sc-if>
+    <div style="height:40px"></div>
   </div>
+
+  <sc-if value="{{ resultOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;z-index:50;background:#EFEEE9;display:flex;flex-direction:column;overflow:hidden;animation:bw-fade .2s ease-out">
+      <div style="flex:1;display:flex;flex-direction:column;overflow:auto;padding:22px 20px 8px;gap:14px">
+        <div style="flex:none;background:#FFFFFF;border-radius:12px;border:1px solid rgba(0,0,0,.06);padding:22px 20px 20px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,.06)">
+          <div style="font-size:11px;font-weight:500;letter-spacing:2px;color:#8A877F;text-transform:uppercase">Endstand</div>
+          <div style="width:44px;height:4px;border-radius:2px;background:#FEAD2E;margin:14px auto 16px"></div>
+          <div style="font-size:14px;color:#6F6C66">{{ winnerLead }}</div>
+          <div style="margin-top:4px;font-size:34px;line-height:1.15;font-weight:700;color:#1C1B18;text-wrap:pretty;animation:bw-pop .45s ease-out">{{ winnerNames }}</div>
+          <div style="margin-top:10px;font-size:13px;color:#8A877F">{{ winnerSummary }}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+        <sc-for list="{{ ranking }}" as="p" hint-placeholder-count="5">
+          <div style="display:flex;align-items:center;gap:14px;height:54px;padding:0 16px;border-radius:12px;background:{{ p.bgL }};border:1px solid {{ p.borderL }}">
+            <div style="width:22px;font-size:15px;font-weight:700;font-family:'Roboto Mono',monospace;color:{{ p.rankFgL }}">{{ p.rank }}</div>
+            <div style="flex:1;font-size:16px;font-weight:500;color:#1C1B18;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ p.name }}</div>
+            <div style="font-size:12px;color:#8A877F;font-family:'Roboto Mono',monospace">{{ p.meta }}</div>
+            <div style="font-size:17px;font-weight:700;font-family:'Roboto Mono',monospace;color:#1C1B18">{{ p.score }}</div>
+          </div>
+        </sc-for>
+        </div>
+      </div>
+      <div style="flex:none;padding:8px 20px 24px;display:flex;flex-direction:column;gap:10px">
+        <div onClick="{{ newGame }}" style="height:52px;border-radius:12px;background:#FEAD2E;color:#2B2205;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;cursor:pointer;user-select:none;box-shadow:0 2px 6px rgba(254,173,46,.45)" style-hover="filter:brightness(1.05)">Neues Spiel starten</div>
+        <div onClick="{{ hideResult }}" style="height:48px;border-radius:12px;border:1px solid #789283;color:#3F5348;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:500;cursor:pointer;user-select:none" style-hover="background:#EDF1EE">Tabelle ansehen</div>
+      </div>
+      {{ confetti }}
+    </div>
   </sc-if>
 
   <sc-if value="{{ scaleOpen }}" hint-placeholder-val="{{ false }}">
@@ -129,7 +147,7 @@ input{font-family:'Roboto Mono',ui-monospace,monospace}
     <sc-if value="{{ kbOpen }}" hint-placeholder-val="{{ false }}">
       <div style="background:#E9E7E1;padding:8px 6px 10px;display:grid;grid-template-columns:repeat(3,1fr);gap:7px">
         <sc-for list="{{ keys }}" as="k" hint-placeholder-count="12">
-          <div onClick="{{ k.onClick }}" onPointerDown="{{ k.onDown }}" style="height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:500;cursor:pointer;user-select:none;background:{{ k.bg }};color:{{ k.fg }};box-shadow:0 1px 1px rgba(0,0,0,.12)">{{ k.label }}</div>
+          <div onClick="{{ k.onClick }}" onPointerDown="{{ k.onDown }}" style="height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:500;cursor:pointer;user-select:none;background:{{ k.bg }};color:{{ k.fg }};box-shadow:0 1px 1px rgba(0,0,0,.12)">{{ k.label }}</div>
         </sc-for>
       </div>
     </sc-if>
@@ -145,8 +163,8 @@ input{font-family:'Roboto Mono',ui-monospace,monospace}
           <input value="{{ dialogValue }}" onChange="{{ onDialogInput }}" inputmode="numeric" maxlength="5" autofocus="{{ true }}" style="margin-top:16px;width:100%;box-sizing:border-box;height:52px;border-radius:12px;border:1px solid rgba(0,0,0,.2);background:#FAF9F6;text-align:center;font-size:22px;font-weight:500;outline:none" style-focus="border-color:#FEAD2E;box-shadow:0 0 0 2px rgba(254,173,46,.3)" />
         </sc-if>
         <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:22px">
-          <div onClick="{{ closeDialog }}" style="height:40px;padding:0 14px;border-radius:20px;display:flex;align-items:center;font-size:14px;font-weight:500;color:#6F6C66;cursor:pointer" style-hover="background:rgba(0,0,0,.05)">Abbrechen</div>
-          <div onClick="{{ confirmDialog }}" style="height:40px;padding:0 18px;border-radius:20px;display:flex;align-items:center;font-size:14px;font-weight:700;color:#2B2205;background:#FEAD2E;cursor:pointer" style-hover="filter:brightness(1.05)">{{ dialogConfirm }}</div>
+          <div onClick="{{ closeDialog }}" style="height:40px;padding:0 14px;border-radius:12px;display:flex;align-items:center;font-size:14px;font-weight:500;color:#6F6C66;cursor:pointer" style-hover="background:rgba(0,0,0,.05)">Abbrechen</div>
+          <div onClick="{{ confirmDialog }}" style="height:40px;padding:0 18px;border-radius:12px;display:flex;align-items:center;font-size:14px;font-weight:700;color:#2B2205;background:#FEAD2E;cursor:pointer" style-hover="filter:brightness(1.05)">{{ dialogConfirm }}</div>
         </div>
       </div>
     </div>
@@ -168,7 +186,6 @@ input{font-family:'Roboto Mono',ui-monospace,monospace}
     </div>
   </sc-if>
 
-  {{ confetti }}
 </div>
 </x-import>
 </x-dc>
@@ -205,7 +222,7 @@ class Component extends DCLogic {
     if (prev.scaleState !== this.props.scaleState && this.props.scaleState)
       this.setState({ scale: this.props.scaleState });
   }
-  componentWillUnmount() { clearInterval(this.timer); clearTimeout(this.lp); }
+  componentWillUnmount() { clearInterval(this.timer); clearTimeout(this.lp); clearTimeout(this.confTimer); }
 
   // ---- data helpers -------------------------------------------------
   players() { return NAMES.slice(0, this.state.n); }
@@ -275,7 +292,7 @@ class Component extends DCLogic {
     const next = this.nextEmpty(r, c + 1);
     if (next >= 0) { this.focusCell(r, next); return; }
     if (r < 0) { this.focusCell(0, this.nextEmpty(0, 0) < 0 ? 0 : this.nextEmpty(0, 0)); return; }
-    if (r === this.state.rounds.length - 1) { this.blurAll(); this.askNewRound(); }
+    if (r === this.state.rounds.length - 1) { this.blurAll(); this.setState({ focus: null, kbOpen: false }); }
     else this.focusCell(r + 1, Math.max(0, this.nextEmpty(r + 1, 0)));
   }
   blurAll() { const el = document.activeElement; el && el.blur && el.blur(); }
@@ -352,7 +369,8 @@ class Component extends DCLogic {
     this.setState({ dialog: { type: 'round' }, dialogValue: String(suggest) });
   };
   askEditTarget(r) { if (this.state.gameOver) return; this.setState({ dialog: { type: 'target', r }, dialogValue: String(this.state.rounds[r].target) }); }
-  askEnd = () => this.setState({ dialog: { type: 'end' } });
+  anyScored() { return this.state.rounds.some(r => this.players().some((_, i) => this.num(r.weights[i]) != null)); }
+  askEnd = () => { if (this.state.gameOver || !this.anyScored()) return; this.setState({ dialog: { type: 'end' } }); };
   closeDialog = () => this.setState({ dialog: null });
   onDialogInput = e => this.setState({ dialogValue: e.target.value.replace(/\D/g, '').slice(0, 5) });
 
@@ -380,11 +398,24 @@ class Component extends DCLogic {
       l: Math.random() * 100, d: Math.random() * 0.6, du: 1.4 + Math.random() * 0.9,
       c: colors[i % colors.length], w: 6 + Math.round(Math.random() * 5),
     });
-    this.setState({ gameOver: true, dialog: null, focus: null, confetti: pieces });
-    setTimeout(() => this.setState({ confetti: null }), 2600);
+    this.setState({ gameOver: true, dialog: null, focus: null, kbOpen: false, resultOpen: true, confetti: pieces });
+    clearTimeout(this.confTimer);
+    this.confTimer = setTimeout(() => this.setState({ confetti: null }), 3200);
   }
+  showResult = () => {
+    const colors = ['#FEAD2E', '#789283', '#E4572E', '#F6F3EA', '#C9D6CD'];
+    const pieces = [];
+    for (let i = 0; i < 70; i++) pieces.push({
+      l: Math.random() * 100, d: Math.random() * 0.6, du: 1.4 + Math.random() * 0.9,
+      c: colors[i % colors.length], w: 6 + Math.round(Math.random() * 5),
+    });
+    clearTimeout(this.confTimer);
+    this.setState({ resultOpen: true, confetti: pieces });
+    this.confTimer = setTimeout(() => this.setState({ confetti: null }), 3200);
+  };
+  hideResult = () => { clearTimeout(this.confTimer); this.setState({ resultOpen: false, confetti: null }); };
   newGame = () => this.setState({
-    gameOver: false, confetti: null,
+    gameOver: false, resultOpen: false, confetti: null,
     initial: ['', '', '', '', '', ''],
     rounds: [{ target: 400, weights: ['', '', '', '', '', ''] }],
   });
@@ -425,6 +456,9 @@ class Component extends DCLogic {
       value: weights[c] ?? '',
       readOnly: ro,
       gold, green,
+      isWin: gold || green,
+      winColor: gold ? '#FEAD2E' : (green ? '#789283' : 'transparent'),
+      barShow: gold || green,
       hasDelta: dv != null,
       delta: dv == null ? '' : (dv === 0 ? '±0' : (dv > 0 ? '+' : '−') + Math.abs(dv)),
       barW: Math.max(dv == null ? 0 : 2, mag),
@@ -459,9 +493,28 @@ class Component extends DCLogic {
       };
     }));
 
-    const anyComplete = s.rounds.some(r => this.roundComplete(r));
+    const anyComplete = this.anyScored();
     const best = Math.max.apply(null, pts.concat([0]));
     const champs = names.filter((_, i) => pts[i] === best && best > 0);
+    const order = names.map((name, i) => ({ name, pts: pts[i], i })).sort((a, b) => b.pts - a.pts);
+    let shown = 0, lastPts = null, lastRank = 0;
+    const ranking = order.map(o => {
+      shown += 1;
+      const rank = o.pts === lastPts ? lastRank : shown;
+      lastPts = o.pts; lastRank = rank;
+      const top = rank === 1;
+      const exacts = s.rounds.reduce((n, r) => n + (this.roundResult(r).exact.indexOf(o.i) >= 0 ? 1 : 0), 0);
+      return {
+        name: o.name, rank: rank + '.', score: String(o.pts),
+        meta: exacts ? exacts + '× exakt' : '',
+        bgL: top ? 'rgba(254,173,46,.18)' : '#FFFFFF',
+        borderL: top ? 'rgba(254,173,46,.55)' : 'rgba(0,0,0,.06)',
+        rankFgL: top ? '#A97205' : '#A5A29B',
+      };
+    });
+    const roundsPlayed = s.rounds.filter(r => names.some((_, i) => this.num(r.weights[i]) != null)).length;
+    const winnerSummary = roundsPlayed + (roundsPlayed === 1 ? ' gespielte Runde' : ' gespielte Runden')
+      + ' · ' + (mode === 'points' ? best + ' Punkte' : best + (best === 1 ? ' Rundensieg' : ' Rundensiege'));
     const winnerNames = champs.length > 1
       ? champs.slice(0, -1).join(', ') + ' und ' + champs[champs.length - 1]
       : (champs[0] || '—');
@@ -532,8 +585,14 @@ class Component extends DCLogic {
       kbChipBg: s.kbOpen ? '#FDF1DC' : '#F1F0EC',
       kbChipFg: s.kbOpen ? '#6B5416' : '#6F6C66',
       liveWeight: liveOn ? (s.live ? String(s.live) : '—') : '—', stabilityPct: s.stability,
-      showEnd: anyComplete && !ro, gameOver: ro, showWinner: ro,
-      showBottom: ro || (anyComplete && !ro),
+      gameOver: ro, playing: !ro,
+      finishBg: anyComplete ? '#FEAD2E' : '#E7E5DE',
+      finishFg: anyComplete ? '#2B2205' : '#A5A29B',
+      finishShadow: anyComplete ? '0 2px 6px rgba(254,173,46,.45)' : 'none',
+      finishCursor: anyComplete ? 'pointer' : 'default',
+      finishHint: anyComplete ? 'Beendet das Spiel und ermittelt den Gewinner.' : 'Erst wiegen, dann beenden.',
+      resultOpen: !!s.resultOpen, showResult: this.showResult, hideResult: this.hideResult,
+      ranking, winnerSummary,
       winnerLead: champs.length > 1 ? 'Die Gewinner sind' : 'Der Gewinner ist',
       winnerNames,
       keepFocus: this.keepFocus,

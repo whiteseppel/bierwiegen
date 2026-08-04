@@ -21,9 +21,11 @@ class CustomColors {
   static const Color neutralDot = Color(0xFFBDBAB2);
 
   static const Color hairline = Color(0x0F000000);
-  static const Color goldOverlay = Color(0x38FEAD2E);
-  static const Color greenOverlay = Color(0x29789283);
-  static const Color goldFocus = Color(0x1FFEAD2E);
+  static const Color goldFocus = Color(0x29FEAD2E);
+  static const Color goldFocusRing = Color(0x8CFEAD2E);
+  static const Color goldRowBg = Color(0x2EFEAD2E);
+  static const Color rankBadgeTop = Color(0xFFA97205);
+  static const Color disabledText = Color(0xFFA5A29B);
   static const Color tileBg = Color(0xFFF4F3EF);
   static const Color trackBg = Color(0xFFE7E5DE);
 }

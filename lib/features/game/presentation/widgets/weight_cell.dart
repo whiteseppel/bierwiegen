@@ -126,17 +126,27 @@ class _WeightCellState extends ConsumerState<WeightCell> {
       height: weightCellHeight,
       decoration: BoxDecoration(
         color: isFocused ? CustomColors.goldFocus : null,
-        border: const Border(left: BorderSide(color: CustomColors.hairline)),
+        border: isFocused
+            ? Border.all(color: CustomColors.goldFocusRing, width: 2)
+            : const Border(left: BorderSide(color: CustomColors.hairline)),
       ),
       child: Stack(
         children: [
           if (gold || green)
-            Positioned.fill(
+            Positioned(
+              left: 14,
+              right: 14,
+              bottom: 0,
+              height: 4,
               child: IgnorePointer(
-                child: ColoredBox(
-                  color: gold
-                      ? CustomColors.goldOverlay
-                      : CustomColors.greenOverlay,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: gold
+                        ? CustomColors.primaryColor
+                        : CustomColors.secondaryColor,
+                    borderRadius:
+                        const BorderRadius.vertical(top: Radius.circular(2)),
+                  ),
                 ),
               ),
             ),

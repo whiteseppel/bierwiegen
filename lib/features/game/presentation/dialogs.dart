@@ -115,7 +115,9 @@ class Dialogs {
 
     FocusManager.instance.primaryFocus?.unfocus();
     ref.read(focusedCellProvider.notifier).state = null;
+    ref.read(keyboardOpenProvider.notifier).state = false;
     ref.read(gameProvider.notifier).finishGame();
+    ref.read(resultOpenProvider.notifier).state = true;
     WinnerConfetti.globalKey.currentState?.playConfetti();
   }
 
@@ -159,7 +161,7 @@ class Dialogs {
           style: TextButton.styleFrom(
             foregroundColor: CustomColors.textMuted,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(standardBorderRadius),
             ),
           ),
           child: const Text('Abbrechen'),
@@ -171,7 +173,7 @@ class Dialogs {
             foregroundColor: CustomColors.onPrimaryDark,
             textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(standardBorderRadius),
             ),
           ),
           child: Text(confirmLabel),

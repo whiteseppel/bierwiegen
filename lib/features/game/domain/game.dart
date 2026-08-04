@@ -22,6 +22,9 @@ class Game {
 
   bool get hasFinishedRound => rounds.any((r) => r.isFinished);
 
+  bool get hasAnyMeasurement =>
+      rounds.any((r) => r.measurements.any((m) => m != 0));
+
   /// Weight the player's glass had before [roundIndex]: the last entered
   /// measurement of an earlier round, else the initial weight; null when
   /// nothing was entered yet.

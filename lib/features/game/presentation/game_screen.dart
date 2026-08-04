@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../ui/tokens.dart';
 import '../../scale/scale_provider.dart';
 import '../../scale/scale_state.dart';
+import '../domain/game_config.dart';
 import '../domain/player.dart';
 import '../state/game_providers.dart';
 import '../state/game_ui_providers.dart';
@@ -59,11 +60,6 @@ class _GameScreenState extends ConsumerState<GameScreen> {
       return const SizedBox.shrink();
     }
 
-    final panelOpen =
-        ref.watch(focusedCellProvider) != null && !game.isFinished;
-    final showBottomBar =
-        !panelOpen && (game.isFinished || game.hasFinishedRound);
-
     return Stack(
       children: [
         Scaffold(
@@ -86,11 +82,12 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                               children: [
                                 _buildRounds(game.players.length,
                                     game.rounds.length),
-                                if (!game.isFinished) ...[
-                                  const SizedBox(height: 8),
-                                  _buildNewRoundButton(),
-                                ],
-                                const SizedBox(height: 24),
+                                const SizedBox(height: 10),
+                                if (game.isFinished)
+                                  _buildEndstandButton()
+                                else
+                                  _buildPlayFooter(game.hasAnyMeasurement),
+                                const SizedBox(height: 40),
                               ],
                             ),
                           ),
@@ -100,11 +97,11 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                   ),
                 ),
                 const ScalePanel(),
-                if (showBottomBar) _buildBottomBar(game.isFinished),
               ],
             ),
           ),
         ),
+        if (ref.watch(resultOpenProvider)) _buildResultOverlay(),
         WinnerConfetti(key: WinnerConfetti.globalKey),
       ],
     );
@@ -279,16 +276,16 @@ class _GameScreenState extends ConsumerState<GameScreen> {
     return GestureDetector(
       onTap: () => startNewRound(context, ref),
       child: Container(
-        height: 44,
+        height: 46,
         decoration: BoxDecoration(
           border: Border.all(color: const Color(0x2E000000)),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(standardBorderRadius),
         ),
         alignment: Alignment.center,
         child: const Text(
           '+ Neue Runde',
           style: TextStyle(
-            fontSize: 13,
+            fontSize: 14,
             fontWeight: FontWeight.w500,
             color: CustomColors.textMuted,
           ),
@@ -297,32 +294,298 @@ class _GameScreenState extends ConsumerState<GameScreen> {
     );
   }
 
-  Widget _buildBottomBar(bool finished) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(color: CustomColors.hairline, offset: Offset(0, -1)),
-        ],
-      ),
-      child: finished ? _buildWinnerSection() : _buildEndGameButton(),
+  Widget _buildPlayFooter(bool canFinish) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _buildNewRoundButton(),
+        const SizedBox(height: 10),
+        _buildFinishButton(canFinish),
+        const SizedBox(height: 8),
+        Text(
+          canFinish
+              ? 'Beendet das Spiel und ermittelt den Gewinner.'
+              : 'Erst wiegen, dann beenden.',
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontSize: 12, color: CustomColors.textFaint),
+        ),
+      ],
     );
   }
 
-  Widget _buildEndGameButton() {
+  Widget _buildFinishButton(bool enabled) {
     return GestureDetector(
-      onTap: () => Dialogs.finishGameDialog(context, ref),
+      onTap: enabled ? () => Dialogs.finishGameDialog(context, ref) : null,
+      child: Container(
+        height: 50,
+        decoration: BoxDecoration(
+          color: enabled ? CustomColors.primaryColor : CustomColors.trackBg,
+          borderRadius: BorderRadius.circular(standardBorderRadius),
+          boxShadow: enabled ? _amberShadow : null,
+        ),
+        alignment: Alignment.center,
+        child: Text(
+          'Spiel beenden',
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w700,
+            color:
+                enabled ? CustomColors.onPrimaryDark : CustomColors.disabledText,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEndstandButton() {
+    return GestureDetector(
+      onTap: _openResult,
+      child: Container(
+        height: 50,
+        decoration: BoxDecoration(
+          color: CustomColors.primaryColor,
+          borderRadius: BorderRadius.circular(standardBorderRadius),
+          boxShadow: _amberShadow,
+        ),
+        alignment: Alignment.center,
+        child: const Text(
+          'Ergebnis ansehen',
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w700,
+            color: CustomColors.onPrimaryDark,
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _openResult() {
+    ref.read(resultOpenProvider.notifier).state = true;
+    WinnerConfetti.globalKey.currentState?.playConfetti();
+  }
+
+  static const List<BoxShadow> _amberShadow = [
+    BoxShadow(color: Color(0x73FEAD2E), offset: Offset(0, 2), blurRadius: 6),
+  ];
+
+  Widget _buildResultOverlay() {
+    final scores = ref.watch(scoresProvider);
+    final best = scores.isEmpty ? 0 : scores.reduce((a, b) => a > b ? a : b);
+    final winners = best > 0 ? ref.watch(winningPlayersProvider) : <Player>[];
+    final ranking = _ranking(scores);
+
+    return Positioned.fill(
+      child: Material(
+        color: CustomColors.background,
+        child: SafeArea(
+          child: Column(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(20, 22, 20, 8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _buildWinnerCard(winners, best),
+                      const SizedBox(height: 14),
+                      for (int i = 0; i < ranking.length; i++) ...[
+                        if (i > 0) const SizedBox(height: 8),
+                        _buildRankingRow(ranking[i]),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+                child: Column(
+                  children: [
+                    _buildNewGameButton(),
+                    const SizedBox(height: 10),
+                    _buildShowTableButton(),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWinnerCard(List<Player> winners, int best) {
+    final game = ref.read(gameProvider)!;
+    final played =
+        game.rounds.where((r) => r.measurements.any((m) => m != 0)).length;
+    final roundsLabel =
+        '$played ${played == 1 ? 'gespielte Runde' : 'gespielte Runden'}';
+    final scoreLabel = game.config.mode == GameMode.points
+        ? '$best Punkte'
+        : '$best ${best == 1 ? 'Rundensieg' : 'Rundensiege'}';
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(20, 22, 20, 20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(standardBorderRadius),
+        border: Border.all(color: CustomColors.hairline),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x0F000000),
+            offset: Offset(0, 2),
+            blurRadius: 10,
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          const Text(
+            'ERGEBNIS',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+              letterSpacing: 2,
+              color: CustomColors.textFaint,
+            ),
+          ),
+          Container(
+            width: 44,
+            height: 4,
+            margin: const EdgeInsets.fromLTRB(0, 14, 0, 16),
+            decoration: BoxDecoration(
+              color: CustomColors.primaryColor,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          Text(
+            winners.length > 1 ? 'Die Gewinner sind' : 'Der Gewinner ist',
+            style: const TextStyle(fontSize: 14, color: CustomColors.textMuted),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            _winnerNames(winners),
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 34,
+              height: 1.15,
+              fontWeight: FontWeight.w700,
+              color: CustomColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            '$roundsLabel · $scoreLabel',
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 13, color: CustomColors.textFaint),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRankingRow(_RankRow row) {
+    return Container(
+      height: 54,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: row.top ? CustomColors.goldRowBg : Colors.white,
+        borderRadius: BorderRadius.circular(standardBorderRadius),
+        border: Border.all(
+          color: row.top ? CustomColors.goldFocusRing : CustomColors.hairline,
+        ),
+      ),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 22,
+            child: Text(
+              '${row.rank}.',
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                fontFamily: 'monospace',
+                color: row.top
+                    ? CustomColors.rankBadgeTop
+                    : CustomColors.disabledText,
+              ),
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Text(
+              row.name,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: CustomColors.textPrimary,
+              ),
+            ),
+          ),
+          if (row.meta.isNotEmpty) ...[
+            Text(
+              row.meta,
+              style: const TextStyle(
+                fontSize: 12,
+                fontFamily: 'monospace',
+                color: CustomColors.textFaint,
+              ),
+            ),
+            const SizedBox(width: 12),
+          ],
+          Text(
+            '${row.score}',
+            style: const TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.w700,
+              fontFamily: 'monospace',
+              color: CustomColors.textPrimary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNewGameButton() {
+    return GestureDetector(
+      onTap: () {
+        ref.read(resultOpenProvider.notifier).state = false;
+        Navigator.of(context).pop();
+      },
+      child: Container(
+        height: 52,
+        decoration: BoxDecoration(
+          color: CustomColors.primaryColor,
+          borderRadius: BorderRadius.circular(standardBorderRadius),
+          boxShadow: _amberShadow,
+        ),
+        alignment: Alignment.center,
+        child: const Text(
+          'Neues Spiel starten',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            color: CustomColors.onPrimaryDark,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildShowTableButton() {
+    return GestureDetector(
+      onTap: () => ref.read(resultOpenProvider.notifier).state = false,
       child: Container(
         height: 48,
         decoration: BoxDecoration(
           border: Border.all(color: CustomColors.secondaryColor),
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(standardBorderRadius),
         ),
         alignment: Alignment.center,
         child: const Text(
-          'Spiel beenden',
+          'Tabelle ansehen',
           style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w500,
@@ -333,59 +596,30 @@ class _GameScreenState extends ConsumerState<GameScreen> {
     );
   }
 
-  Widget _buildWinnerSection() {
-    final winners = ref.watch(winningPlayersProvider);
+  List<_RankRow> _ranking(List<int> scores) {
+    final game = ref.read(gameProvider)!;
+    final order = [for (int i = 0; i < game.players.length; i++) i]
+      ..sort((a, b) => scores[b].compareTo(scores[a]));
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          winners.length > 1 ? 'Die Gewinner sind' : 'Der Gewinner ist',
-          style: const TextStyle(
-            fontSize: 13,
-            color: CustomColors.textMuted,
-          ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          _winnerNames(winners),
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.w700,
-            color: CustomColors.textPrimary,
-          ),
-        ),
-        const SizedBox(height: 10),
-        GestureDetector(
-          onTap: () => Navigator.of(context).pop(),
-          child: Container(
-            height: 52,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: CustomColors.primaryColor,
-              borderRadius: BorderRadius.circular(26),
-              boxShadow: const [
-                BoxShadow(
-                  color: Color(0x73FEAD2E),
-                  offset: Offset(0, 2),
-                  blurRadius: 6,
-                ),
-              ],
-            ),
-            alignment: Alignment.center,
-            child: const Text(
-              'Neues Spiel starten',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: CustomColors.onPrimaryDark,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
+    final rows = <_RankRow>[];
+    int shown = 0;
+    int lastScore = 0;
+    int lastRank = 0;
+    for (final i in order) {
+      shown++;
+      final rank = rows.isNotEmpty && scores[i] == lastScore ? lastRank : shown;
+      lastScore = scores[i];
+      lastRank = rank;
+      final exacts = game.rounds.where((r) => r.isExact(i)).length;
+      rows.add(_RankRow(
+        rank: rank,
+        name: game.players[i].name,
+        meta: exacts > 0 ? '$exacts× exakt' : '',
+        score: scores[i],
+        top: rank == 1,
+      ));
+    }
+    return rows;
   }
 
   String _winnerNames(List<Player> winners) {
@@ -400,4 +634,20 @@ class _GameScreenState extends ConsumerState<GameScreen> {
         winners.sublist(0, winners.length - 1).map((p) => p.name).join(', ');
     return '$allButLast und ${winners.last.name}';
   }
+}
+
+class _RankRow {
+  const _RankRow({
+    required this.rank,
+    required this.name,
+    required this.meta,
+    required this.score,
+    required this.top,
+  });
+
+  final int rank;
+  final String name;
+  final String meta;
+  final int score;
+  final bool top;
 }

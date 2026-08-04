@@ -15,3 +15,7 @@ final scalePausedProvider = StateProvider.autoDispose<bool>((_) => false);
 /// Whether the system keyboard is wanted for the focused cell; it is hidden
 /// by default while the scale delivers values.
 final keyboardOpenProvider = StateProvider.autoDispose<bool>((_) => false);
+
+/// Whether the full-screen final-standings overlay is showing. Opened on
+/// finish and via "Ergebnis ansehen"; closed with "Tabelle ansehen".
+final resultOpenProvider = StateProvider.autoDispose<bool>((_) => false);

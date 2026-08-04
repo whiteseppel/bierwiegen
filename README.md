@@ -163,6 +163,12 @@ flat until they hurt — no folders for symmetry's sake.
 
 ## Requirements
 
+### Start screen redesign
+
+See [docs/start_screen_requirements.md](docs/start_screen_requirements.md) —
+layout (player input → game options button → start → "oder" → join game),
+game-options bottom sheet, and the menu page behind the top-right player icon.
+
 ### Scrollable game field with fixed headers
 
 Currently the game field divides the screen width by the number of players, so with
