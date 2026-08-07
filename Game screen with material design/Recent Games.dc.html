@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&amp;family=Roboto+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#DFDDD6;font-family:Roboto,system-ui,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px;box-sizing:border-box}
+a{color:#789283}a:hover{color:#5C7466}
+@keyframes bw-fade{from{opacity:0}to{opacity:1}}
+@keyframes bw-slide{from{transform:translateX(16px);opacity:0}to{transform:translateX(0);opacity:1}}
+</style>
+</helmet>
+<x-import component-from-global-scope="AndroidDevice" from="./android-frame.jsx" hint-size="412px,892px">
+<div style="height:100%;position:relative;display:flex;flex-direction:column;background:#EFEEE9;overflow:hidden;color:#1C1B18">
+
+  <div style="height:56px;flex:none;display:flex;align-items:center;gap:4px;padding:0 8px;background:#EFEEE9;box-shadow:{{ barShadow }};z-index:10;transition:box-shadow .18s linear">
+    <a href="./Home.dc.html" style="width:44px;height:44px;flex:none;border-radius:22px;display:flex;align-items:center;justify-content:center;text-decoration:none;color:#1C1B18" style-hover="background:rgba(0,0,0,.05)">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg>
+    </a>
+    <div style="flex:1;min-width:0;font-size:20px;font-weight:700;letter-spacing:-.2px;white-space:nowrap">Letzte Spiele</div>
+  </div>
+
+  <div onScroll="{{ onScroll }}" style="flex:1;overflow:auto;padding:6px 20px 32px">
+    <div style="font-size:13px;color:#8A877F;margin-bottom:14px">{{ intro }}</div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <sc-for list="{{ games }}" as="g" hint-placeholder-count="5">
+        <div style="background:#FFFFFF;border-radius:14px;border:1px solid rgba(0,0,0,.06);overflow:hidden">
+          <div onClick="{{ g.onOpen }}" style="display:flex;align-items:center;gap:14px;padding:14px 16px;cursor:pointer;user-select:none" style-hover="background:rgba(0,0,0,.02)">
+            <div style="width:44px;height:44px;flex:none;border-radius:22px;background:#FDF1DC;color:#6B5416;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05">
+              <div style="font-size:14px;font-weight:700;font-family:'Roboto Mono',monospace">{{ g.day }}</div>
+              <div style="font-size:9px;font-weight:500;letter-spacing:.4px;text-transform:uppercase">{{ g.month }}</div>
+            </div>
+            <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+              <div style="font-size:16px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ g.winnerLine }}</div>
+              <div style="font-size:13px;color:#6F6C66;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ g.meta }}</div>
+              <div style="display:flex;align-items:center;gap:8px;margin-top:3px;overflow:hidden;white-space:nowrap">
+                <sc-for list="{{ g.podium }}" as="p" hint-placeholder-count="3">
+                  <div style="display:flex;align-items:baseline;gap:4px;min-width:0">
+                    <div style="font-size:13px;color:{{ p.nameFg }};font-weight:{{ p.weight }};overflow:hidden;text-overflow:ellipsis">{{ p.name }}</div>
+                    <div style="font-size:13px;font-family:'Roboto Mono',monospace;color:{{ p.scoreFg }}">{{ p.score }}</div>
+                  </div>
+                </sc-for>
+                <sc-if value="{{ g.hasRest }}" hint-placeholder-val="{{ false }}">
+                  <div style="font-size:12px;color:#A5A29B">{{ g.rest }}</div>
+                </sc-if>
+              </div>
+            </div>
+            <div style="flex:none;font-size:18px;color:#A5A29B">›</div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <sc-if value="{{ detailOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;z-index:40;background:#EFEEE9;display:flex;flex-direction:column;overflow:hidden;animation:bw-slide .2s ease-out">
+      <div style="height:56px;flex:none;display:flex;align-items:center;gap:4px;padding:0 8px;background:#EFEEE9">
+        <div onClick="{{ closeDetail }}" style="width:44px;height:44px;flex:none;border-radius:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none;color:#1C1B18" style-hover="background:rgba(0,0,0,.05)">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg>
+        </div>
+        <div style="flex:1;min-width:0;font-size:17px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ detailTitle }}</div>
+      </div>
+
+      <div style="flex:1;overflow:auto;padding:8px 20px 24px;display:flex;flex-direction:column;gap:14px">
+        <div style="flex:none;background:#FFFFFF;border-radius:12px;border:1px solid rgba(0,0,0,.06);padding:22px 20px 20px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,.06)">
+          <div style="font-size:11px;font-weight:500;letter-spacing:2px;color:#8A877F;text-transform:uppercase">Endstand</div>
+          <div style="width:44px;height:4px;border-radius:2px;background:#FEAD2E;margin:14px auto 16px"></div>
+          <div style="font-size:14px;color:#6F6C66">{{ detailLead }}</div>
+          <div style="margin-top:4px;font-size:34px;line-height:1.15;font-weight:700;text-wrap:pretty">{{ detailWinner }}</div>
+          <div style="margin-top:10px;font-size:13px;color:#8A877F">{{ detailSummary }}</div>
+        </div>
+
+        <div style="display:flex;gap:10px">
+          <div style="flex:1;background:#FFFFFF;border-radius:12px;border:1px solid rgba(0,0,0,.06);padding:12px 14px">
+            <div style="font-size:10px;letter-spacing:.6px;color:#8A877F;text-transform:uppercase">Datum</div>
+            <div style="margin-top:4px;font-size:15px;font-weight:500">{{ detailDate }}</div>
+            <div style="margin-top:2px;font-size:13px;color:#6F6C66;font-family:'Roboto Mono',monospace">{{ detailTime }}</div>
+          </div>
+          <div style="flex:1;background:#FFFFFF;border-radius:12px;border:1px solid rgba(0,0,0,.06);padding:12px 14px">
+            <div style="font-size:10px;letter-spacing:.6px;color:#8A877F;text-transform:uppercase">Modus</div>
+            <div style="margin-top:4px;font-size:15px;font-weight:500">{{ detailMode }}</div>
+            <div style="margin-top:2px;font-size:13px;color:#6F6C66">{{ detailTargets }}</div>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <sc-for list="{{ detailRanking }}" as="p" hint-placeholder-count="5">
+            <div style="display:flex;align-items:center;gap:14px;height:54px;padding:0 16px;border-radius:12px;background:{{ p.bg }};border:1px solid {{ p.border }}">
+              <div style="width:22px;font-size:15px;font-weight:700;font-family:'Roboto Mono',monospace;color:{{ p.rankFg }}">{{ p.rank }}</div>
+              <div style="flex:1;min-width:0;font-size:16px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ p.name }}</div>
+              <div style="font-size:12px;color:#8A877F;font-family:'Roboto Mono',monospace">{{ p.detail }}</div>
+              <div style="font-size:17px;font-weight:700;font-family:'Roboto Mono',monospace">{{ p.score }}</div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;padding:2px 4px;font-size:13px;color:#8A877F">
+          <div>{{ detailRounds }}</div>
+          <div style="font-family:'Roboto Mono',monospace">{{ detailDuration }}</div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+</div>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:460,&quot;height&quot;:940}}">
+const MONTHS = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
+const WEEKDAYS = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
+
+const GAMES = [
+  { id: 'g1', date: '2026-08-05', time: '21:34', duration: '48 Min', mode: 'points', targets: 'auto', rounds: 6,
+    players: [{ n: 'Lena', s: 14, e: 2 }, { n: 'Tobi', s: 11, e: 1 }, { n: 'Marc', s: 9, e: 0 }, { n: 'Sara', s: 7, e: 0 }, { n: 'Jonas', s: 4, e: 0 }] },
+  { id: 'g2', date: '2026-08-01', time: '19:12', duration: '35 Min', mode: 'standard', targets: 'manual', rounds: 5,
+    players: [{ n: 'Marc', s: 3, e: 1 }, { n: 'Lena', s: 1, e: 0 }, { n: 'Pia', s: 1, e: 0 }, { n: 'Tobi', s: 0, e: 0 }] },
+  { id: 'g3', date: '2026-07-26', time: '22:05', duration: '1 Std 6 Min', mode: 'points', targets: 'manual', rounds: 8,
+    players: [{ n: 'Sara', s: 18, e: 3 }, { n: 'Jonas', s: 16, e: 1 }, { n: 'Lena', s: 12, e: 1 }, { n: 'Marc', s: 10, e: 0 }, { n: 'Tobi', s: 8, e: 0 }, { n: 'Pia', s: 5, e: 0 }] },
+  { id: 'g4', date: '2026-07-19', time: '20:40', duration: '41 Min', mode: 'standard', targets: 'auto', rounds: 6,
+    players: [{ n: 'Tobi', s: 3, e: 0 }, { n: 'Pia', s: 2, e: 1 }, { n: 'Lena', s: 1, e: 0 }] },
+  { id: 'g5', date: '2026-07-11', time: '23:18', duration: '52 Min', mode: 'points', targets: 'manual', rounds: 7,
+    players: [{ n: 'Jonas', s: 15, e: 2 }, { n: 'Sara', s: 15, e: 2 }, { n: 'Marc', s: 9, e: 0 }, { n: 'Lena', s: 6, e: 0 }] },
+];
+
+class Component extends DCLogic {
+  state = { detail: null, scrolled: false };
+
+  onScroll = e => {
+    const on = e.target.scrollTop > 4;
+    if (on !== this.state.scrolled) this.setState({ scrolled: on });
+  };
+
+  parse(g) {
+    const [y, m, d] = g.date.split('-').map(Number);
+    return new Date(y, m - 1, d);
+  }
+  ranked(g) {
+    const order = g.players.slice().sort((a, b) => b.s - a.s);
+    let shown = 0, lastS = null, lastR = 0;
+    return order.map(p => {
+      shown += 1;
+      const rank = p.s === lastS ? lastR : shown;
+      lastS = p.s; lastR = rank;
+      return { ...p, rank };
+    });
+  }
+  scoreLabel(g, v) { return g.mode === 'points' ? v + ' Pkt' : v + (v === 1 ? ' Sieg' : ' Siege'); }
+  winners(g) { const r = this.ranked(g); return r.filter(p => p.rank === 1); }
+  winnerNames(g) {
+    const w = this.winners(g).map(p => p.n);
+    return w.length > 1 ? w.slice(0, -1).join(', ') + ' und ' + w[w.length - 1] : w[0];
+  }
+
+  renderVals() {
+    const s = this.state;
+
+    const games = GAMES.map(g => {
+      const dt = this.parse(g);
+      const rank = this.ranked(g);
+      const w = this.winners(g);
+      return {
+        day: String(dt.getDate()),
+        month: MONTHS[dt.getMonth()],
+        winnerLine: (w.length > 1 ? 'Unentschieden: ' : '') + this.winnerNames(g),
+        meta: g.time + ' Uhr · ' + g.players.length + ' Spieler · ' + g.rounds + ' Runden · ' + (g.mode === 'points' ? 'Punkte' : 'Standard'),
+        onOpen: () => this.setState({ detail: g.id }),
+        podium: rank.slice(0, 3).map((p, i) => ({
+          name: p.n, score: String(p.s),
+          weight: i === 0 ? '700' : '400',
+          nameFg: i === 0 ? '#1C1B18' : '#6F6C66',
+          scoreFg: i === 0 ? '#A97205' : '#A5A29B',
+        })),
+        hasRest: g.players.length > 3,
+        rest: '+' + (g.players.length - 3),
+      };
+    });
+
+    const g = GAMES.filter(x => x.id === s.detail)[0];
+    let detail = {};
+    if (g) {
+      const dt = this.parse(g);
+      const rank = this.ranked(g);
+      const w = this.winners(g);
+      detail = {
+        detailTitle: dt.getDate() + '. ' + MONTHS[dt.getMonth()] + ' ' + dt.getFullYear(),
+        detailLead: w.length > 1 ? 'Die Gewinner sind' : 'Der Gewinner ist',
+        detailWinner: this.winnerNames(g),
+        detailSummary: g.rounds + ' gespielte Runden · ' + this.scoreLabel(g, w[0].s),
+        detailDate: WEEKDAYS[dt.getDay()] + ', ' + dt.getDate() + '. ' + MONTHS[dt.getMonth()],
+        detailTime: g.time + ' Uhr',
+        detailMode: g.mode === 'points' ? 'Punkte' : 'Standard',
+        detailTargets: g.targets === 'auto' ? 'Automatische Ziele' : 'Manuelle Ziele',
+        detailRounds: g.players.length + ' Spieler · ' + g.rounds + ' Runden',
+        detailDuration: g.duration,
+        detailRanking: rank.map(p => ({
+          rank: p.rank + '.', name: p.n, score: String(p.s),
+          detail: p.e ? p.e + '× exakt' : '',
+          bg: p.rank === 1 ? 'rgba(254,173,46,.18)' : '#FFFFFF',
+          border: p.rank === 1 ? 'rgba(254,173,46,.55)' : 'rgba(0,0,0,.06)',
+          rankFg: p.rank === 1 ? '#A97205' : '#A5A29B',
+        })),
+      };
+    }
+
+    return {
+      games,
+      intro: GAMES.length + ' Spiele gespielt · zuletzt am ' + this.parse(GAMES[0]).getDate() + '. ' + MONTHS[this.parse(GAMES[0]).getMonth()],
+      onScroll: this.onScroll,
+      barShadow: s.scrolled ? '0 1px 0 rgba(0,0,0,.08)' : 'none',
+      detailOpen: !!g,
+      closeDetail: () => this.setState({ detail: null }),
+      ...detail,
+    };
+  }
+}
+</script>
+</body>
+</html>

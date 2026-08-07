@@ -8,9 +8,21 @@ Um Bierwiegen zu spielen brauchst du eine Digitalwage und ein Getränk für jede
 ''';
 
   static const String bierwiegenGameRules = '''
-Zuerst wird das Gewicht für alle Getränke gewogen, damit jeder weiß, wie man startet (Einwiegen). Anschließend beginnt die erste Runde: Der Spieler mit dem niedirgsten Gesamtgewicht gibt ein Ziel für die Runde an. Dieses muss zwischen 15 und 100 Gramm weniger als das letzte niedrigste Gewicht haben. Nun beginnt die Trinkphase. Jeder Spieler darf einmal ansetzten jedoch beliebig lange von seinem Getränk trinken. Nach dem Trinken werden die Getränke auf die Wage gestellt. Die Werte der Spieler werden notiert. Die Runde wird von dem Spieler gewonnen, der am nähesten am Zielgewicht ist. Nach jeder Runde kann entschieden werden, ob man eine weitere Runde starten möchte.
+Zuerst wird das Gewicht für alle Getränke gewogen, damit jeder weiß, wie man startet (Einwiegen). Anschließend beginnt die erste Runde: Es wird ein Zielgewicht für die Runde festgelegt, das unter dem aktuellen Gewicht liegt. Nun beginnt die Trinkphase. Jeder Spieler darf einmal ansetzten jedoch beliebig lange von seinem Getränk trinken. Nach dem Trinken werden die Getränke auf die Wage gestellt. Die Werte der Spieler werden notiert. Die Runde wird von dem Spieler gewonnen, der am nähesten am Zielgewicht ist.
 
-Das Spiel gewinnt der mit den meisten Rundensiegen.
+Es wird so lange weitergespielt, bis ein Glas unter 50 Gramm fällt. Dann endet das Spiel und der Endstand wird ermittelt.
+''';
+
+  static const String bierwiegenScoringModes = '''
+Standard: Wer am nächsten am Ziel liegt, holt den Rundensieg. Gezählt werden die gewonnenen Runden.
+
+Punkte: Punkte nach Platzierung – 3 für den ersten, 2 für den zweiten, 1 für den dritten Platz. Exakt getroffen zählt 5.
+''';
+
+  static const String bierwiegenTargetModes = '''
+Manuelle Ziele: Ihr legt das Zielgewicht jeder Runde selbst fest.
+
+Automatische Ziele: Das nächste Ziel wird ausgelost – 30 bis 80 Gramm unter dem aktuellen Ziel.
 ''';
 
   static const String appFunctionality = '''

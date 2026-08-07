@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../../ui/tokens.dart';
+import '../account/account_screen.dart';
 import '../game/domain/game_config.dart';
 import '../game/presentation/game_screen.dart';
+import '../game/presentation/widgets/choice_tile.dart';
 import '../game/state/game_providers.dart';
 import '../info/introduction_screen.dart';
 import '../settings/options_screen.dart';
@@ -22,6 +24,7 @@ class _StartScreenState extends ConsumerState<StartScreen> {
   ];
   final ScrollController _scrollController = ScrollController();
   GameMode _mode = GameMode.standard;
+  TargetMode _targetMode = TargetMode.manual;
   double _titleOpacity = 0;
 
   @override
@@ -127,7 +130,8 @@ class _StartScreenState extends ConsumerState<StartScreen> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _OptionsRow(
-          summary: _mode == GameMode.points ? 'Punkte' : 'Standard',
+          summary: (_mode == GameMode.points ? 'Punkte' : 'Standard') +
+              (_targetMode == TargetMode.auto ? ' · Auto-Ziele' : ''),
           onTap: _openOptions,
         ),
         const SizedBox(height: 12),
@@ -161,9 +165,12 @@ class _StartScreenState extends ConsumerState<StartScreen> {
   }
 
   Future<void> _openOptions() async {
-    final mode = await showStartOptionsSheet(context, _mode);
-    if (mode != null) {
-      setState(() => _mode = mode);
+    final result = await showStartOptionsSheet(context, _mode, _targetMode);
+    if (result != null) {
+      setState(() {
+        _mode = result.mode;
+        _targetMode = result.targetMode;
+      });
     }
   }
 
@@ -173,6 +180,10 @@ class _StartScreenState extends ConsumerState<StartScreen> {
       return;
     }
     switch (action) {
+      case _MenuAction.account:
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (context) => const AccountScreen()),
+        );
       case _MenuAction.settings:
         Navigator.of(context).push(
           MaterialPageRoute(builder: (context) => const OptionsScreen()),
@@ -204,6 +215,7 @@ class _StartScreenState extends ConsumerState<StartScreen> {
     final notifier = ref.read(gameProvider.notifier);
     notifier.startGame(names);
     notifier.setMode(_mode);
+    notifier.setTargetMode(_targetMode);
 
     Navigator.of(
       context,
@@ -535,36 +547,48 @@ class _JoinButton extends StatelessWidget {
   }
 }
 
-Future<GameMode?> showStartOptionsSheet(
+typedef StartOptions = ({GameMode mode, TargetMode targetMode});
+
+Future<StartOptions?> showStartOptionsSheet(
   BuildContext context,
-  GameMode current,
+  GameMode currentMode,
+  TargetMode currentTargetMode,
 ) {
-  return showModalBottomSheet<GameMode>(
+  return showModalBottomSheet<StartOptions>(
     context: context,
+    isScrollControlled: true,
     backgroundColor: Colors.white,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
     ),
-    builder: (context) => _StartOptionsSheet(current: current),
+    builder: (context) => _StartOptionsSheet(
+      currentMode: currentMode,
+      currentTargetMode: currentTargetMode,
+    ),
   );
 }
 
 class _StartOptionsSheet extends StatefulWidget {
-  const _StartOptionsSheet({required this.current});
+  const _StartOptionsSheet({
+    required this.currentMode,
+    required this.currentTargetMode,
+  });
 
-  final GameMode current;
+  final GameMode currentMode;
+  final TargetMode currentTargetMode;
 
   @override
   State<_StartOptionsSheet> createState() => _StartOptionsSheetState();
 }
 
 class _StartOptionsSheetState extends State<_StartOptionsSheet> {
-  late GameMode _mode = widget.current;
+  late GameMode _mode = widget.currentMode;
+  late TargetMode _targetMode = widget.currentTargetMode;
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -588,19 +612,37 @@ class _StartOptionsSheetState extends State<_StartOptionsSheet> {
             const SizedBox(height: 18),
             const _SectionLabel('Spielmodus'),
             const SizedBox(height: 8),
-            _ModeOption(
+            ChoiceTile(
               label: 'Standard',
               description: 'Wer am nächsten dran ist, gewinnt die Runde.',
               selected: _mode == GameMode.standard,
               onTap: () => setState(() => _mode = GameMode.standard),
             ),
             const SizedBox(height: 8),
-            _ModeOption(
+            ChoiceTile(
               label: 'Punkte',
               description:
                   'Punkte nach Platzierung, exakt getroffen zählt doppelt.',
               selected: _mode == GameMode.points,
               onTap: () => setState(() => _mode = GameMode.points),
+            ),
+            const SizedBox(height: 20),
+            const _SectionLabel('Zielvorgabe'),
+            const SizedBox(height: 8),
+            ChoiceTile(
+              label: 'Manuelle Ziele',
+              description: 'Ihr legt das Zielgewicht jeder Runde selbst fest.',
+              selected: _targetMode == TargetMode.manual,
+              onTap: () => setState(() => _targetMode = TargetMode.manual),
+            ),
+            const SizedBox(height: 8),
+            ChoiceTile(
+              label: 'Automatische Ziele',
+              description:
+                  'Das nächste Ziel wird ausgelost: 30 – 80 g unter dem '
+                  'aktuellen.',
+              selected: _targetMode == TargetMode.auto,
+              onTap: () => setState(() => _targetMode = TargetMode.auto),
             ),
             const SizedBox(height: 22),
             Material(
@@ -609,7 +651,9 @@ class _StartOptionsSheetState extends State<_StartOptionsSheet> {
               elevation: 2,
               shadowColor: CustomColors.goldFocusRing,
               child: InkWell(
-                onTap: () => Navigator.of(context).pop(_mode),
+                onTap: () => Navigator.of(context).pop(
+                  (mode: _mode, targetMode: _targetMode),
+                ),
                 borderRadius: BorderRadius.circular(standardBorderRadius),
                 child: Container(
                   height: 52,
@@ -651,97 +695,7 @@ class _SectionLabel extends StatelessWidget {
   }
 }
 
-class _ModeOption extends StatelessWidget {
-  const _ModeOption({
-    required this.label,
-    required this.description,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final String label;
-  final String description;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: selected ? CustomColors.goldTint : CustomColors.tileBg,
-      borderRadius: BorderRadius.circular(standardBorderRadius),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(standardBorderRadius),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(standardBorderRadius),
-            border: Border.all(
-              color: selected
-                  ? CustomColors.goldFocusRing
-                  : CustomColors.hairline,
-            ),
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 20,
-                height: 20,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: selected
-                        ? CustomColors.primaryColor
-                        : CustomColors.neutralDot,
-                    width: 2,
-                  ),
-                ),
-                child: Center(
-                  child: Container(
-                    width: 10,
-                    height: 10,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: selected
-                          ? CustomColors.primaryColor
-                          : Colors.transparent,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      label,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w500,
-                        color: CustomColors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      description,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        color: CustomColors.textMuted,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-enum _MenuAction { settings, rules, history }
+enum _MenuAction { account, settings, rules, history }
 
 Future<_MenuAction?> showStartMenuSheet(BuildContext context) {
   return showModalBottomSheet<_MenuAction>(
@@ -779,6 +733,12 @@ class _MenuSheet extends StatelessWidget {
           const Padding(
             padding: EdgeInsets.fromLTRB(24, 6, 24, 10),
             child: _SectionLabel('Menü'),
+          ),
+          _MenuItem(
+            dot: CustomColors.goldTextDark,
+            label: 'Konto & Verbindung',
+            note: 'Konto',
+            onTap: () => Navigator.of(context).pop(_MenuAction.account),
           ),
           _MenuItem(
             dot: CustomColors.secondaryColor,

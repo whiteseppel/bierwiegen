@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../domain/game_config.dart';
 import '../state/game_providers.dart';
 import '../state/game_ui_providers.dart';
 import 'cell_registry.dart';
 import 'dialogs.dart';
+import 'widgets/roll_dialog.dart';
 
 /// Advances the game after a cell was submitted: moves the focus to the next
 /// empty cell in the current round. Completing a round no longer opens a new
@@ -82,17 +84,26 @@ Future<void> startNewRound(BuildContext context, WidgetRef ref) async {
   }
 
   final lastTarget = game.rounds.isEmpty ? null : game.rounds.last.target;
-  final suggested = lastTarget == null
-      ? 400.0
-      : (lastTarget - 100).clamp(0.0, double.infinity);
 
-  final target = await Dialogs.weightInputDialog(
-    context,
-    title: 'Neue Runde',
-    body: 'Zielgewicht in Gramm festlegen.',
-    confirmLabel: 'Hinzufügen',
-    initialValue: suggested,
-  );
+  final double? target;
+  if (game.config.targetMode == TargetMode.auto) {
+    target = await showRollDialog(
+      context,
+      current: lastTarget ?? 500,
+      roundNumber: game.rounds.length + 1,
+    );
+  } else {
+    final suggested = lastTarget == null
+        ? 400.0
+        : (lastTarget - 100).clamp(0.0, double.infinity);
+    target = await Dialogs.weightInputDialog(
+      context,
+      title: 'Neue Runde',
+      body: 'Zielgewicht in Gramm festlegen.',
+      confirmLabel: 'Hinzufügen',
+      initialValue: suggested,
+    );
+  }
   if (target == null) {
     return;
   }

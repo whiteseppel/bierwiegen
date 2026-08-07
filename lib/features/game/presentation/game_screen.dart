@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../ui/tokens.dart';
 import '../../scale/scale_provider.dart';
 import '../../scale/scale_state.dart';
+import '../domain/game.dart';
 import '../domain/game_config.dart';
 import '../domain/player.dart';
 import '../state/game_providers.dart';
@@ -86,7 +87,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                                 if (game.isFinished)
                                   _buildEndstandButton()
                                 else
-                                  _buildPlayFooter(game.hasAnyMeasurement),
+                                  _buildPlayFooter(game),
                                 const SizedBox(height: 40),
                               ],
                             ),
@@ -272,7 +273,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
     );
   }
 
-  Widget _buildNewRoundButton() {
+  Widget _buildNewRoundButton(String label) {
     return GestureDetector(
       onTap: () => startNewRound(context, ref),
       child: Container(
@@ -282,9 +283,9 @@ class _GameScreenState extends ConsumerState<GameScreen> {
           borderRadius: BorderRadius.circular(standardBorderRadius),
         ),
         alignment: Alignment.center,
-        child: const Text(
-          '+ Neue Runde',
-          style: TextStyle(
+        child: Text(
+          label,
+          style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w500,
             color: CustomColors.textMuted,
@@ -294,17 +295,38 @@ class _GameScreenState extends ConsumerState<GameScreen> {
     );
   }
 
-  Widget _buildPlayFooter(bool canFinish) {
+  Widget _buildPlayFooter(Game game) {
+    final finishers = game.finishers;
+    final auto = game.config.targetMode == TargetMode.auto;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _buildNewRoundButton(),
-        if (canFinish) ...[
-          const SizedBox(height: 10),
+        if (finishers.isEmpty)
+          _buildNewRoundButton(auto ? '+ Neue Runde auslosen' : '+ Neue Runde')
+        else
           _buildFinishButton(),
-        ],
+        const SizedBox(height: 10),
+        Text(
+          _finishHint(game, finishers),
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontSize: 12, color: CustomColors.textFaint),
+        ),
       ],
     );
+  }
+
+  String _finishHint(Game game, List<Player> finishers) {
+    if (finishers.isNotEmpty) {
+      final names = finishers.map((p) => p.name).join(' und ');
+      final verb = finishers.length == 1 ? 'ist' : 'sind';
+      return '$names $verb unter '
+          '${Game.finishThreshold.toInt()} g – das Spiel ist zu Ende.';
+    }
+    return game.hasAnyMeasurement
+        ? 'Spiel endet, sobald jemand unter '
+            '${Game.finishThreshold.toInt()} g kommt.'
+        : 'Erst wiegen, dann geht es weiter.';
   }
 
   Widget _buildFinishButton() {

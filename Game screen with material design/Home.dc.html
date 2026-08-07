@@ -22,14 +22,17 @@ input::placeholder{color:#A5A29B}
 <x-import component-from-global-scope="AndroidDevice" from="./android-frame.jsx" hint-size="412px,892px">
 <div style="height:100%;position:relative;display:flex;flex-direction:column;background:#EFEEE9;overflow:hidden;color:#1C1B18">
 
-  <div style="flex:none;padding:20px 20px 26px;background:#EFEEE9">
-    <div style="display:flex;justify-content:flex-end;margin-bottom:14px"><div onClick="{{ openMenu }}" style="width:44px;height:44px;flex:none;border-radius:22px;background:#FDF1DC;display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none" style-hover="filter:brightness(.97)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6B5416" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.6"></circle><path d="M4.8 20c.9-3.6 3.7-5.4 7.2-5.4s6.3 1.8 7.2 5.4"></path></svg></div></div>
-    <div style="font-size:13px;font-weight:500;letter-spacing:2.4px;color:#8A877F;text-transform:uppercase">Dein Party-Game</div>
-    <div style="margin-top:10px;font-size:56px;font-weight:700;letter-spacing:-2px;line-height:.92">Bier<br />wiegen</div>
-    <div style="margin-top:18px;width:64px;height:6px;border-radius:3px;background:#FEAD2E"></div>
+  <div style="position:absolute;top:0;left:0;right:0;height:56px;z-index:12;display:flex;align-items:center;gap:8px;padding:0 8px 0 20px;box-sizing:border-box;background:{{ barBg }};box-shadow:{{ barShadow }};transition:background .18s linear,box-shadow .18s linear">
+    <div style="flex:1;min-width:0;font-size:20px;font-weight:700;letter-spacing:-.2px;white-space:nowrap;opacity:{{ barTitleOpacity }};transform:translateY({{ barTitleY }});transition:opacity .16s linear,transform .16s ease-out">Bierwiegen</div>
+    <a href="./Profile.dc.html" style="width:44px;height:44px;flex:none;border-radius:22px;background:#FDF1DC;display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none;text-decoration:none" style-hover="filter:brightness(.97)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6B5416" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.6"></circle><path d="M4.8 20c.9-3.6 3.7-5.4 7.2-5.4s6.3 1.8 7.2 5.4"></path></svg></a>
   </div>
 
-  <div style="flex:1;overflow:auto;padding:18px 20px 24px;display:flex;flex-direction:column">
+  <div onScroll="{{ onScroll }}" style="flex:1;overflow:auto;padding:56px 20px 24px;display:flex;flex-direction:column">
+    <div style="padding:14px 0 26px;opacity:{{ posterOpacity }}">
+      <div style="font-size:13px;font-weight:500;letter-spacing:2.4px;color:#8A877F;text-transform:uppercase">Dein Party-Game</div>
+      <div style="margin-top:10px;font-size:56px;font-weight:700;letter-spacing:-2px;line-height:.92">Bier<br />wiegen</div>
+      <div style="margin-top:18px;width:64px;height:6px;border-radius:3px;background:#FEAD2E"></div>
+    </div>
     <div style="font-size:15px;line-height:1.45;color:#6F6C66;text-wrap:pretty;margin-bottom:16px">Gib die Namen der Mitspieler ein und lege direkt los!</div>
 
     <div style="display:flex;flex-direction:column;gap:10px">
@@ -69,7 +72,7 @@ input::placeholder{color:#A5A29B}
 
   <sc-if value="{{ optionsOpen }}" hint-placeholder-val="{{ false }}">
     <div onClick="{{ closeOptions }}" style="position:absolute;inset:0;z-index:40;background:rgba(0,0,0,.34);display:flex;align-items:flex-end;animation:bw-fade .15s ease-out">
-      <div style="width:100%;background:#FFFFFF;border-radius:28px 28px 0 0;padding:12px 20px 24px;animation:bw-rise .22s ease-out">
+      <div style="width:100%;max-height:88%;overflow:auto;box-sizing:border-box;background:#FFFFFF;border-radius:28px 28px 0 0;padding:12px 20px 24px;animation:bw-rise .22s ease-out">
         <div style="width:32px;height:4px;border-radius:2px;background:rgba(0,0,0,.15);margin:0 auto 16px"></div>
         <div style="font-size:20px;font-weight:500;margin-bottom:18px">Spieloptionen</div>
 
@@ -83,6 +86,21 @@ input::placeholder{color:#A5A29B}
               <div style="flex:1;min-width:0">
                 <div style="font-size:15px;font-weight:500">{{ m.label }}</div>
                 <div style="font-size:13px;color:#6F6C66;text-wrap:pretty">{{ m.desc }}</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="font-size:12px;font-weight:500;letter-spacing:.6px;color:#8A877F;text-transform:uppercase;margin-bottom:8px">Zielvorgabe</div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px">
+          <sc-for list="{{ targetModes }}" as="t" hint-placeholder-count="2">
+            <div onClick="{{ t.onClick }}" style="display:flex;align-items:center;gap:14px;padding:12px 14px;border-radius:12px;background:{{ t.bg }};border:1px solid {{ t.border }};cursor:pointer;user-select:none">
+              <div style="width:20px;height:20px;flex:none;border-radius:10px;border:2px solid {{ t.dot }};display:flex;align-items:center;justify-content:center">
+                <div style="width:10px;height:10px;border-radius:5px;background:{{ t.fill }}"></div>
+              </div>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:15px;font-weight:500">{{ t.label }}</div>
+                <div style="font-size:13px;color:#6F6C66;text-wrap:pretty">{{ t.desc }}</div>
               </div>
             </div>
           </sc-for>
@@ -131,6 +149,12 @@ class Component extends DCLogic {
     teams: false,
     optionsOpen: false,
     menuOpen: false,
+    targetMode: 'manual',
+    scrollT: 0,
+  };
+  onScroll = e => {
+    const t = Math.max(0, Math.min(1, (e.target.scrollTop - 40) / 60));
+    if (Math.abs(t - this.state.scrollT) > 0.01) this.setState({ scrollT: t });
   };
   refs = {};
 
@@ -187,9 +211,31 @@ class Component extends DCLogic {
       };
     });
 
+    const targetModes = [
+      { id: 'manual', label: 'Manuelle Ziele', desc: 'Ihr legt das Zielgewicht jeder Runde selbst fest.' },
+      { id: 'auto', label: 'Automatische Ziele', desc: 'Das nächste Ziel wird ausgelost: 30 – 80 g unter dem aktuellen.' },
+    ].map(m => {
+      const on = s.targetMode === m.id;
+      return {
+        label: m.label, desc: m.desc,
+        bg: on ? '#FDF1DC' : '#F4F3EF',
+        border: on ? 'rgba(254,173,46,.6)' : 'rgba(0,0,0,.06)',
+        dot: on ? '#FEAD2E' : '#BDBAB2',
+        fill: on ? '#FEAD2E' : 'transparent',
+        onClick: () => this.setState({ targetMode: m.id }),
+      };
+    });
+
+    const t = s.scrollT;
     return {
-      fields, modes,
-      optionsSummary: (s.mode === 'points' ? 'Punkte' : 'Standard') + (s.teams ? ' · Teams' : ''),
+      fields, modes, targetModes,
+      onScroll: this.onScroll,
+      barBg: t > 0.02 ? '#EFEEE9' : 'transparent',
+      barShadow: t > 0.9 ? '0 1px 0 rgba(0,0,0,.08)' : 'none',
+      barTitleOpacity: String(t),
+      barTitleY: (8 - 8 * t).toFixed(1) + 'px',
+      posterOpacity: String(Math.max(0, 1 - t * 1.15)),
+      optionsSummary: (s.mode === 'points' ? 'Punkte' : 'Standard') + (s.targetMode === 'auto' ? ' · Auto-Ziele' : '') + (s.teams ? ' · Teams' : ''),
       teamDesc: s.teams ? 'Spieler werden vor dem Start auf Teams verteilt' : 'Jeder spielt für sich',
       teamTrack: s.teams ? '#789283' : '#D5D2CA',
       teamJustify: s.teams ? 'flex-end' : 'flex-start',

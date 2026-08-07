@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&amp;family=Roboto+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#DFDDD6;font-family:Roboto,system-ui,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px;box-sizing:border-box}
+a{color:#789283}a:hover{color:#5C7466}
+input{font-family:Roboto,system-ui,sans-serif}
+input::placeholder{color:#A5A29B}
+@keyframes bw-fade{from{opacity:0}to{opacity:1}}
+@keyframes bw-spin{to{transform:rotate(360deg)}}
+</style>
+</helmet>
+<x-import component-from-global-scope="AndroidDevice" from="./android-frame.jsx" hint-size="412px,892px">
+<div style="height:100%;position:relative;display:flex;flex-direction:column;background:#EFEEE9;overflow:hidden;color:#1C1B18">
+
+  <div style="height:56px;flex:none;display:flex;align-items:center;gap:4px;padding:0 8px;background:#EFEEE9;box-shadow:{{ barShadow }};z-index:10;transition:box-shadow .18s linear">
+    <a href="./Home.dc.html" style="width:44px;height:44px;flex:none;border-radius:22px;display:flex;align-items:center;justify-content:center;text-decoration:none;color:#1C1B18" style-hover="background:rgba(0,0,0,.05)">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg>
+    </a>
+    <div style="flex:1;min-width:0;font-size:20px;font-weight:700;letter-spacing:-.2px;white-space:nowrap">Konto</div>
+  </div>
+
+  <div onScroll="{{ onScroll }}" style="flex:1;overflow:auto;padding:8px 20px 32px;display:flex;flex-direction:column;gap:26px">
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:center;gap:16px">
+        <div style="width:72px;height:72px;flex:none;border-radius:36px;background:#FDF1DC;color:#6B5416;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700">{{ initial }}</div>
+        <div style="min-width:0">
+          <div style="font-size:22px;font-weight:700;letter-spacing:-.3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ displayName }}</div>
+          <div style="margin-top:2px;font-size:13px;color:#8A877F">Profilbild ändern folgt</div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div style="font-size:12px;font-weight:500;letter-spacing:.6px;color:#8A877F;text-transform:uppercase">Name</div>
+        <div style="display:flex;align-items:center;height:56px;padding:0 16px;border-radius:12px;background:#FFFFFF;border:1px solid rgba(0,0,0,.10)">
+          <input value="{{ name }}" onChange="{{ onName }}" placeholder="Dein Name" style="flex:1;min-width:0;height:100%;border:0;background:transparent;outline:none;font-size:16px;color:#1C1B18;padding:0" />
+        </div>
+        <div style="font-size:12px;color:#A5A29B">E-Mail und Benutzername kommen später dazu.</div>
+      </div>
+    </div>
+
+    <div style="height:1px;background:rgba(0,0,0,.08)"></div>
+
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="font-size:12px;font-weight:500;letter-spacing:.6px;color:#8A877F;text-transform:uppercase">Spiele</div>
+      <a href="./Recent Games.dc.html" style="display:flex;align-items:center;gap:14px;height:60px;padding:0 16px;border-radius:12px;background:#FFFFFF;border:1px solid rgba(0,0,0,.06);text-decoration:none;color:#1C1B18" style-hover="background:#FAF9F6">
+        <div style="width:40px;height:40px;flex:none;border-radius:20px;background:#EDF1EE;display:flex;align-items:center;justify-content:center">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3F5348" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7v5l3 2"></path><circle cx="12" cy="12" r="8.5"></circle></svg>
+        </div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:15px;font-weight:500">Letzte Spiele</div>
+          <div style="margin-top:2px;font-size:13px;color:#6F6C66">Ergebnisse und Statistiken ansehen</div>
+        </div>
+        <div style="font-size:18px;color:#A5A29B">›</div>
+      </a>
+    </div>
+
+    <div style="height:1px;background:rgba(0,0,0,.08)"></div>
+
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="font-size:12px;font-weight:500;letter-spacing:.6px;color:#8A877F;text-transform:uppercase">Waage</div>
+      <div style="font-size:15px;line-height:1.5;color:#4A4843;text-wrap:pretty">Bierwiegen läuft mit einer Bluetooth-Küchenwaage. Verbinde sie einmal, danach übernimmt die App die Gewichte automatisch in die Tabelle.</div>
+
+      <div style="display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:12px;background:#FFFFFF;border:1px solid {{ btBorder }}">
+        <div style="width:40px;height:40px;flex:none;border-radius:20px;display:flex;align-items:center;justify-content:center;background:{{ btIconBg }}">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{{ btIconFg }}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 8l10 8-5 4V4l5 4-10 8"></path></svg>
+        </div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:15px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ btTitle }}</div>
+          <div style="margin-top:2px;font-size:13px;color:#6F6C66">{{ btSub }}</div>
+        </div>
+        <sc-if value="{{ btBusy }}" hint-placeholder-val="{{ false }}">
+          <div style="width:18px;height:18px;flex:none;border-radius:9px;border:2px solid rgba(0,0,0,.12);border-top-color:#789283;animation:bw-spin .8s linear infinite"></div>
+        </sc-if>
+      </div>
+
+      <div onClick="{{ onBtAction }}" style="height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;user-select:none;cursor:pointer;background:{{ btBtnBg }};color:{{ btBtnFg }};border:{{ btBtnBorder }};box-shadow:{{ btBtnShadow }}">{{ btBtnLabel }}</div>
+      <div style="font-size:12px;color:#A5A29B;text-wrap:pretty">{{ btHint }}</div>
+    </div>
+
+    <div style="height:1px;background:rgba(0,0,0,.08)"></div>
+
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="font-size:12px;font-weight:500;letter-spacing:.6px;color:#8A877F;text-transform:uppercase">So wird gespielt</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <sc-for list="{{ steps }}" as="s" hint-placeholder-count="4">
+          <div style="display:flex;gap:14px;align-items:flex-start">
+            <div style="width:26px;height:26px;flex:none;border-radius:13px;background:#FDF1DC;color:#6B5416;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;font-family:'Roboto Mono',monospace">{{ s.n }}</div>
+            <div style="flex:1;min-width:0;padding-top:2px">
+              <div style="font-size:15px;font-weight:500">{{ s.title }}</div>
+              <div style="margin-top:2px;font-size:14px;line-height:1.45;color:#6F6C66;text-wrap:pretty">{{ s.text }}</div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="font-size:12px;font-weight:500;letter-spacing:.6px;color:#8A877F;text-transform:uppercase">Spielmodi</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <sc-for list="{{ modes }}" as="m" hint-placeholder-count="4">
+          <div style="padding:14px 16px;border-radius:12px;background:#FFFFFF;border:1px solid rgba(0,0,0,.06)">
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="width:8px;height:8px;flex:none;border-radius:4px;background:{{ m.dot }}"></div>
+              <div style="flex:1;font-size:15px;font-weight:500">{{ m.title }}</div>
+              <div style="font-size:12px;color:#A5A29B">{{ m.group }}</div>
+            </div>
+            <div style="margin-top:6px;font-size:14px;line-height:1.45;color:#6F6C66;text-wrap:pretty">{{ m.text }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+  </div>
+</div>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:460,&quot;height&quot;:940}}">
+const PRIMARY = '#FEAD2E', SECONDARY = '#789283';
+
+class Component extends DCLogic {
+  state = { name: 'Lena', bt: 'idle', scrolled: false };
+
+  componentWillUnmount() { clearTimeout(this.t); }
+
+  onScroll = e => {
+    const on = e.target.scrollTop > 4;
+    if (on !== this.state.scrolled) this.setState({ scrolled: on });
+  };
+
+  onBtAction = () => {
+    const bt = this.state.bt;
+    clearTimeout(this.t);
+    if (bt === 'connected') { this.setState({ bt: 'idle' }); return; }
+    if (bt === 'searching') { this.setState({ bt: 'idle' }); return; }
+    this.setState({ bt: 'searching' });
+    this.t = setTimeout(() => this.setState({ bt: 'connected' }), 2200);
+  };
+
+  renderVals() {
+    const s = this.state;
+    const bt = {
+      idle: {
+        title: 'Keine Waage verbunden', sub: 'Bluetooth ist bereit',
+        border: 'rgba(0,0,0,.06)', iconBg: '#F1F0EC', iconFg: '#8A877F',
+        btn: 'Waage verbinden', bg: PRIMARY, fg: '#2B2205', bd: '0', sh: '0 2px 6px rgba(254,173,46,.45)',
+        hint: 'Schalte die Waage ein und halte sie in die Nähe des Telefons.',
+      },
+      searching: {
+        title: 'Suche nach Geräten …', sub: 'Waage einschalten und warten',
+        border: 'rgba(254,173,46,.5)', iconBg: '#FDF1DC', iconFg: '#6B5416',
+        btn: 'Suche abbrechen', bg: 'transparent', fg: '#3F5348', bd: '1px solid #789283', sh: 'none',
+        hint: 'Das dauert meistens ein paar Sekunden.',
+      },
+      connected: {
+        title: 'Bierwaage BW-01', sub: 'Verbunden · Akku 82 %',
+        border: 'rgba(120,146,131,.55)', iconBg: '#EDF1EE', iconFg: '#3F5348',
+        btn: 'Verbindung trennen', bg: 'transparent', fg: '#3F5348', bd: '1px solid #789283', sh: 'none',
+        hint: 'Die Waage verbindet sich beim nächsten Spiel automatisch.',
+      },
+    }[s.bt];
+
+    const nm = s.name.trim();
+    return {
+      name: s.name,
+      onName: e => this.setState({ name: e.target.value }),
+      displayName: nm || 'Dein Name',
+      initial: (nm ? nm[0] : '?').toUpperCase(),
+      onScroll: this.onScroll,
+      barShadow: s.scrolled ? '0 1px 0 rgba(0,0,0,.08)' : 'none',
+      btTitle: bt.title, btSub: bt.sub, btBorder: bt.border,
+      btIconBg: bt.iconBg, btIconFg: bt.iconFg,
+      btBtnLabel: bt.btn, btBtnBg: bt.bg, btBtnFg: bt.fg, btBtnBorder: bt.bd, btBtnShadow: bt.sh,
+      btBusy: s.bt === 'searching', btHint: bt.hint,
+      onBtAction: this.onBtAction,
+      steps: [
+        { n: '1', title: 'Startgewicht wiegen', text: 'Jeder stellt sein volles Glas einmal auf die Waage.' },
+        { n: '2', title: 'Ziel festlegen', text: 'Für jede Runde gilt ein Zielgewicht, das unter dem aktuellen liegt.' },
+        { n: '3', title: 'Trinken und wiegen', text: 'Reihum trinken, danach das Glas zurück auf die Waage. Wer am nächsten am Ziel liegt, gewinnt die Runde.' },
+        { n: '4', title: 'Spielende', text: 'Sobald ein Glas unter 50 g fällt, endet das Spiel und der Endstand wird ermittelt.' },
+      ],
+      modes: [
+        { group: 'Wertung', dot: PRIMARY, title: 'Standard', text: 'Wer am nächsten am Ziel liegt, holt den Rundensieg. Gezählt werden die gewonnenen Runden.' },
+        { group: 'Wertung', dot: PRIMARY, title: 'Punkte', text: 'Punkte nach Platzierung: 3 für den ersten, 2 für den zweiten, 1 für den dritten Platz. Exakt getroffen zählt 5.' },
+        { group: 'Ziele', dot: SECONDARY, title: 'Manuelle Ziele', text: 'Ihr legt das Zielgewicht jeder Runde selbst fest.' },
+        { group: 'Ziele', dot: SECONDARY, title: 'Automatische Ziele', text: 'Das nächste Ziel wird ausgelost: 30 bis 80 g unter dem aktuellen Ziel.' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

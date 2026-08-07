@@ -25,6 +25,29 @@ class Game {
   bool get hasAnyMeasurement =>
       rounds.any((r) => r.measurements.any((m) => m != 0));
 
+  /// A glass under this weight (grams) ends the game.
+  static const double finishThreshold = 50;
+
+  /// Player's most recently entered measurement across all rounds; null when
+  /// they have not been weighed in any round yet.
+  double? lastMeasurement(int playerIndex) {
+    for (int i = rounds.length - 1; i >= 0; i--) {
+      final measurement = rounds[i].measurements[playerIndex];
+      if (measurement != 0) {
+        return measurement;
+      }
+    }
+    return null;
+  }
+
+  /// Players whose glass has dropped below [finishThreshold]; their presence
+  /// ends the game.
+  List<Player> get finishers => [
+        for (int i = 0; i < players.length; i++)
+          if ((lastMeasurement(i) ?? double.infinity) < finishThreshold)
+            players[i],
+      ];
+
   /// Weight the player's glass had before [roundIndex]: the last entered
   /// measurement of an earlier round, else the initial weight; null when
   /// nothing was entered yet.
