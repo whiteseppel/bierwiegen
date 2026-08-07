@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../ui/tokens.dart';
+import '../history/recent_games_screen.dart';
 import '../scale/scale_provider.dart';
 import '../scale/scale_state.dart';
 import 'account_providers.dart';
@@ -57,6 +58,10 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     _buildProfile(displayName, initial),
+                    const SizedBox(height: 26),
+                    const _Divider(),
+                    const SizedBox(height: 26),
+                    const _GamesSection(),
                     const SizedBox(height: 26),
                     const _Divider(),
                     const SizedBox(height: 26),
@@ -206,6 +211,89 @@ class _TopBar extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _GamesSection extends StatelessWidget {
+  const _GamesSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const _SectionLabel('Spiele'),
+        const SizedBox(height: 12),
+        Material(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(standardBorderRadius),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(standardBorderRadius),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const RecentGamesScreen()),
+            ),
+            child: Container(
+              height: 60,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(standardBorderRadius),
+                border: Border.all(color: const Color(0x0F000000)),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: CustomColors.greenTint,
+                    ),
+                    child: const Icon(
+                      Icons.history,
+                      size: 20,
+                      color: CustomColors.greenDark,
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Letzte Spiele',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: CustomColors.textPrimary,
+                          ),
+                        ),
+                        SizedBox(height: 2),
+                        Text(
+                          'Ergebnisse und Statistiken ansehen',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: CustomColors.textMuted,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  const Text(
+                    '›',
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: CustomColors.disabledText,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
