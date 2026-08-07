@@ -7,7 +7,213 @@
 </head>
 <body>
 <x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#DFDDD6;font-family:Roboto,system-ui,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px;box-sizing:border-box}
+a{color:#789283}a:hover{color:#5C7466}
+input{font-family:Roboto,system-ui,sans-serif}
+input::placeholder{color:#A5A29B}
+@keyframes bw-rise{from{transform:translateY(100%)}to{transform:translateY(0)}}
+@keyframes bw-fade{from{opacity:0}to{opacity:1}}
+</style>
+</helmet>
+<x-import component-from-global-scope="AndroidDevice" from="./android-frame.jsx" hint-size="412px,892px">
+<div style="height:100%;position:relative;display:flex;flex-direction:column;background:#EFEEE9;overflow:hidden;color:#1C1B18">
 
+  <div style="flex:none;padding:20px 20px 26px;background:#EFEEE9">
+    <div style="display:flex;justify-content:flex-end;margin-bottom:14px"><div onClick="{{ openMenu }}" style="width:44px;height:44px;flex:none;border-radius:22px;background:#FDF1DC;display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none" style-hover="filter:brightness(.97)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6B5416" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.6"></circle><path d="M4.8 20c.9-3.6 3.7-5.4 7.2-5.4s6.3 1.8 7.2 5.4"></path></svg></div></div>
+    <div style="font-size:13px;font-weight:500;letter-spacing:2.4px;color:#8A877F;text-transform:uppercase">Dein Party-Game</div>
+    <div style="margin-top:10px;font-size:56px;font-weight:700;letter-spacing:-2px;line-height:.92">Bier<br />wiegen</div>
+    <div style="margin-top:18px;width:64px;height:6px;border-radius:3px;background:#FEAD2E"></div>
+  </div>
+
+  <div style="flex:1;overflow:auto;padding:18px 20px 24px;display:flex;flex-direction:column">
+    <div style="font-size:15px;line-height:1.45;color:#6F6C66;text-wrap:pretty;margin-bottom:16px">Gib die Namen der Mitspieler ein und lege direkt los!</div>
+
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <sc-for list="{{ fields }}" as="f" hint-placeholder-count="3">
+        <div style="display:flex;align-items:center;gap:10px;height:56px;padding:0 6px 0 16px;border-radius:12px;background:#FFFFFF;border:1px solid {{ f.border }}">
+          <div style="width:22px;flex:none;font-size:13px;font-weight:500;color:#A5A29B">{{ f.num }}</div>
+          <input value="{{ f.value }}" onChange="{{ f.onChange }}" onKeyDown="{{ f.onKeyDown }}" ref="{{ f.ref }}" placeholder="{{ f.hint }}" enterkeyhint="next" style="flex:1;min-width:0;height:100%;border:0;background:transparent;outline:none;font-size:16px;color:#1C1B18;padding:0" />
+          <sc-if value="{{ f.filled }}" hint-placeholder-val="{{ true }}">
+            <div onClick="{{ f.onClear }}" style="width:40px;height:40px;flex:none;border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:17px;color:#8A877F;cursor:pointer;user-select:none" style-hover="background:rgba(0,0,0,.05)">✕</div>
+          </sc-if>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="height:20px"></div>
+    <div style="flex:1;min-height:8px"></div>
+
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div onClick="{{ openOptions }}" style="display:flex;align-items:center;gap:12px;height:52px;padding:0 16px;border-radius:12px;background:#F4F3EF;border:1px solid rgba(0,0,0,.06);cursor:pointer;user-select:none" style-hover="background:#EDECE7">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6F6C66" stroke-width="2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"></path><circle cx="16" cy="7" r="2.2"></circle><circle cx="10" cy="17" r="2.2"></circle></svg>
+        <div style="flex:1;font-size:15px;font-weight:500">Spieloptionen</div>
+        <div style="font-size:14px;color:#6F6C66">{{ optionsSummary }}</div>
+        <div style="font-size:18px;color:#A5A29B">›</div>
+      </div>
+
+      <div onClick="{{ startGame }}" style="height:56px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;user-select:none;cursor:{{ startCursor }};background:{{ startBg }};color:{{ startFg }};box-shadow:{{ startShadow }}">Spiel starten</div>
+
+      <div style="display:flex;align-items:center;gap:14px;padding:2px 0">
+        <div style="flex:1;height:1px;background:rgba(0,0,0,.14)"></div>
+        <div style="font-size:13px;font-weight:500;color:#8A877F;letter-spacing:.4px">oder</div>
+        <div style="flex:1;height:1px;background:rgba(0,0,0,.14)"></div>
+      </div>
+
+      <div onClick="{{ joinGame }}" style="height:56px;border-radius:12px;border:1px solid #789283;color:#3F5348;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:500;cursor:pointer;user-select:none" style-hover="background:#EDF1EE">Spiel beitreten</div>
+    </div>
+  </div>
+
+  <sc-if value="{{ optionsOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeOptions }}" style="position:absolute;inset:0;z-index:40;background:rgba(0,0,0,.34);display:flex;align-items:flex-end;animation:bw-fade .15s ease-out">
+      <div style="width:100%;background:#FFFFFF;border-radius:28px 28px 0 0;padding:12px 20px 24px;animation:bw-rise .22s ease-out">
+        <div style="width:32px;height:4px;border-radius:2px;background:rgba(0,0,0,.15);margin:0 auto 16px"></div>
+        <div style="font-size:20px;font-weight:500;margin-bottom:18px">Spieloptionen</div>
+
+        <div style="font-size:12px;font-weight:500;letter-spacing:.6px;color:#8A877F;text-transform:uppercase;margin-bottom:8px">Spielmodus</div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px">
+          <sc-for list="{{ modes }}" as="m" hint-placeholder-count="2">
+            <div onClick="{{ m.onClick }}" style="display:flex;align-items:center;gap:14px;padding:12px 14px;border-radius:12px;background:{{ m.bg }};border:1px solid {{ m.border }};cursor:pointer;user-select:none">
+              <div style="width:20px;height:20px;flex:none;border-radius:10px;border:2px solid {{ m.dot }};display:flex;align-items:center;justify-content:center">
+                <div style="width:10px;height:10px;border-radius:5px;background:{{ m.fill }}"></div>
+              </div>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:15px;font-weight:500">{{ m.label }}</div>
+                <div style="font-size:13px;color:#6F6C66;text-wrap:pretty">{{ m.desc }}</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="font-size:12px;font-weight:500;letter-spacing:.6px;color:#8A877F;text-transform:uppercase;margin-bottom:8px">Teams</div>
+        <div onClick="{{ toggleTeams }}" style="display:flex;align-items:center;gap:14px;padding:12px 14px;border-radius:12px;background:#F4F3EF;border:1px solid rgba(0,0,0,.06);cursor:pointer;user-select:none;margin-bottom:22px">
+          <div style="flex:1;min-width:0">
+            <div style="font-size:15px;font-weight:500">Teammodus</div>
+            <div style="font-size:13px;color:#6F6C66">{{ teamDesc }}</div>
+          </div>
+          <div style="width:48px;height:28px;flex:none;border-radius:14px;padding:2px;box-sizing:border-box;display:flex;justify-content:{{ teamJustify }};background:{{ teamTrack }};transition:background .15s">
+            <div style="width:24px;height:24px;border-radius:12px;background:#FFFFFF;box-shadow:0 1px 3px rgba(0,0,0,.3)"></div>
+          </div>
+        </div>
+
+        <div onClick="{{ closeOptions }}" style="height:52px;border-radius:12px;background:#FEAD2E;color:#2B2205;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;cursor:pointer;user-select:none;box-shadow:0 2px 6px rgba(254,173,46,.45)" style-hover="filter:brightness(1.05)">Übernehmen</div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ menuOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeMenu }}" style="position:absolute;inset:0;z-index:45;background:rgba(0,0,0,.34);display:flex;align-items:flex-end;animation:bw-fade .15s ease-out">
+      <div style="width:100%;background:#FFFFFF;border-radius:28px 28px 0 0;padding:12px 0 20px;animation:bw-rise .22s ease-out">
+        <div style="width:32px;height:4px;border-radius:2px;background:rgba(0,0,0,.15);margin:0 auto 12px"></div>
+        <div style="padding:6px 24px 10px;font-size:12px;font-weight:500;letter-spacing:.6px;color:#8A877F;text-transform:uppercase">Menü</div>
+        <sc-for list="{{ menuItems }}" as="i" hint-placeholder-count="3">
+          <div style="display:flex;align-items:center;gap:16px;height:56px;padding:0 24px;cursor:pointer" style-hover="background:rgba(0,0,0,.04)">
+            <div style="width:8px;height:8px;border-radius:4px;background:{{ i.dot }}"></div>
+            <div style="flex:1;font-size:16px">{{ i.label }}</div>
+            <div style="font-size:12px;color:#A5A29B">{{ i.note }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </sc-if>
+
+</div>
+</x-import>
 </x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:460,&quot;height&quot;:940}}">
+class Component extends DCLogic {
+  state = {
+    names: [''],
+    mode: 'standard',
+    teams: false,
+    optionsOpen: false,
+    menuOpen: false,
+  };
+  refs = {};
+
+  setName(i, v) {
+    this.setState(s => {
+      const names = s.names.slice();
+      names[i] = v;
+      while (names.length > 1 && names[names.length - 1] === '' && names[names.length - 2] === '') names.pop();
+      if (names[names.length - 1] !== '') names.push('');
+      return { names };
+    });
+  }
+  clear(i) {
+    this.setState(s => {
+      const names = s.names.filter((_, k) => k !== i);
+      if (!names.length || names[names.length - 1] !== '') names.push('');
+      return { names };
+    });
+  }
+  next(i) {
+    const el = this.refs[i + 1];
+    if (el) el.focus();
+  }
+
+  renderVals() {
+    const s = this.state;
+    const filledCount = s.names.filter(n => n.trim()).length;
+    const canStart = filledCount >= 1;
+
+    const fields = s.names.map((v, i) => ({
+      value: v,
+      num: String(i + 1),
+      hint: 'Spieler ' + (i + 1),
+      filled: !!v,
+      border: v ? 'rgba(0,0,0,.10)' : 'rgba(0,0,0,.06)',
+      ref: el => { this.refs[i] = el; },
+      onChange: e => this.setName(i, e.target.value),
+      onKeyDown: e => { if (e.key === 'Enter') { e.preventDefault(); this.next(i); } },
+      onClear: () => this.clear(i),
+    }));
+
+    const modes = [
+      { id: 'standard', label: 'Standard', desc: 'Wer am nächsten dran ist, gewinnt die Runde.' },
+      { id: 'points', label: 'Punkte', desc: 'Punkte nach Platzierung, exakt getroffen zählt doppelt.' },
+    ].map(m => {
+      const on = s.mode === m.id;
+      return {
+        label: m.label, desc: m.desc,
+        bg: on ? '#FDF1DC' : '#F4F3EF',
+        border: on ? 'rgba(254,173,46,.6)' : 'rgba(0,0,0,.06)',
+        dot: on ? '#FEAD2E' : '#BDBAB2',
+        fill: on ? '#FEAD2E' : 'transparent',
+        onClick: () => this.setState({ mode: m.id }),
+      };
+    });
+
+    return {
+      fields, modes,
+      optionsSummary: (s.mode === 'points' ? 'Punkte' : 'Standard') + (s.teams ? ' · Teams' : ''),
+      teamDesc: s.teams ? 'Spieler werden vor dem Start auf Teams verteilt' : 'Jeder spielt für sich',
+      teamTrack: s.teams ? '#789283' : '#D5D2CA',
+      teamJustify: s.teams ? 'flex-end' : 'flex-start',
+      toggleTeams: () => this.setState(x => ({ teams: !x.teams })),
+      startBg: canStart ? '#FEAD2E' : '#E7E5DE',
+      startFg: canStart ? '#2B2205' : '#A5A29B',
+      startShadow: canStart ? '0 2px 6px rgba(254,173,46,.45)' : 'none',
+      startCursor: canStart ? 'pointer' : 'default',
+      startGame: () => {},
+      joinGame: () => {},
+      openOptions: () => this.setState({ optionsOpen: true }),
+      closeOptions: () => this.setState({ optionsOpen: false }),
+      optionsOpen: s.optionsOpen,
+      openMenu: () => this.setState({ menuOpen: true }),
+      closeMenu: () => this.setState({ menuOpen: false }),
+      menuOpen: s.menuOpen,
+      menuItems: [
+        { label: 'Einstellungen', note: 'Waage', dot: '#789283' },
+        { label: 'Was ist Bierwiegen?', note: 'Regeln', dot: '#FEAD2E' },
+        { label: 'Spielverlauf', note: 'bald', dot: '#BDBAB2' },
+      ],
+    };
+  }
+}
+</script>
 </body>
 </html>

@@ -299,38 +299,31 @@ class _GameScreenState extends ConsumerState<GameScreen> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _buildNewRoundButton(),
-        const SizedBox(height: 10),
-        _buildFinishButton(canFinish),
-        const SizedBox(height: 8),
-        Text(
-          canFinish
-              ? 'Beendet das Spiel und ermittelt den Gewinner.'
-              : 'Erst wiegen, dann beenden.',
-          textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 12, color: CustomColors.textFaint),
-        ),
+        if (canFinish) ...[
+          const SizedBox(height: 10),
+          _buildFinishButton(),
+        ],
       ],
     );
   }
 
-  Widget _buildFinishButton(bool enabled) {
+  Widget _buildFinishButton() {
     return GestureDetector(
-      onTap: enabled ? () => Dialogs.finishGameDialog(context, ref) : null,
+      onTap: () => Dialogs.finishGameDialog(context, ref),
       child: Container(
         height: 50,
         decoration: BoxDecoration(
-          color: enabled ? CustomColors.primaryColor : CustomColors.trackBg,
+          color: CustomColors.primaryColor,
           borderRadius: BorderRadius.circular(standardBorderRadius),
-          boxShadow: enabled ? _amberShadow : null,
+          boxShadow: _amberShadow,
         ),
         alignment: Alignment.center,
-        child: Text(
+        child: const Text(
           'Spiel beenden',
           style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w700,
-            color:
-                enabled ? CustomColors.onPrimaryDark : CustomColors.disabledText,
+            color: CustomColors.onPrimaryDark,
           ),
         ),
       ),
