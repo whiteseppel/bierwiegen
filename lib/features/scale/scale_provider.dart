@@ -1,13 +1,18 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import 'scale_state.dart';
 
 class ScaleNotifier extends StateNotifier<ScaleState> {
-  ScaleNotifier() : super(const ScaleState());
+  ScaleNotifier() : super(const ScaleState()) {
+    _watchAdapterState();
+    refreshAvailability();
+  }
 
   static const _deviceName = 'Chipsea-BLE';
   static const _weightCharacteristicId = 'fff1';
@@ -24,17 +29,114 @@ class ScaleNotifier extends StateNotifier<ScaleState> {
   StreamSubscription? _scanSubscription;
   StreamSubscription? _connectionSubscription;
   StreamSubscription? _weightSubscription;
+  StreamSubscription? _adapterSubscription;
   Timer? _stabilityTimer;
   List<int>? _lastLoggedFrame;
   final _seenDeviceIds = <String>{};
   BluetoothDevice? _knownDevice;
   bool _reconnecting = false;
 
+  BluetoothAdapterState _rawAdapter = BluetoothAdapterState.unknown;
+  bool _permissionDenied = false;
+
+  bool get _isAndroid =>
+      !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
+
   void _log(String message) => print('[scale] $message');
+
+  void _watchAdapterState() {
+    try {
+      _rawAdapter = FlutterBluePlus.adapterStateNow;
+      _updateAvailability();
+      _adapterSubscription = FlutterBluePlus.adapterState.listen((btState) {
+        _rawAdapter = btState;
+        _updateAvailability();
+      });
+    } catch (e) {
+      _log('adapter state unavailable: $e');
+    }
+  }
+
+  /// Combines the hardware adapter state with the runtime permission: a missing
+  /// Bluetooth permission masks the adapter as unauthorized.
+  void _updateAvailability() {
+    final availability =
+        _permissionDenied
+            ? BluetoothAvailability.unauthorized
+            : _mapAdapterState(_rawAdapter);
+    if (availability != state.adapter) {
+      state = state.copyWith(adapter: availability);
+    }
+  }
+
+  BluetoothAvailability _mapAdapterState(BluetoothAdapterState btState) {
+    switch (btState) {
+      case BluetoothAdapterState.on:
+        return BluetoothAvailability.ready;
+      case BluetoothAdapterState.unauthorized:
+        return BluetoothAvailability.unauthorized;
+      case BluetoothAdapterState.off:
+      case BluetoothAdapterState.turningOff:
+      case BluetoothAdapterState.turningOn:
+      case BluetoothAdapterState.unavailable:
+        return BluetoothAvailability.off;
+      case BluetoothAdapterState.unknown:
+        return BluetoothAvailability.unknown;
+    }
+  }
+
+  /// Re-checks whether the Bluetooth runtime permission is granted. On iOS the
+  /// adapter state already reports [BluetoothAdapterState.unauthorized], so this
+  /// only matters on Android, where a missing permission is otherwise invisible.
+  Future<void> refreshAvailability() async {
+    if (!_isAndroid) {
+      return;
+    }
+    try {
+      final scan = await Permission.bluetoothScan.status;
+      final connect = await Permission.bluetoothConnect.status;
+      _permissionDenied = !(scan.isGranted && connect.isGranted);
+    } catch (e) {
+      _log('permission check failed: $e');
+      _permissionDenied = false;
+    }
+    _updateAvailability();
+  }
+
+  /// Requests the Bluetooth permission; on success starts connecting, and opens
+  /// the app settings when the user has permanently denied it.
+  Future<void> requestBluetoothAccess() async {
+    if (!_isAndroid) {
+      await tryConnect();
+      return;
+    }
+
+    final statuses =
+        await [Permission.bluetoothScan, Permission.bluetoothConnect].request();
+    final granted = statuses.values.every((s) => s.isGranted);
+    _permissionDenied = !granted;
+    _updateAvailability();
+
+    if (granted) {
+      await tryConnect();
+    } else if (statuses.values.any((s) => s.isPermanentlyDenied)) {
+      await openAppSettings();
+    }
+  }
 
   void resetConnection() {
     _cancelSubscriptions();
-    state = const ScaleState();
+    // Keep the adapter availability; only the scale connection is reset.
+    state = ScaleState(adapter: state.adapter);
+  }
+
+  /// Asks the OS to enable Bluetooth (Android only; a no-op elsewhere).
+  Future<void> enableBluetooth() async {
+    try {
+      await FlutterBluePlus.turnOn();
+    } catch (e) {
+      _log('turn on bluetooth failed: $e');
+    }
   }
 
   Future<void> tryConnect() async {
@@ -278,6 +380,7 @@ class ScaleNotifier extends StateNotifier<ScaleState> {
   @override
   void dispose() {
     _cancelSubscriptions();
+    _adapterSubscription?.cancel();
     super.dispose();
   }
 }

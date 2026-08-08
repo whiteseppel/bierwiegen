@@ -48,7 +48,8 @@ input{font-family:'Roboto Mono',ui-monospace,monospace}
 
     <div style="display:flex;flex-direction:column;gap:8px;width:max-content;min-width:100%">
       <sc-for list="{{ rows }}" as="row" hint-placeholder-count="4">
-        <div style="display:flex;width:max-content;min-width:100%;background:#FFFFFF;border-radius:14px;border:1px solid rgba(0,0,0,.06)">
+      <div style="position:relative;width:max-content;min-width:100%">
+        <div onPointerDown="{{ row.onSwipeStart }}" onPointerMove="{{ row.onSwipeMove }}" onPointerUp="{{ row.onSwipeEnd }}" onPointerCancel="{{ row.onSwipeEnd }}" style="display:flex;width:max-content;min-width:100%;background:#FFFFFF;border-radius:14px;border:1px solid rgba(0,0,0,.06);position:relative">
           <div onPointerDown="{{ row.onPressStart }}" onPointerUp="{{ row.onPressEnd }}" onPointerLeave="{{ row.onPressEnd }}" style="position:sticky;left:0;z-index:2;width:58px;flex:none;height:62px;border-radius:13px 0 0 13px;background:#EDF1EE;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;user-select:none;touch-action:none;box-shadow:6px 0 10px -8px rgba(0,0,0,.4)">
             <div style="font-size:9px;font-weight:500;letter-spacing:.6px;color:#7C8F84;text-transform:uppercase">{{ row.tag }}</div>
             <div style="font-size:17px;font-weight:700;font-family:'Roboto Mono',monospace;color:#3F5348">{{ row.label }}</div>
@@ -64,7 +65,16 @@ input{font-family:'Roboto Mono',ui-monospace,monospace}
               </sc-if>
             </div>
           </sc-for>
+          <sc-if value="{{ row.canDelete }}" hint-placeholder-val="{{ false }}">
+            <div style="position:sticky;right:0;z-index:4;flex:none;width:0;height:62px">
+              <div onClick="{{ row.onDelete }}" style="position:absolute;top:0;right:0;height:62px;box-sizing:border-box;border-radius:0 13px 13px 0;background:#C0392B;color:#FFFFFF;display:flex;align-items:center;justify-content:flex-end;gap:7px;overflow:hidden;cursor:pointer;user-select:none;padding-right:14px;transition:{{ row.revealTransition }};width:{{ row.revealW }};opacity:{{ row.revealOpacity }}">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"></path></svg>
+                <span style="flex:none;font-size:13px;font-weight:500;white-space:nowrap">Löschen</span>
+              </div>
+            </div>
+          </sc-if>
         </div>
+      </div>
       </sc-for>
     </div>
 
@@ -119,15 +129,18 @@ input{font-family:'Roboto Mono',ui-monospace,monospace}
     <div style="position:absolute;left:0;right:0;bottom:0;z-index:30;display:flex;flex-direction:column;animation:bw-rise .22s ease-out">
     <div style="background:#FFFFFF;border-radius:28px 28px 0 0;padding:16px 20px 18px;box-shadow:0 -8px 30px rgba(0,0,0,.18)">
       <div style="width:32px;height:4px;border-radius:2px;background:rgba(0,0,0,.15);margin:0 auto 12px"></div>
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:2px">
-        <div style="font-size:15px;font-weight:700;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ scalePlayer }}</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:2px">
+        <div style="flex:1;min-width:0;display:flex;align-items:flex-end">
+          <div style="max-width:100%;font-size:28px;font-weight:700;letter-spacing:-.7px;line-height:1.15;padding-bottom:4px;border-bottom:4px solid #FEAD2E;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ scalePlayer }}</div>
+        </div>
         <div onClick="{{ toggleScaleInput }}" onPointerDown="{{ keepFocus }}" style="display:flex;align-items:center;gap:6px;height:30px;padding:0 10px;border-radius:15px;cursor:pointer;user-select:none;font-size:11px;font-weight:500;letter-spacing:.3px;background:{{ scaleChipBg }};color:{{ scaleChipFg }}">
           <span style="width:7px;height:7px;border-radius:4px;background:{{ scaleDotColor }}"></span>
           <span>{{ scaleToggleLabel }}</span>
         </div>
         <div onClick="{{ toggleKeypad }}" onPointerDown="{{ keepFocus }}" style="display:flex;align-items:center;gap:6px;height:30px;padding:0 10px;border-radius:15px;cursor:pointer;user-select:none;font-size:11px;font-weight:500;letter-spacing:.3px;background:{{ kbChipBg }};color:{{ kbChipFg }}">{{ kbChipLabel }}</div>
       </div>
-      <div style="display:flex;align-items:baseline;gap:6px;margin:6px 0 12px">
+      <div style="height:14px"></div>
+      <div style="display:flex;align-items:baseline;gap:6px;margin:0 0 12px">
         <div style="font-size:46px;font-weight:500;font-family:'Roboto Mono',monospace;line-height:1;letter-spacing:-1px">{{ liveWeight }}</div>
         <div style="font-size:18px;color:#6F6C66">g</div>
       </div>
@@ -182,6 +195,37 @@ input{font-family:'Roboto Mono',ui-monospace,monospace}
         </div>
         <div style="font-size:13px;color:#8A877F;min-height:18px">{{ rollSub }}</div>
         <div onClick="{{ rollConfirm }}" style="margin-top:16px;height:50px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;user-select:none;cursor:{{ rollBtnCursor }};background:{{ rollBtnBg }};color:{{ rollBtnFg }}">{{ rollBtnLabel }}</div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ manualOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;z-index:48;background:rgba(0,0,0,.42);display:flex;align-items:center;justify-content:center;animation:bw-fade .15s ease-out">
+      <div style="width:296px;background:#FFFFFF;border-radius:28px;padding:24px 24px 20px;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.28)">
+        <div style="font-size:11px;font-weight:500;letter-spacing:2px;color:#8A877F;text-transform:uppercase">{{ manualEyebrow }}</div>
+        <div style="margin-top:6px;font-size:14px;color:#6F6C66">{{ manualCaption }}</div>
+        <div style="display:flex;align-items:stretch;gap:16px;margin:18px 0 12px;height:180px">
+          <div style="flex:1;min-width:0;border-radius:10px 10px 14px 14px;background:#F4F3EF;border:1px solid rgba(0,0,0,.10);position:relative;overflow:hidden">
+            <div style="position:absolute;left:0;right:0;bottom:0;transition:height .18s ease;height:{{ manualGlassPct }}">
+              <div style="height:10px;background:#FFF3DC"></div>
+              <div style="position:absolute;top:10px;left:0;right:0;bottom:0;background:linear-gradient(180deg,#FFC55C,#F0A020)"></div>
+            </div>
+            <div style="position:absolute;left:0;right:0;bottom:{{ manualFromPct }};height:2px;background:rgba(120,146,131,.9)"></div>
+          </div>
+          <div style="flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:8px;text-align:left">
+            <div style="font-size:11px;font-weight:500;letter-spacing:.6px;color:#8A877F;text-transform:uppercase">Ziel</div>
+            <div style="display:flex;align-items:baseline;gap:4px;width:100%">
+              <input value="{{ dialogValue }}" onChange="{{ onDialogInput }}" onKeyDown="{{ onManualKey }}" inputmode="numeric" maxlength="5" autofocus="{{ true }}" placeholder="0" style="width:104px;min-width:0;padding:0;border:0;border-bottom:2px solid rgba(254,173,46,.55);background:transparent;outline:none;font-family:'Roboto Mono',monospace;font-weight:500;font-size:42px;letter-spacing:-1.5px;line-height:1.1;color:#1C1B18" style-focus="border-bottom-color:#FEAD2E" />
+              <div style="font-size:17px;color:#6F6C66">g</div>
+            </div>
+            <div style="font-size:12px;font-family:'Roboto Mono',monospace;color:#8A877F">von {{ manualFrom }} g</div>
+          </div>
+        </div>
+        <div style="font-size:13px;color:#8A877F;min-height:18px">{{ manualSub }}</div>
+        <div style="display:flex;gap:8px;margin-top:16px">
+          <div onClick="{{ closeDialog }}" style="flex:none;height:50px;padding:0 16px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:500;color:#6F6C66;cursor:pointer;user-select:none" style-hover="background:rgba(0,0,0,.05)">Abbrechen</div>
+          <div onClick="{{ confirmDialog }}" style="flex:1;height:50px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;user-select:none;cursor:{{ manualBtnCursor }};background:{{ manualBtnBg }};color:{{ manualBtnFg }}">{{ manualBtnLabel }}</div>
+        </div>
       </div>
     </div>
   </sc-if>
@@ -288,6 +332,7 @@ class Component extends DCLogic {
       confetti: null,
       targetMode: props.targetMode ?? 'manual',
       mode: props.gameMode ?? 'standard',
+      swipeX: 0, swiping: false,
       roll: null,
     };
   }
@@ -302,7 +347,7 @@ class Component extends DCLogic {
     if (prev.gameMode !== this.props.gameMode && this.props.gameMode)
       this.setState({ mode: this.props.gameMode });
   }
-  componentWillUnmount() { clearInterval(this.timer); clearTimeout(this.lp); clearTimeout(this.confTimer); clearTimeout(this.rollTimer); }
+  componentWillUnmount() { clearInterval(this.timer); clearTimeout(this.lp); clearTimeout(this.confTimer); clearTimeout(this.rollTimer); clearTimeout(this.tease1); clearTimeout(this.tease2); }
 
   // ---- data helpers -------------------------------------------------
   players() { return NAMES.slice(0, this.state.n); }
@@ -481,8 +526,30 @@ class Component extends DCLogic {
     if (!r || r.rolling) return;
     clearTimeout(this.rollTimer);
     this.setState(s => ({ roll: null, rounds: s.rounds.concat([{ target: r.final, weights: ['', '', '', '', '', ''] }]) }),
-      () => { const i = this.state.rounds.length - 1; setTimeout(() => this.focusCell(i, 0), 60); });
+      () => { const i = this.state.rounds.length - 1; setTimeout(() => this.focusCell(i, 0), 60); this.teaseSwipe(); });
   };
+  teaseSwipe() {
+    clearTimeout(this.tease1); clearTimeout(this.tease2);
+    this.tease1 = setTimeout(() => this.setState({ swipeX: -104, swiping: false }), 240);
+    this.tease2 = setTimeout(() => this.setState({ swipeX: 0 }), 1400);
+  }
+  deleteLastRound() {
+    if (this.state.gameOver || this.state.rounds.length < 2) return;
+    clearTimeout(this.lp);
+    this.setState(s => ({ rounds: s.rounds.slice(0, -1), swipeX: 0, swiping: false, focus: null, kbOpen: false }));
+  }
+  onSwipeStart = e => { this.sx = e.clientX; this.setState({ swiping: true, swipeX: 0 }); };
+  onSwipeMove = e => {
+    if (!this.state.swiping) return;
+    const dx = Math.max(-112, Math.min(0, e.clientX - this.sx));
+    if (dx !== this.state.swipeX) this.setState({ swipeX: dx });
+  };
+  onSwipeEnd = () => {
+    if (!this.state.swiping) return;
+    if (this.state.swipeX < -70) { this.deleteLastRound(); return; }
+    this.setState({ swiping: false, swipeX: 0 });
+  };
+
   askEditTarget(r) { if (this.state.gameOver) return; this.setState({ dialog: { type: 'target', r }, dialogValue: String(this.state.rounds[r].target) }); }
   anyScored() { return this.state.rounds.some(r => this.players().some((_, i) => this.num(r.weights[i]) != null)); }
   askEnd = () => { if (this.state.gameOver || !this.anyScored()) return; this.setState({ dialog: { type: 'end' } }); };
@@ -495,7 +562,7 @@ class Component extends DCLogic {
     if (d.type === 'round') {
       const t = this.num(this.state.dialogValue) ?? 0;
       this.setState(s => ({ rounds: s.rounds.concat([{ target: t, weights: ['', '', '', '', '', ''] }]), dialog: null }),
-        () => { const r = this.state.rounds.length - 1; setTimeout(() => this.focusCell(r, 0), 60); });
+        () => { const r = this.state.rounds.length - 1; setTimeout(() => this.focusCell(r, 0), 60); this.teaseSwipe(); });
     } else if (d.type === 'target') {
       const t = this.num(this.state.dialogValue) ?? 0;
       this.setState(s => ({ rounds: s.rounds.map((x, i) => i === d.r ? { target: t, weights: x.weights } : x), dialog: null }));
@@ -600,10 +667,19 @@ class Component extends DCLogic {
       cells: mkCells(-1, s.initial, null, null),
     }].concat(s.rounds.map((r, i) => {
       const res = this.roundResult(r);
+      const sw = !ro && s.rounds.length > 1 && i === s.rounds.length - 1;
       return {
         key: 'r' + i, tag: 'R' + (i + 1), label: String(r.target), labelBg: '#DCE5DF',
         onPressStart: () => { clearTimeout(this.lp); this.lp = setTimeout(() => this.askEditTarget(i), 450); },
         onPressEnd: () => clearTimeout(this.lp),
+        canDelete: sw,
+        revealW: (sw ? Math.min(112, Math.abs(s.swipeX)) : 0) + 'px',
+        revealOpacity: sw && s.swipeX < -2 ? '1' : '0',
+        revealTransition: s.swiping ? 'opacity .12s linear' : 'width .22s ease,opacity .18s linear',
+        onSwipeStart: sw ? this.onSwipeStart : undefined,
+        onSwipeMove: sw ? this.onSwipeMove : undefined,
+        onSwipeEnd: sw ? this.onSwipeEnd : undefined,
+        onDelete: e => { if (e && e.stopPropagation) e.stopPropagation(); this.deleteLastRound(); },
         cells: mkCells(i, r.weights, res, r.target),
       };
     }));
@@ -665,6 +741,10 @@ class Component extends DCLogic {
     }[s.scale];
 
     const d = s.dialog;
+    const manualVal = this.num(s.dialogValue);
+    const manualFrom = d && d.type === 'target'
+      ? (d.r > 0 ? s.rounds[d.r - 1].target : Math.max(s.rounds[d.r].target, manualVal ?? 0, 1))
+      : (s.rounds.length ? s.rounds[s.rounds.length - 1].target : 500);
     const dialogMeta = {
       round: { title: 'Neue Runde', body: 'Zielgewicht in Gramm festlegen.', confirm: 'Hinzufügen', input: true },
       target: { title: 'Ziel korrigieren', body: 'Zielgewicht dieser Runde anpassen.', confirm: 'Speichern', input: true },
@@ -717,6 +797,8 @@ class Component extends DCLogic {
       }),
       scaleChipBg: chip.bg, scaleChipFg: chip.fg, scaleDotColor: chip.dot, scaleChipLabel: chip.label,
       scaleOpen, scalePlayer, scaleCurrent, scaleGoal, scaleHint,
+      scaleInitial: scalePlayer ? scalePlayer.trim().charAt(0).toUpperCase() : '?',
+      scaleTurnLabel: f ? (f.r < 0 ? 'Startgewicht' : 'Runde ' + (f.r + 1) + ' · am Zug') : 'Am Zug',
       scaleLiveOn: liveOn, keys, kbOpen: !!s.kbOpen,
       toggleScaleInput: this.toggleScaleInput, toggleKeypad: this.toggleKeypad,
       scaleToggleLabel: s.scale === 'active' ? 'Waage an' : (s.scale === 'paused' ? 'Waage aus' : 'Getrennt'),
@@ -752,7 +834,20 @@ class Component extends DCLogic {
       winnerLead: champs.length > 1 ? 'Die Gewinner sind' : 'Der Gewinner ist',
       winnerNames,
       keepFocus: this.keepFocus,
-      dialogOpen: !!d, dialogTitle: dialogMeta.title, dialogBody: dialogMeta.body,
+      manualOpen: !!d && (d.type === 'round' || d.type === 'target'),
+      manualEyebrow: d && d.type === 'target' ? 'Runde ' + (d.r + 1) : 'Runde ' + (s.rounds.length + 1),
+      manualCaption: d && d.type === 'target' ? 'Zielgewicht anpassen' : 'Euer nächstes Zielgewicht',
+      manualFrom: String(manualFrom),
+      manualGlassPct: Math.round(Math.max(0, Math.min(1, (manualVal ?? 0) / (manualFrom || 1))) * 100) + '%',
+      manualFromPct: '100%',
+      manualSub: manualVal == null ? 'Gib das Ziel für diese Runde ein.'
+        : (manualVal >= manualFrom ? 'Das Ziel sollte unter ' + manualFrom + ' g liegen.' : '−' + (manualFrom - manualVal) + ' g gegenüber ' + manualFrom + ' g'),
+      manualBtnLabel: d && d.type === 'target' ? 'Speichern' : 'Runde starten',
+      manualBtnBg: manualVal == null ? '#E7E5DE' : '#FEAD2E',
+      manualBtnFg: manualVal == null ? '#A5A29B' : '#2B2205',
+      manualBtnCursor: manualVal == null ? 'default' : 'pointer',
+      onManualKey: e => { if (e.key === 'Enter') this.confirmDialog(); },
+      dialogOpen: !!d && d.type === 'end', dialogTitle: dialogMeta.title, dialogBody: dialogMeta.body,
       dialogConfirm: dialogMeta.confirm, dialogHasInput: !!dialogMeta.input,
       dialogValue: s.dialogValue, onDialogInput: this.onDialogInput,
       closeDialog: this.closeDialog, confirmDialog: this.confirmDialog,

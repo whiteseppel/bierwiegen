@@ -73,11 +73,12 @@ Future<void> startNewRound(BuildContext context, WidgetRef ref) async {
         lastTarget == null
             ? 400.0
             : (lastTarget - 100).clamp(0.0, double.infinity);
-    target = await Dialogs.weightInputDialog(
+    target = await Dialogs.targetWeightDialog(
       context,
-      title: 'Neue Runde',
-      body: 'Zielgewicht in Gramm festlegen.',
-      confirmLabel: 'Hinzufügen',
+      eyebrow: 'Runde ${game.rounds.length + 1}',
+      caption: 'Euer nächstes Zielgewicht',
+      confirmLabel: 'Runde starten',
+      fromWeight: lastTarget ?? 500,
       initialValue: suggested,
     );
   }

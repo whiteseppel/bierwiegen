@@ -11,9 +11,14 @@ class GameHistoryNotifier extends StateNotifier<List<Game>> {
 
   final GameRepository _repo;
 
-  void record(Game game) {
+  Future<void> record(Game game) async {
     state = [game, ...state];
-    _repo.save(game);
+    await _repo.save(game);
+  }
+
+  Future<void> remove(Game game) async {
+    state = state.where((g) => g != game).toList();
+    await _repo.delete(game);
   }
 }
 

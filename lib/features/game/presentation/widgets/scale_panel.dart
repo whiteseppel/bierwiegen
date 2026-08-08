@@ -82,14 +82,31 @@ class _ScalePanelState extends ConsumerState<ScalePanel> {
             Row(
               children: [
                 Expanded(
-                  child: Text(
-                    game.players[cell.player].name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: CustomColors.textPrimary,
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Container(
+                      margin: const EdgeInsets.only(right: 10),
+                      padding: const EdgeInsets.only(bottom: 4),
+                      decoration: const BoxDecoration(
+                        border: Border(
+                          bottom: BorderSide(
+                            color: CustomColors.primaryColor,
+                            width: 4,
+                          ),
+                        ),
+                      ),
+                      child: Text(
+                        game.players[cell.player].name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: -0.7,
+                          height: 1.15,
+                          color: CustomColors.textPrimary,
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -132,7 +149,7 @@ class _ScalePanelState extends ConsumerState<ScalePanel> {
                 ),
               ],
             ),
-            const SizedBox(height: Spacings.small),
+            const SizedBox(height: 14),
             Row(
               crossAxisAlignment: CrossAxisAlignment.baseline,
               textBaseline: TextBaseline.alphabetic,

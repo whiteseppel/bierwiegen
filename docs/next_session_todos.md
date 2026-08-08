@@ -37,15 +37,13 @@ notes tying it to the current code so the next session has a head start.
 - Consider whether persisted data needs a way to be cleared (e.g. a "Daten
   löschen" action) and reflect that in the text.
 
-### 2b. Remove played games from the list
-- **Goal:** let the user delete individual games from the "Letzte Spiele" list
-  (`RecentGamesScreen` in `lib/features/history/recent_games_screen.dart`).
-- Add a remove action per game (e.g. swipe-to-dismiss or a delete button on the
-  card / in the detail view) plus a `remove(Game)` on `GameHistoryNotifier`
-  (`lib/features/history/game_history_provider.dart`).
-- Storage side is ready: `GameRepository.delete(Game)` already removes the record
-  (keyed by `meta.createdAt`); `GameHistoryNotifier.record` persists on add. Just
-  wire a `remove` method + UI. Consider a confirm step and possibly "alle löschen".
+### 2b. Remove played games from the list — DONE
+- Each card in the "Letzte Spiele" list is now a `flutter_slidable` `Slidable`
+  (`RecentGamesScreen`): swipe right-to-left reveals a red trash button that
+  deletes the game. Backed by `GameHistoryNotifier.remove(Game)` →
+  `GameRepository.delete(Game)`, so it drops from state and storage.
+- Open follow-ups if desired: a confirm step / undo snackbar, and an "alle
+  löschen" action.
 
 ## Input / round flow
 

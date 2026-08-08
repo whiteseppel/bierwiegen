@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 
 import '../../ui/tokens.dart';
 import '../game/domain/game.dart';
+import '../game/presentation/dialogs.dart';
 import 'date_format_de.dart';
 import 'game_history_provider.dart';
 import 'game_result_view.dart';
@@ -22,10 +24,9 @@ class RecentGamesScreen extends ConsumerWidget {
           children: [
             const _TopBar(title: 'Letzte Spiele'),
             Expanded(
-              child:
-                  games.isEmpty
-                      ? const _EmptyState()
-                      : _GamesList(games: games),
+              child: games.isEmpty
+                  ? const _EmptyState()
+                  : _GamesList(games: games),
             ),
           ],
         ),
@@ -64,13 +65,25 @@ class _GamesList extends StatelessWidget {
   }
 }
 
-class _GameCard extends StatelessWidget {
+class _GameCard extends ConsumerWidget {
   const _GameCard({required this.game});
 
   final Game game;
 
+  Future<void> _confirmAndRemove(BuildContext context, WidgetRef ref) async {
+    final confirmed = await Dialogs.confirmDialog(
+      context,
+      title: 'Spiel löschen?',
+      body: 'Dieses Spiel wird dauerhaft aus der Liste entfernt.',
+      confirmLabel: 'Löschen',
+    );
+    if (confirmed) {
+      ref.read(gameHistoryProvider.notifier).remove(game);
+    }
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final model = GameResultViewModel(game);
     final podium = model.ranking.take(3).toList();
     final rest = model.playerCount - podium.length;
@@ -81,69 +94,100 @@ class _GameCard extends StatelessWidget {
         '${clock(finished)} Uhr · ${model.playerCount} Spieler · '
         '${model.roundsPlayed} Runden · ${model.modeLabel}';
 
-    return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(14),
-      child: InkWell(
+    // The whole row is clipped to one rounded silhouette here, so the card and
+    // the reveal action are square-edged rectangles that meet flush — without
+    // per-corner rounding the sliding seam has no transparent notch that would
+    // show the list background.
+    return Container(
+      clipBehavior: Clip.antiAlias,
+      decoration: const BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(14)),
+      ),
+      // Border drawn in the foreground so the clip can't shave it off at the
+      // rounded corners.
+      foregroundDecoration: BoxDecoration(
         borderRadius: BorderRadius.circular(14),
-        onTap:
-            () => Navigator.of(context).push(
-              MaterialPageRoute(
-                builder:
-                    (_) => GameResultView(
-                      game: game,
-                      variant: GameResultVariant.summary,
-                    ),
-              ),
+        border: Border.all(color: CustomColors.hairline),
+      ),
+      child: Slidable(
+        key: ValueKey(game.meta.createdAt),
+        endActionPane: ActionPane(
+          motion: const BehindMotion(),
+          extentRatio: 0.22,
+          children: [
+            CustomSlidableAction(
+              onPressed: (context) => _confirmAndRemove(context, ref),
+              backgroundColor: CustomColors.danger,
+              foregroundColor: Colors.white,
+              padding: EdgeInsets.zero,
+              child: const Icon(Icons.delete_outline, size: 26),
             ),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: const Color(0x0F000000)),
-          ),
-          child: Row(
-            children: [
-              _DateBadge(date: finished),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          ],
+        ),
+        // Cache the card so the drag translates a layer instead of repainting
+        // the whole row (podium, texts) under the clip every frame.
+        child: RepaintBoundary(
+          child: Material(
+            color: Colors.white,
+            child: InkWell(
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => GameResultView(
+                    game: game,
+                    variant: GameResultVariant.summary,
+                  ),
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
+                child: Row(
                   children: [
-                    Text(
-                      winnerLine,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: CustomColors.textPrimary,
+                    _DateBadge(date: finished),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            winnerLine,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: CustomColors.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            meta,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: CustomColors.textMuted,
+                            ),
+                          ),
+                          const SizedBox(height: Spacings.small),
+                          _Podium(podium: podium, rest: rest),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 3),
-                    Text(
-                      meta,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        color: CustomColors.textMuted,
+                    const SizedBox(width: Spacings.small),
+                    const Text(
+                      '›',
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: CustomColors.disabledText,
                       ),
                     ),
-                    const SizedBox(height: Spacings.small),
-                    _Podium(podium: podium, rest: rest),
                   ],
                 ),
               ),
-              const SizedBox(width: Spacings.small),
-              const Text(
-                '›',
-                style: TextStyle(
-                  fontSize: 18,
-                  color: CustomColors.disabledText,
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -219,10 +263,9 @@ class _Podium extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: i == 0 ? FontWeight.w700 : FontWeight.w400,
-                      color:
-                          i == 0
-                              ? CustomColors.textPrimary
-                              : CustomColors.textMuted,
+                      color: i == 0
+                          ? CustomColors.textPrimary
+                          : CustomColors.textMuted,
                     ),
                   ),
                 ),
@@ -232,10 +275,9 @@ class _Podium extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 13,
                     fontFamily: 'monospace',
-                    color:
-                        i == 0
-                            ? CustomColors.rankBadgeTop
-                            : CustomColors.disabledText,
+                    color: i == 0
+                        ? CustomColors.rankBadgeTop
+                        : CustomColors.disabledText,
                   ),
                 ),
               ],

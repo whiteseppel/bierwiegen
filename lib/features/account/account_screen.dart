@@ -25,6 +25,11 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
   @override
   void initState() {
     super.initState();
+    // The user may have changed the Bluetooth permission in system settings
+    // since the app started.
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => ref.read(scaleProvider.notifier).refreshAvailability(),
+    );
     _scrollController.addListener(() {
       final scrolled = _scrollController.offset > 4;
       if (scrolled != _scrolled) {
@@ -337,26 +342,30 @@ class _ScaleSection extends ConsumerWidget {
         ),
         const SizedBox(height: 12),
         _ScaleStatusCard(info: info),
+        if (info.connected) ...[
+          const SizedBox(height: 12),
+          _ScaleReadingPanel(scale: scale),
+        ],
         const SizedBox(height: 12),
         _ScaleActionButton(
           label: info.buttonLabel,
           primary: info.primaryButton,
-          onTap:
-              info.busy ? notifier.resetConnection : _actionFor(info, notifier),
-        ),
-        const SizedBox(height: Spacings.small),
-        Text(
-          info.hint,
-          style: const TextStyle(
-            fontSize: 12,
-            color: CustomColors.disabledText,
-          ),
+          onTap: _actionFor(info, notifier),
         ),
       ],
     );
   }
 
   VoidCallback _actionFor(_ScaleCardInfo info, ScaleNotifier notifier) {
+    if (info.busy) {
+      return notifier.resetConnection;
+    }
+    if (info.enableBluetooth) {
+      return notifier.enableBluetooth;
+    }
+    if (info.requestPermission) {
+      return notifier.requestBluetoothAccess;
+    }
     return info.connected ? notifier.resetConnection : notifier.tryConnect;
   }
 }
@@ -385,7 +394,11 @@ class _ScaleStatusCard extends StatelessWidget {
               color: info.iconBg,
             ),
             alignment: Alignment.center,
-            child: Icon(Icons.bluetooth, size: 20, color: info.iconFg),
+            child: Icon(
+              info.warn ? Icons.error_outline : Icons.bluetooth,
+              size: 20,
+              color: info.iconFg,
+            ),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -473,11 +486,154 @@ class _ScaleActionButton extends StatelessWidget {
   }
 }
 
+class _ScaleReadingPanel extends StatelessWidget {
+  const _ScaleReadingPanel({required this.scale});
+
+  final ScaleState scale;
+
+  @override
+  Widget build(BuildContext context) {
+    final reading = scale.liveWeight ?? 0;
+    final stable = scale.stableWeight != null;
+    final fraction = (reading / 600).clamp(0.0, 1.0);
+    final fillColor =
+        stable ? CustomColors.secondaryColor : CustomColors.primaryColor;
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(18, 16, 18, 14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(standardBorderRadius),
+        border: Border.all(color: const Color(0x73789283)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const _PulsingDot(),
+              const SizedBox(width: 8),
+              const Expanded(
+                child: Text(
+                  'LIVE-MESSUNG',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: 0.6,
+                    color: CustomColors.textFaint,
+                  ),
+                ),
+              ),
+              Text(
+                stable ? 'stabil' : 'pendelt',
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontFamily: 'monospace',
+                  color: CustomColors.textFaint,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                '$reading',
+                style: const TextStyle(
+                  fontFamily: 'monospace',
+                  fontWeight: FontWeight.w500,
+                  fontSize: 40,
+                  letterSpacing: -1.5,
+                  height: 1,
+                  color: CustomColors.textPrimary,
+                ),
+              ),
+              const SizedBox(width: 6),
+              const Text(
+                'g',
+                style: TextStyle(fontSize: 17, color: CustomColors.textMuted),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Container(
+            height: 6,
+            decoration: BoxDecoration(
+              color: CustomColors.neutralChipBg,
+              borderRadius: BorderRadius.circular(3),
+            ),
+            alignment: Alignment.centerLeft,
+            child: TweenAnimationBuilder<double>(
+              tween: Tween(end: fraction),
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.linear,
+              builder:
+                  (context, factor, _) => FractionallySizedBox(
+                    widthFactor: factor,
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      height: 6,
+                      decoration: BoxDecoration(
+                        color: fillColor,
+                        borderRadius: BorderRadius.circular(3),
+                      ),
+                    ),
+                  ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          const Text(
+            'Stelle etwas auf die Waage, um die Übertragung zu prüfen.',
+            style: TextStyle(fontSize: 13, color: CustomColors.textMuted),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PulsingDot extends StatefulWidget {
+  const _PulsingDot();
+
+  @override
+  State<_PulsingDot> createState() => _PulsingDotState();
+}
+
+class _PulsingDotState extends State<_PulsingDot>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 800),
+  )..repeat(reverse: true);
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: Tween<double>(begin: 1, end: 0.3).animate(_controller),
+      child: Container(
+        width: 8,
+        height: 8,
+        decoration: const BoxDecoration(
+          shape: BoxShape.circle,
+          color: CustomColors.secondaryColor,
+        ),
+      ),
+    );
+  }
+}
+
 class _ScaleCardInfo {
   const _ScaleCardInfo({
     required this.title,
     required this.subtitle,
-    required this.hint,
     required this.buttonLabel,
     required this.primaryButton,
     required this.busy,
@@ -485,18 +641,34 @@ class _ScaleCardInfo {
     required this.border,
     required this.iconBg,
     required this.iconFg,
+    this.warn = false,
+    this.enableBluetooth = false,
+    this.requestPermission = false,
   });
 
   final String title;
   final String subtitle;
-  final String hint;
   final String buttonLabel;
   final bool primaryButton;
   final bool busy;
   final bool connected;
+
+  /// Renders the warning (alert) variant: red icon and border.
+  final bool warn;
+
+  /// The primary action turns Bluetooth on rather than connecting.
+  final bool enableBluetooth;
+
+  /// The primary action requests the Bluetooth permission rather than
+  /// connecting.
+  final bool requestPermission;
   final Color border;
   final Color iconBg;
   final Color iconFg;
+
+  static const Color _warnBorder = Color(0x59C0392B);
+  static const Color _warnIconBg = Color(0xFFFBECEA);
+  static const Color _warnIconFg = Color(0xFFC0392B);
 
   factory _ScaleCardInfo.of(ScaleState scale) {
     switch (scale.connectionState) {
@@ -506,7 +678,6 @@ class _ScaleCardInfo {
         return const _ScaleCardInfo(
           title: 'Suche nach Geräten …',
           subtitle: 'Waage einschalten und warten',
-          hint: 'Das dauert meistens ein paar Sekunden.',
           buttonLabel: 'Suche abbrechen',
           primaryButton: false,
           busy: true,
@@ -520,7 +691,6 @@ class _ScaleCardInfo {
         return _ScaleCardInfo(
           title: 'Bierwaage',
           subtitle: weight == null ? 'Verbunden' : 'Verbunden · $weight g',
-          hint: 'Die Waage verbindet sich beim nächsten Spiel automatisch.',
           buttonLabel: 'Verbindung trennen',
           primaryButton: false,
           busy: false,
@@ -532,28 +702,61 @@ class _ScaleCardInfo {
       case ScaleConnectionState.notFound:
       case ScaleConnectionState.error:
       case ScaleConnectionState.disconnected:
-        final failed =
-            scale.connectionState == ScaleConnectionState.notFound ||
-            scale.connectionState == ScaleConnectionState.error;
-        final subtitle = switch (scale.connectionState) {
-          ScaleConnectionState.notFound => 'Keine Waage gefunden',
-          ScaleConnectionState.error =>
-            scale.errorMessage ?? 'Verbindung fehlgeschlagen',
-          _ => 'Bluetooth ist bereit',
-        };
-        return _ScaleCardInfo(
-          title: 'Keine Waage verbunden',
-          subtitle: subtitle,
-          hint: 'Schalte die Waage ein und halte sie in die Nähe des Telefons.',
-          buttonLabel: failed ? 'Erneut verbinden' : 'Waage verbinden',
-          primaryButton: true,
-          busy: false,
-          connected: false,
-          border: CustomColors.hairline,
-          iconBg: CustomColors.neutralChipBg,
-          iconFg: CustomColors.textFaint,
-        );
+        break;
     }
+
+    // Not connected: surface an adapter problem that blocks connecting.
+    if (scale.adapter == BluetoothAvailability.off) {
+      return const _ScaleCardInfo(
+        title: 'Bluetooth ist aus',
+        subtitle: 'Schalte Bluetooth ein, um die Waage zu finden',
+        buttonLabel: 'Bluetooth einschalten',
+        primaryButton: true,
+        busy: false,
+        connected: false,
+        warn: true,
+        enableBluetooth: true,
+        border: _warnBorder,
+        iconBg: _warnIconBg,
+        iconFg: _warnIconFg,
+      );
+    }
+    if (scale.adapter == BluetoothAvailability.unauthorized) {
+      return const _ScaleCardInfo(
+        title: 'Berechtigung fehlt',
+        subtitle: 'Bierwiegen darf nicht auf Bluetooth zugreifen',
+        buttonLabel: 'Zugriff erlauben',
+        primaryButton: true,
+        busy: false,
+        connected: false,
+        warn: true,
+        requestPermission: true,
+        border: _warnBorder,
+        iconBg: _warnIconBg,
+        iconFg: _warnIconFg,
+      );
+    }
+
+    final failed =
+        scale.connectionState == ScaleConnectionState.notFound ||
+        scale.connectionState == ScaleConnectionState.error;
+    final subtitle = switch (scale.connectionState) {
+      ScaleConnectionState.notFound => 'Keine Waage gefunden',
+      ScaleConnectionState.error =>
+        scale.errorMessage ?? 'Verbindung fehlgeschlagen',
+      _ => 'Bluetooth ist bereit',
+    };
+    return _ScaleCardInfo(
+      title: 'Keine Waage verbunden',
+      subtitle: subtitle,
+      buttonLabel: failed ? 'Erneut verbinden' : 'Waage verbinden',
+      primaryButton: true,
+      busy: false,
+      connected: false,
+      border: CustomColors.hairline,
+      iconBg: CustomColors.neutralChipBg,
+      iconFg: CustomColors.textFaint,
+    );
   }
 }
 

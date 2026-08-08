@@ -35,4 +35,6 @@ class CustomColors {
   static const Color disabledText = Color(0xFFA5A29B);
   static const Color tileBg = Color(0xFFF4F3EF);
   static const Color trackBg = Color(0xFFE7E5DE);
+
+  static const Color danger = Color(0xFFBF4B3A);
 }

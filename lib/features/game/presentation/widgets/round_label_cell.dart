@@ -2,16 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../ui/tokens.dart';
+import '../../domain/game.dart';
 import '../../state/game_providers.dart';
 import '../dialogs.dart';
 import '../format.dart';
+import 'round_actions_sheet.dart';
 import 'round_delete.dart';
 import 'weight_cell.dart';
 
 const double roundLabelWidth = 58;
 
 /// Sticky left cell of a table row; [roundIndex] is -1 for the
-/// initial-weights row. Long press edits the round's target.
+/// initial-weights row. Tapping a round opens its actions (edit target,
+/// delete the last round).
 class RoundLabelCell extends ConsumerWidget {
   const RoundLabelCell({super.key, required this.roundIndex});
 
@@ -28,25 +31,10 @@ class RoundLabelCell extends ConsumerWidget {
     final tag = isInitial ? 'START' : 'R${roundIndex + 1}';
     final label =
         isInitial ? '—' : formatWeight(game.rounds[roundIndex].target);
+    final interactive = !isInitial && !game.isFinished;
 
-    final labelBody = GestureDetector(
-      onLongPress:
-          isInitial || game.isFinished
-              ? null
-              : () async {
-                final newTarget = await Dialogs.weightInputDialog(
-                  context,
-                  title: 'Ziel korrigieren',
-                  body: 'Zielgewicht dieser Runde anpassen.',
-                  confirmLabel: 'Speichern',
-                  initialValue: game.rounds[roundIndex].target,
-                );
-                if (newTarget != null) {
-                  ref
-                      .read(gameProvider.notifier)
-                      .updateTarget(roundIndex, newTarget);
-                }
-              },
+    return GestureDetector(
+      onTap: interactive ? () => _openActions(context, ref) : null,
       child: Container(
         width: roundLabelWidth,
         height: weightCellHeight,
@@ -87,20 +75,50 @@ class RoundLabelCell extends ConsumerWidget {
         ),
       ),
     );
+  }
 
-    final deletable =
-        !isInitial && !game.isFinished && roundIndex == game.rounds.length - 1;
-    if (roundDeleteStyle == RoundDeleteStyle.swipeReveal && deletable) {
-      return SwipeToRevealDelete(
-        key: ValueKey('swipe-delete-$roundIndex'),
-        width: roundLabelWidth,
-        height: weightCellHeight,
-        revealWidth: 44,
-        onDelete: () => confirmAndRemoveLastRound(context, ref),
-        child: labelBody,
-      );
+  Future<void> _openActions(BuildContext context, WidgetRef ref) async {
+    final game = ref.read(gameProvider);
+    if (game == null || game.isFinished || roundIndex < 0) {
+      return;
+    }
+    final deletable = roundIndex == game.rounds.length - 1;
+
+    final action = await showRoundActionsSheet(
+      context,
+      roundIndex: roundIndex,
+      canDelete: deletable,
+    );
+    if (action == null || !context.mounted) {
+      return;
     }
 
-    return labelBody;
+    switch (action) {
+      case RoundAction.editTarget:
+        await _editTarget(context, ref, game);
+      case RoundAction.delete:
+        await confirmAndRemoveLastRound(context, ref);
+    }
+  }
+
+  Future<void> _editTarget(
+    BuildContext context,
+    WidgetRef ref,
+    Game game,
+  ) async {
+    final fromWeight = roundIndex > 0
+        ? game.rounds[roundIndex - 1].target
+        : game.rounds[roundIndex].target;
+    final newTarget = await Dialogs.targetWeightDialog(
+      context,
+      eyebrow: 'Runde ${roundIndex + 1}',
+      caption: 'Zielgewicht anpassen',
+      confirmLabel: 'Speichern',
+      fromWeight: fromWeight,
+      initialValue: game.rounds[roundIndex].target,
+    );
+    if (newTarget != null) {
+      ref.read(gameProvider.notifier).updateTarget(roundIndex, newTarget);
+    }
   }
 }

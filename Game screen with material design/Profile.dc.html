@@ -17,6 +17,7 @@ input{font-family:Roboto,system-ui,sans-serif}
 input::placeholder{color:#A5A29B}
 @keyframes bw-fade{from{opacity:0}to{opacity:1}}
 @keyframes bw-spin{to{transform:rotate(360deg)}}
+@keyframes bw-pulse{0%,100%{opacity:1}50%{opacity:.3}}
 </style>
 </helmet>
 <x-import component-from-global-scope="AndroidDevice" from="./android-frame.jsx" hint-size="412px,892px">
@@ -73,19 +74,41 @@ input::placeholder{color:#A5A29B}
 
       <div style="display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:12px;background:#FFFFFF;border:1px solid {{ btBorder }}">
         <div style="width:40px;height:40px;flex:none;border-radius:20px;display:flex;align-items:center;justify-content:center;background:{{ btIconBg }}">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{{ btIconFg }}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 8l10 8-5 4V4l5 4-10 8"></path></svg>
+          <sc-if value="{{ btIconIsWarn }}" hint-placeholder-val="{{ false }}">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{{ btIconFg }}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v5"></path><path d="M12 16.5v.5"></path><circle cx="12" cy="12" r="8.5"></circle></svg>
+          </sc-if>
+          <sc-if value="{{ btIconIsBt }}" hint-placeholder-val="{{ true }}">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{{ btIconFg }}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 8l10 8-5 4V4l5 4-10 8"></path></svg>
+          </sc-if>
         </div>
         <div style="flex:1;min-width:0">
           <div style="font-size:15px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ btTitle }}</div>
-          <div style="margin-top:2px;font-size:13px;color:#6F6C66">{{ btSub }}</div>
+          <div style="margin-top:2px;font-size:13px;color:#6F6C66;text-wrap:pretty">{{ btSub }}</div>
         </div>
         <sc-if value="{{ btBusy }}" hint-placeholder-val="{{ false }}">
           <div style="width:18px;height:18px;flex:none;border-radius:9px;border:2px solid rgba(0,0,0,.12);border-top-color:#789283;animation:bw-spin .8s linear infinite"></div>
         </sc-if>
       </div>
 
-      <div onClick="{{ onBtAction }}" style="height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;user-select:none;cursor:pointer;background:{{ btBtnBg }};color:{{ btBtnFg }};border:{{ btBtnBorder }};box-shadow:{{ btBtnShadow }}">{{ btBtnLabel }}</div>
-      <div style="font-size:12px;color:#A5A29B;text-wrap:pretty">{{ btHint }}</div>
+      <sc-if value="{{ btShowReading }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:16px 18px 14px;border-radius:12px;background:#FFFFFF;border:1px solid rgba(120,146,131,.45)">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:8px;height:8px;border-radius:4px;background:#789283;animation:bw-pulse 1.6s ease-in-out infinite"></div>
+            <div style="flex:1;font-size:11px;font-weight:500;letter-spacing:.6px;color:#8A877F;text-transform:uppercase">Live-Messung</div>
+            <div style="font-size:12px;color:#8A877F;font-family:'Roboto Mono',monospace">{{ btStableLabel }}</div>
+          </div>
+          <div style="display:flex;align-items:baseline;gap:6px;margin-top:10px">
+            <div style="font-family:'Roboto Mono',monospace;font-weight:500;font-size:40px;letter-spacing:-1.5px;line-height:1">{{ btReading }}</div>
+            <div style="font-size:17px;color:#6F6C66">g</div>
+          </div>
+          <div style="margin-top:12px;height:6px;border-radius:3px;background:#F1F0EC;overflow:hidden">
+            <div style="height:100%;border-radius:3px;transition:width .2s linear,background .3s ease;width:{{ btBarW }};background:{{ btBarFill }}"></div>
+          </div>
+          <div style="margin-top:10px;font-size:13px;color:#6F6C66;text-wrap:pretty">Stelle etwas auf die Waage, um die Übertragung zu prüfen.</div>
+        </div>
+      </sc-if>
+
+      <div onClick="{{ onBtAction }}" style="height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;gap:10px;font-size:16px;font-weight:700;user-select:none;cursor:pointer;background:{{ btBtnBg }};color:{{ btBtnFg }};border:{{ btBtnBorder }};box-shadow:{{ btBtnShadow }}">{{ btBtnLabel }}</div>
     </div>
 
     <div style="height:1px;background:rgba(0,0,0,.08)"></div>
@@ -129,9 +152,28 @@ input::placeholder{color:#A5A29B}
 const PRIMARY = '#FEAD2E', SECONDARY = '#789283';
 
 class Component extends DCLogic {
-  state = { name: 'Lena', bt: 'idle', scrolled: false };
+  state = { name: 'Lena', bt: 'noPermission', scrolled: false, reading: 0, stable: false };
 
-  componentWillUnmount() { clearTimeout(this.t); }
+  componentWillUnmount() { clearTimeout(this.t); clearInterval(this.live); }
+
+  setBt(bt) {
+    clearTimeout(this.t); clearInterval(this.live);
+    this.setState({ bt, reading: 0, stable: false });
+    if (bt === 'searching') this.t = setTimeout(() => this.setBt('connected'), 2200);
+    if (bt === 'connected') this.startLive();
+  }
+  startLive() {
+    let target = 486, t = 0;
+    this.live = setInterval(() => {
+      t += 1;
+      if (t % 40 === 0) target = 120 + Math.round(Math.random() * 380);
+      this.setState(s => {
+        const cur = s.reading || 0;
+        const next = cur + (target - cur) * 0.16 + (Math.random() - 0.5) * 1.4;
+        return { reading: Math.max(0, Math.round(next)), stable: Math.abs(target - next) < 1.5 };
+      });
+    }, 120);
+  }
 
   onScroll = e => {
     const on = e.target.scrollTop > 4;
@@ -140,16 +182,32 @@ class Component extends DCLogic {
 
   onBtAction = () => {
     const bt = this.state.bt;
-    clearTimeout(this.t);
-    if (bt === 'connected') { this.setState({ bt: 'idle' }); return; }
-    if (bt === 'searching') { this.setState({ bt: 'idle' }); return; }
-    this.setState({ bt: 'searching' });
-    this.t = setTimeout(() => this.setState({ bt: 'connected' }), 2200);
+    if (bt === 'noPermission') { this.setBt('idle'); return; }
+    if (bt === 'btOff') { this.setBt('idle'); return; }
+    if (bt === 'searching') { this.setBt('idle'); return; }
+    if (bt === 'connected') { this.setBt('idle'); return; }
+    this.setBt('searching');
+  };
+  onBtSecondary = () => {
+    if (this.state.bt === 'connected') this.setBt('searching');
+    else this.setBt('idle');
   };
 
   renderVals() {
     const s = this.state;
     const bt = {
+      noPermission: {
+        title: 'Berechtigung fehlt', sub: 'Bierwiegen darf nicht auf Bluetooth zugreifen',
+        border: 'rgba(192,57,43,.35)', iconBg: '#FBECEA', iconFg: '#C0392B', warn: true,
+        btn: 'Zugriff erlauben', bg: PRIMARY, fg: '#2B2205', bd: '0', sh: '0 2px 6px rgba(254,173,46,.45)',
+        hint: 'Android fragt einmalig nach der Bluetooth-Berechtigung. Ohne sie kann die Waage nicht gefunden werden.',
+      },
+      btOff: {
+        title: 'Bluetooth ist aus', sub: 'Schalte Bluetooth ein, um die Waage zu finden',
+        border: 'rgba(192,57,43,.35)', iconBg: '#FBECEA', iconFg: '#C0392B', warn: true,
+        btn: 'Bluetooth einschalten', bg: PRIMARY, fg: '#2B2205', bd: '0', sh: '0 2px 6px rgba(254,173,46,.45)',
+        hint: 'Du kannst Bluetooth auch in den Android-Einstellungen aktivieren.',
+      },
       idle: {
         title: 'Keine Waage verbunden', sub: 'Bluetooth ist bereit',
         border: 'rgba(0,0,0,.06)', iconBg: '#F1F0EC', iconFg: '#8A877F',
@@ -183,6 +241,25 @@ class Component extends DCLogic {
       btBtnLabel: bt.btn, btBtnBg: bt.bg, btBtnFg: bt.fg, btBtnBorder: bt.bd, btBtnShadow: bt.sh,
       btBusy: s.bt === 'searching', btHint: bt.hint,
       onBtAction: this.onBtAction,
+      btIconIsWarn: !!bt.warn, btIconIsBt: !bt.warn,
+      btHasSecondary: !!bt.secondary, btSecondaryLabel: bt.secondary || '', onBtSecondary: this.onBtSecondary,
+      btShowReading: s.bt === 'connected',
+      btReading: String(s.reading),
+      btStableLabel: s.stable ? 'stabil' : 'pendelt',
+      btBarW: Math.min(100, Math.round((s.reading / 600) * 100)) + '%',
+      btBarFill: s.stable ? '#789283' : '#FEAD2E',
+      btStates: [
+        { id: 'noPermission', label: 'Keine Berechtigung' },
+        { id: 'btOff', label: 'Bluetooth aus' },
+        { id: 'idle', label: 'Bereit' },
+        { id: 'searching', label: 'Sucht' },
+        { id: 'connected', label: 'Verbunden' },
+      ].map(x => ({
+        label: x.label,
+        bg: s.bt === x.id ? '#FEAD2E' : '#FFFFFF',
+        fg: s.bt === x.id ? '#2B2205' : '#6F6C66',
+        onClick: () => this.setBt(x.id),
+      })),
       steps: [
         { n: '1', title: 'Startgewicht wiegen', text: 'Jeder stellt sein volles Glas einmal auf die Waage.' },
         { n: '2', title: 'Ziel festlegen', text: 'Für jede Runde gilt ein Zielgewicht, das unter dem aktuellen liegt.' },
