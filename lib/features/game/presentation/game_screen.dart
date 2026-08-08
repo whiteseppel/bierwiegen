@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../ui/tokens.dart';
+import '../../history/game_result_view.dart';
 import '../../scale/scale_provider.dart';
 import '../../scale/scale_state.dart';
 import '../domain/game.dart';
@@ -81,8 +82,10 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                                _buildRounds(game.players.length,
-                                    game.rounds.length),
+                                _buildRounds(
+                                  game.players.length,
+                                  game.rounds.length,
+                                ),
                                 const SizedBox(height: 10),
                                 if (game.isFinished)
                                   _buildEndstandButton()
@@ -102,7 +105,13 @@ class _GameScreenState extends ConsumerState<GameScreen> {
             ),
           ),
         ),
-        if (ref.watch(resultOpenProvider)) _buildResultOverlay(),
+        if (ref.watch(resultOpenProvider))
+          Positioned.fill(
+            child: GameResultView(
+              game: game,
+              variant: GameResultVariant.finish,
+            ),
+          ),
         WinnerConfetti(key: WinnerConfetti.globalKey),
       ],
     );
@@ -145,15 +154,16 @@ class _GameScreenState extends ConsumerState<GameScreen> {
           const Spacer(),
           ScaleChip(
             data: chip,
-            onTap: connecting
-                ? null
-                : () {
-                    if (chip.connected) {
-                      ref.read(scalePausedProvider.notifier).state = !paused;
-                    } else {
-                      ref.read(scaleProvider.notifier).tryConnect();
-                    }
-                  },
+            onTap:
+                connecting
+                    ? null
+                    : () {
+                      if (chip.connected) {
+                        ref.read(scalePausedProvider.notifier).state = !paused;
+                      } else {
+                        ref.read(scaleProvider.notifier).tryConnect();
+                      }
+                    },
           ),
           SizedBox(
             width: 44,
@@ -209,8 +219,9 @@ class _GameScreenState extends ConsumerState<GameScreen> {
               child: Container(
                 decoration: const BoxDecoration(
                   color: Colors.white,
-                  borderRadius:
-                      BorderRadius.horizontal(right: Radius.circular(14)),
+                  borderRadius: BorderRadius.horizontal(
+                    right: Radius.circular(14),
+                  ),
                 ),
                 child: Row(
                   children: [
@@ -254,8 +265,9 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                   Container(
                     decoration: const BoxDecoration(
                       color: Colors.white,
-                      borderRadius:
-                          BorderRadius.horizontal(right: Radius.circular(14)),
+                      borderRadius: BorderRadius.horizontal(
+                        right: Radius.circular(14),
+                      ),
                     ),
                     child: Row(
                       children: [
@@ -306,7 +318,8 @@ class _GameScreenState extends ConsumerState<GameScreen> {
         if (ready)
           if (finishers.isEmpty)
             _buildNewRoundButton(
-                auto ? '+ Neue Runde auslosen' : '+ Neue Runde')
+              auto ? '+ Neue Runde auslosen' : '+ Neue Runde',
+            )
           else
             _buildFinishButton(),
         if (ready) const SizedBox(height: 10),
@@ -389,286 +402,4 @@ class _GameScreenState extends ConsumerState<GameScreen> {
   static const List<BoxShadow> _amberShadow = [
     BoxShadow(color: Color(0x73FEAD2E), offset: Offset(0, 2), blurRadius: 6),
   ];
-
-  Widget _buildResultOverlay() {
-    final scores = ref.watch(scoresProvider);
-    final best = scores.isEmpty ? 0 : scores.reduce((a, b) => a > b ? a : b);
-    final winners = best > 0 ? ref.watch(winningPlayersProvider) : <Player>[];
-    final ranking = _ranking(scores);
-
-    return Positioned.fill(
-      child: Material(
-        color: CustomColors.background,
-        child: SafeArea(
-          child: Column(
-            children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(20, 22, 20, 8),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      _buildWinnerCard(winners, best),
-                      const SizedBox(height: 14),
-                      for (int i = 0; i < ranking.length; i++) ...[
-                        if (i > 0) const SizedBox(height: 8),
-                        _buildRankingRow(ranking[i]),
-                      ],
-                    ],
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-                child: Column(
-                  children: [
-                    _buildNewGameButton(),
-                    const SizedBox(height: 10),
-                    _buildShowTableButton(),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildWinnerCard(List<Player> winners, int best) {
-    final game = ref.read(gameProvider)!;
-    final played =
-        game.rounds.where((r) => r.measurements.any((m) => m != 0)).length;
-    final roundsLabel =
-        '$played ${played == 1 ? 'gespielte Runde' : 'gespielte Runden'}';
-    final scoreLabel = game.config.mode == GameMode.points
-        ? '$best Punkte'
-        : '$best ${best == 1 ? 'Rundensieg' : 'Rundensiege'}';
-
-    return Container(
-      padding: const EdgeInsets.fromLTRB(20, 22, 20, 20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(standardBorderRadius),
-        border: Border.all(color: CustomColors.hairline),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x0F000000),
-            offset: Offset(0, 2),
-            blurRadius: 10,
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          const Text(
-            'ERGEBNIS',
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w500,
-              letterSpacing: 2,
-              color: CustomColors.textFaint,
-            ),
-          ),
-          Container(
-            width: 44,
-            height: 4,
-            margin: const EdgeInsets.fromLTRB(0, 14, 0, 16),
-            decoration: BoxDecoration(
-              color: CustomColors.primaryColor,
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          Text(
-            winners.length > 1 ? 'Die Gewinner sind' : 'Der Gewinner ist',
-            style: const TextStyle(fontSize: 14, color: CustomColors.textMuted),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            _winnerNames(winners),
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 34,
-              height: 1.15,
-              fontWeight: FontWeight.w700,
-              color: CustomColors.textPrimary,
-            ),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            '$roundsLabel · $scoreLabel',
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 13, color: CustomColors.textFaint),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildRankingRow(_RankRow row) {
-    return Container(
-      height: 54,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-        color: row.top ? CustomColors.goldRowBg : Colors.white,
-        borderRadius: BorderRadius.circular(standardBorderRadius),
-        border: Border.all(
-          color: row.top ? CustomColors.goldFocusRing : CustomColors.hairline,
-        ),
-      ),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 22,
-            child: Text(
-              '${row.rank}.',
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
-                fontFamily: 'monospace',
-                color: row.top
-                    ? CustomColors.rankBadgeTop
-                    : CustomColors.disabledText,
-              ),
-            ),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Text(
-              row.name,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                color: CustomColors.textPrimary,
-              ),
-            ),
-          ),
-          if (row.meta.isNotEmpty) ...[
-            Text(
-              row.meta,
-              style: const TextStyle(
-                fontSize: 12,
-                fontFamily: 'monospace',
-                color: CustomColors.textFaint,
-              ),
-            ),
-            const SizedBox(width: 12),
-          ],
-          Text(
-            '${row.score}',
-            style: const TextStyle(
-              fontSize: 17,
-              fontWeight: FontWeight.w700,
-              fontFamily: 'monospace',
-              color: CustomColors.textPrimary,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildNewGameButton() {
-    return GestureDetector(
-      onTap: () {
-        ref.read(resultOpenProvider.notifier).state = false;
-        Navigator.of(context).pop();
-      },
-      child: Container(
-        height: 52,
-        decoration: BoxDecoration(
-          color: CustomColors.primaryColor,
-          borderRadius: BorderRadius.circular(standardBorderRadius),
-          boxShadow: _amberShadow,
-        ),
-        alignment: Alignment.center,
-        child: const Text(
-          'Neues Spiel starten',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-            color: CustomColors.onPrimaryDark,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildShowTableButton() {
-    return GestureDetector(
-      onTap: () => ref.read(resultOpenProvider.notifier).state = false,
-      child: Container(
-        height: 48,
-        decoration: BoxDecoration(
-          border: Border.all(color: CustomColors.secondaryColor),
-          borderRadius: BorderRadius.circular(standardBorderRadius),
-        ),
-        alignment: Alignment.center,
-        child: const Text(
-          'Tabelle ansehen',
-          style: TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w500,
-            color: CustomColors.greenDark,
-          ),
-        ),
-      ),
-    );
-  }
-
-  List<_RankRow> _ranking(List<int> scores) {
-    final game = ref.read(gameProvider)!;
-    final order = [for (int i = 0; i < game.players.length; i++) i]
-      ..sort((a, b) => scores[b].compareTo(scores[a]));
-
-    final rows = <_RankRow>[];
-    int shown = 0;
-    int lastScore = 0;
-    int lastRank = 0;
-    for (final i in order) {
-      shown++;
-      final rank = rows.isNotEmpty && scores[i] == lastScore ? lastRank : shown;
-      lastScore = scores[i];
-      lastRank = rank;
-      final exacts = game.rounds.where((r) => r.isExact(i)).length;
-      rows.add(_RankRow(
-        rank: rank,
-        name: game.players[i].name,
-        meta: exacts > 0 ? '$exacts× exakt' : '',
-        score: scores[i],
-        top: rank == 1,
-      ));
-    }
-    return rows;
-  }
-
-  String _winnerNames(List<Player> winners) {
-    if (winners.isEmpty) {
-      return '—';
-    }
-    if (winners.length == 1) {
-      return winners.first.name;
-    }
-
-    final allButLast =
-        winners.sublist(0, winners.length - 1).map((p) => p.name).join(', ');
-    return '$allButLast und ${winners.last.name}';
-  }
-}
-
-class _RankRow {
-  const _RankRow({
-    required this.rank,
-    required this.name,
-    required this.meta,
-    required this.score,
-    required this.top,
-  });
-
-  final int rank;
-  final String name;
-  final String meta;
-  final int score;
-  final bool top;
 }

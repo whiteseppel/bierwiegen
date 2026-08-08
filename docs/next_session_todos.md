@@ -8,13 +8,15 @@ notes tying it to the current code so the next session has a head start.
 ### 1. How we save games
 - **Question:** Where and how do finished games get persisted?
 - Today `gameHistoryProvider` (`lib/features/history/game_history_provider.dart`)
-  keeps summaries **in memory only** — the "Letzte Spiele" list is empty on a
-  fresh launch and clears on restart.
+  keeps finished `Game` objects **in memory only** — the "Letzte Spiele" list is
+  empty on a fresh launch and clears on restart.
 - Decide: storage mechanism (`shared_preferences` for a small JSON list, or a
   local DB like `sqflite`/`drift`/`hive` if we expect many games), serialization
   format, and retention (cap the list? delete old?).
-- `GameSummary` (`lib/features/history/game_summary.dart`) is the snapshot to
-  serialize — add `toJson`/`fromJson`.
+- We store the full `Game` (small footprint) and derive display data via
+  `GameResultViewModel`. Add `toJson`/`fromJson` on `Game` (and `Player` /
+  `GameRound` / `GameConfig` / `GameMetaData`), or introduce a dedicated
+  persistence DTO if serializing the whole domain model proves fragile.
 - **Privacy note:** the app currently states "keine Daten gespeichert"
   (`lib/features/info/strings.dart`). Persisting games needs a matching update to
   the privacy text.
@@ -37,6 +39,15 @@ notes tying it to the current code so the next session has a head start.
   (`werdn`, `gespreichert`) and review the `imprint` text.
 - Consider whether persisted data needs a way to be cleared (e.g. a "Daten
   löschen" action) and reflect that in the text.
+
+### 2b. Remove played games from the list
+- **Goal:** let the user delete individual games from the "Letzte Spiele" list
+  (`RecentGamesScreen` in `lib/features/history/recent_games_screen.dart`).
+- Add a remove action per game (e.g. swipe-to-dismiss or a delete button on the
+  card / in the detail view) plus a `remove(Game)` on `GameHistoryNotifier`
+  (`lib/features/history/game_history_provider.dart`).
+- Once games are persisted (item 1), removal must delete from storage too, not
+  just the in-memory list. Consider a confirm step and possibly "alle löschen".
 
 ## Input / round flow
 
@@ -157,3 +168,23 @@ notes tying it to the current code so the next session has a head start.
   account name (`profileNameProvider`), instead of an empty field.
 - See `_StartScreenState` in `lib/features/home/start_screen.dart`. Depends on
   item 2 (persisted name).
+
+## Localization / formatting
+
+### 11. Use `intl` for localization and locale-correct formatting
+- **Goal:** adopt Dart's `intl` package for both string localization and
+  formatting (dates, times, numbers) instead of hand-rolled helpers and inline
+  German strings.
+- **Formatting:** replace the manual helpers in
+  `lib/features/history/date_format_de.dart` (month/weekday arrays, `clock`,
+  `durationLabel`) and any manual number/weight formatting
+  (`lib/features/game/presentation/format.dart`) with `DateFormat` / `NumberFormat`
+  bound to the active locale (e.g. `DateFormat.MMM('de')`, `DateFormat.EEEE('de')`).
+  `date_format_de.dart` is an interim manual stopgap meant to be superseded here.
+- **Strings:** the UI is German-only with strings scattered inline across screens
+  and in `AppStrings` (`lib/features/info/strings.dart`). Move them into localized
+  resources — set up `flutter_localizations` + `intl` in `pubspec.yaml`, add
+  `l10n.yaml` + ARB files, generate `AppLocalizations`, and wire
+  `MaterialApp.localizationsDelegates` / `supportedLocales`.
+- Decide the supported locales (de only, or de + en) — this is a broad refactor,
+  best done as its own pass.

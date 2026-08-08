@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../ui/tokens.dart';
 import '../../history/game_history_provider.dart';
-import '../../history/game_summary.dart';
 import '../state/game_providers.dart';
 import '../state/game_ui_providers.dart';
 import 'format.dart';
@@ -122,9 +121,7 @@ class Dialogs {
 
     final finished = ref.read(gameProvider);
     if (finished != null) {
-      ref
-          .read(gameHistoryProvider.notifier)
-          .record(GameSummary.fromGame(finished));
+      ref.read(gameHistoryProvider.notifier).record(finished);
     }
 
     ref.read(resultOpenProvider.notifier).state = true;
