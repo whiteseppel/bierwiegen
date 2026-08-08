@@ -69,9 +69,10 @@ Future<void> startNewRound(BuildContext context, WidgetRef ref) async {
       roundNumber: game.rounds.length + 1,
     );
   } else {
-    final suggested = lastTarget == null
-        ? 400.0
-        : (lastTarget - 100).clamp(0.0, double.infinity);
+    final suggested =
+        lastTarget == null
+            ? 400.0
+            : (lastTarget - 100).clamp(0.0, double.infinity);
     target = await Dialogs.weightInputDialog(
       context,
       title: 'Neue Runde',

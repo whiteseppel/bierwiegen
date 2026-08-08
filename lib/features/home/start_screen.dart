@@ -44,8 +44,10 @@ class _StartScreenState extends ConsumerState<StartScreen> {
   void _onScroll() {
     const start = 50.0;
     const end = 140.0;
-    final value =
-        ((_scrollController.offset - start) / (end - start)).clamp(0.0, 1.0);
+    final value = ((_scrollController.offset - start) / (end - start)).clamp(
+      0.0,
+      1.0,
+    );
     if ((value - _titleOpacity).abs() > 0.01) {
       setState(() => _titleOpacity = value);
     }
@@ -76,7 +78,7 @@ class _StartScreenState extends ConsumerState<StartScreen> {
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             const _TitleBlock(),
-                            const SizedBox(height: 24),
+                            const SizedBox(height: Spacings.large),
                             const Text(
                               'Gib die Namen der Mitspieler ein und lege '
                               'direkt los!',
@@ -86,7 +88,7 @@ class _StartScreenState extends ConsumerState<StartScreen> {
                                 color: CustomColors.textMuted,
                               ),
                             ),
-                            const SizedBox(height: 16),
+                            const SizedBox(height: Spacings.medium),
                             _buildPlayerFields(),
                             const SizedBox(height: 20),
                             const Spacer(),
@@ -128,12 +130,16 @@ class _StartScreenState extends ConsumerState<StartScreen> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _OptionsRow(
-          summary: (_mode == GameMode.points ? 'Punkte' : 'Standard') +
+          summary:
+              (_mode == GameMode.points ? 'Punkte' : 'Standard') +
               (_targetMode == TargetMode.auto ? ' · Auto-Ziele' : ''),
           onTap: _openOptions,
         ),
         const SizedBox(height: 12),
-        _StartButton(enabled: canStart, onPressed: canStart ? _startGame : null),
+        _StartButton(
+          enabled: canStart,
+          onPressed: canStart ? _startGame : null,
+        ),
         const SizedBox(height: 12),
         const _OrDivider(),
         const SizedBox(height: 12),
@@ -156,7 +162,8 @@ class _StartScreenState extends ConsumerState<StartScreen> {
   void _clearField(int index) {
     setState(() {
       _playerControllers.removeAt(index).dispose();
-      if (_playerControllers.isEmpty || _playerControllers.last.text.isNotEmpty) {
+      if (_playerControllers.isEmpty ||
+          _playerControllers.last.text.isNotEmpty) {
         _playerControllers.add(TextEditingController());
       }
     });
@@ -173,9 +180,9 @@ class _StartScreenState extends ConsumerState<StartScreen> {
   }
 
   void _openAccount() {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => const AccountScreen()),
-    );
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (context) => const AccountScreen()));
   }
 
   void _comingSoon() {
@@ -393,7 +400,7 @@ class _OptionsRow extends StatelessWidget {
         borderRadius: BorderRadius.circular(standardBorderRadius),
         child: Container(
           height: 52,
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.symmetric(horizontal: Spacings.medium),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(standardBorderRadius),
             border: Border.all(color: CustomColors.hairline),
@@ -419,7 +426,7 @@ class _OptionsRow extends StatelessWidget {
                   color: CustomColors.textMuted,
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: Spacings.small),
               const Icon(
                 Icons.chevron_right,
                 size: 20,
@@ -457,9 +464,10 @@ class _StartButton extends StatelessWidget {
             style: TextStyle(
               fontSize: 17,
               fontWeight: FontWeight.w700,
-              color: enabled
-                  ? CustomColors.onPrimaryDark
-                  : CustomColors.disabledText,
+              color:
+                  enabled
+                      ? CustomColors.onPrimaryDark
+                      : CustomColors.disabledText,
             ),
           ),
         ),
@@ -542,10 +550,11 @@ Future<StartOptions?> showStartOptionsSheet(
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
     ),
-    builder: (context) => _StartOptionsSheet(
-      currentMode: currentMode,
-      currentTargetMode: currentTargetMode,
-    ),
+    builder:
+        (context) => _StartOptionsSheet(
+          currentMode: currentMode,
+          currentTargetMode: currentTargetMode,
+        ),
   );
 }
 
@@ -585,21 +594,21 @@ class _StartOptionsSheetState extends State<_StartOptionsSheet> {
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: Spacings.medium),
             const Text(
               'Spieloptionen',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 18),
             const _SectionLabel('Spielmodus'),
-            const SizedBox(height: 8),
+            const SizedBox(height: Spacings.small),
             ChoiceTile(
               label: 'Standard',
               description: 'Wer am nächsten dran ist, gewinnt die Runde.',
               selected: _mode == GameMode.standard,
               onTap: () => setState(() => _mode = GameMode.standard),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: Spacings.small),
             ChoiceTile(
               label: 'Punkte',
               description:
@@ -609,14 +618,14 @@ class _StartOptionsSheetState extends State<_StartOptionsSheet> {
             ),
             const SizedBox(height: 20),
             const _SectionLabel('Zielvorgabe'),
-            const SizedBox(height: 8),
+            const SizedBox(height: Spacings.small),
             ChoiceTile(
               label: 'Manuelle Ziele',
               description: 'Ihr legt das Zielgewicht jeder Runde selbst fest.',
               selected: _targetMode == TargetMode.manual,
               onTap: () => setState(() => _targetMode = TargetMode.manual),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: Spacings.small),
             ChoiceTile(
               label: 'Automatische Ziele',
               description:
@@ -632,9 +641,10 @@ class _StartOptionsSheetState extends State<_StartOptionsSheet> {
               elevation: 2,
               shadowColor: CustomColors.goldFocusRing,
               child: InkWell(
-                onTap: () => Navigator.of(context).pop(
-                  (mode: _mode, targetMode: _targetMode),
-                ),
+                onTap:
+                    () => Navigator.of(
+                      context,
+                    ).pop((mode: _mode, targetMode: _targetMode)),
                 borderRadius: BorderRadius.circular(standardBorderRadius),
                 child: Container(
                   height: 52,
@@ -675,4 +685,3 @@ class _SectionLabel extends StatelessWidget {
     );
   }
 }
-

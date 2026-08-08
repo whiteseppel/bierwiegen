@@ -5,29 +5,26 @@ notes tying it to the current code so the next session has a head start.
 
 ## Persistence
 
-### 1. How we save games
-- **Question:** Where and how do finished games get persisted?
-- Today `gameHistoryProvider` (`lib/features/history/game_history_provider.dart`)
-  keeps finished `Game` objects **in memory only** — the "Letzte Spiele" list is
-  empty on a fresh launch and clears on restart.
-- Decide: storage mechanism (`shared_preferences` for a small JSON list, or a
-  local DB like `sqflite`/`drift`/`hive` if we expect many games), serialization
-  format, and retention (cap the list? delete old?).
-- We store the full `Game` (small footprint) and derive display data via
-  `GameResultViewModel`. Add `toJson`/`fromJson` on `Game` (and `Player` /
-  `GameRound` / `GameConfig` / `GameMetaData`), or introduce a dedicated
-  persistence DTO if serializing the whole domain model proves fragile.
-- **Privacy note:** the app currently states "keine Daten gespeichert"
-  (`lib/features/info/strings.dart`). Persisting games needs a matching update to
-  the privacy text.
+### 1. How we save games — DONE
+- Finished games now persist to a local **sembast** document store
+  (`GameRepository`, `lib/features/history/game_repository.dart`): one JSON record
+  per game keyed by `meta.createdAt`. The DB is opened at startup
+  (`openAppDatabase`, `lib/features/persistence/app_database.dart`) and the loaded
+  list seeds `gameHistoryProvider` via an override in `main`.
+- The domain model (`Game` / `Player` / `GameRound` / `GameConfig` /
+  `GameMetaData`) was converted to **freezed** with `toJson`/`fromJson`
+  (`json_serializable`, `build.yaml` sets `explicit_to_json`).
+- Round-trip covered by `test/features/history/game_repository_test.dart`.
+- Not yet done: **retention** (no cap on the stored list — decide later if needed)
+  and the **privacy text** update (item 2a).
 
-### 2. How we save player data
-- **Question:** How do we persist per-player/account data (name, and later the
-  account color, stats)?
-- Today `profileNameProvider` (`lib/features/account/account_providers.dart`) is
-  in-memory only. Ties into item 10 (auto-populate name) and item 9 (account
-  color).
-- Decide the same storage mechanism as item 1 (keep consistent).
+### 2. How we save player data — DONE
+- The account name now persists via `ProfileRepository`
+  (`lib/features/account/profile_repository.dart`), backed by the same sembast DB;
+  `profileNameProvider` is a `StateNotifier` that writes on change and is seeded
+  from storage in `main`. Account color/stats can extend the same repo.
+- Still open: item 10 (auto-populate the name into the start screen) and item 9
+  (account color).
 
 ### 2a. Update the privacy / legal text
 - The privacy text (`AppStrings.privacy`, shown in the "Rechtliches" section of
@@ -46,8 +43,9 @@ notes tying it to the current code so the next session has a head start.
 - Add a remove action per game (e.g. swipe-to-dismiss or a delete button on the
   card / in the detail view) plus a `remove(Game)` on `GameHistoryNotifier`
   (`lib/features/history/game_history_provider.dart`).
-- Once games are persisted (item 1), removal must delete from storage too, not
-  just the in-memory list. Consider a confirm step and possibly "alle löschen".
+- Storage side is ready: `GameRepository.delete(Game)` already removes the record
+  (keyed by `meta.createdAt`); `GameHistoryNotifier.record` persists on add. Just
+  wire a `remove` method + UI. Consider a confirm step and possibly "alle löschen".
 
 ## Input / round flow
 
@@ -108,20 +106,27 @@ notes tying it to the current code so the next session has a head start.
     `game_screen.dart` `_buildPlayFooter` and `Game.canStartNewRound`.)
   - Keep it consistent with the auto-target step sizing in item 5a.
 
-### 5c. Remove a round
-- **Goal:** let players delete a round, primarily the current/last one.
+### 5c. Remove a round — IMPLEMENTED (two variants to compare)
+- **Goal:** let players delete the current/last round.
 - **Example:** the group wants to finish, but someone accidentally taps
   "Neue Runde" and adds an empty round — we need a way to remove it so the finish
   flow becomes available again.
-- Today rounds can only be added (`GameNotifier.addRound` in
-  `lib/features/game/state/game_providers.dart`); there is no removal. Add a
-  `removeRound` / `removeLastRound` and a UI affordance (e.g. on the round label
-  `RoundLabelCell`, or next to the "Neue Runde" button).
-- Decide scope: only the last round, or any round? Confirm before deleting a round
-  that already has entered weights, and re-focus/refresh the table afterwards.
-- Interacts with the finish-button visibility (`_buildPlayFooter`,
-  `Game.canStartNewRound`): after removing an accidental empty round, the previous
-  round is current again and the finish button should reappear when appropriate.
+- **State:** `GameNotifier.removeLastRound` (`game_providers.dart`) drops the last
+  round; `confirmAndRemoveLastRound` (`widgets/round_delete.dart`) confirms first
+  when the round already holds weights, then clears focus.
+- **Two UI affordances** live behind the `roundDeleteStyle` switch in
+  `widgets/round_delete.dart` so they can be compared in the app:
+  - `trashCell` — the last round's row extends past the last player with a
+    distinct trash-can cell (`DeleteRoundCell`) in the horizontal scroll area.
+  - `swipeReveal` — the last round's `RoundLabelCell` drags aside
+    (`SwipeToRevealDelete`) to reveal a delete button, teasing a peek when the
+    round first appears.
+- **Follow-ups to decide:** pick one variant (or keep both), whether to allow
+  deleting any round vs. only the last, and consider a destructive-red confirm
+  button (`Dialogs._styledDialog` currently hardcodes the gold confirm).
+- Scope note: currently only the **last** round is removable. Finish-button
+  visibility (`_buildPlayFooter`, `Game.canStartNewRound`) already reacts, so
+  removing an accidental empty round re-enables the finish flow.
 
 ## Navigation / structure
 
@@ -188,3 +193,22 @@ notes tying it to the current code so the next session has a head start.
   `MaterialApp.localizationsDelegates` / `supportedLocales`.
 - Decide the supported locales (de only, or de + en) — this is a broad refactor,
   best done as its own pass.
+
+## Design system
+
+### 12. Audit and extend the design tokens for a consistent layout
+- **Goal:** review `lib/ui/tokens.dart` and make the whole project use it
+  consistently, so spacing, colors, radii and text styles are uniform.
+- `Spacings` (small 8 / medium 16 / large 24) exists and covers the 6/8/16/24/26
+  family, but off-scale gaps are still literals across the app (10, 12, 14, 18,
+  20, 22). Decide the full scale — e.g. add `xsmall` (4) and steps for 12 / 20 —
+  then sweep the remaining literals onto it.
+- Also review the other tokens for consistency and coverage:
+  - `standardBorderRadius` (12) vs. the many literal radii still in use (14, 22,
+    28, the sheet's `Radius.circular(28)`), and one-off `Border`/`BoxShadow`
+    values scattered inline (e.g. `Color(0x0F000000)`, `Color(0x1A000000)`).
+  - Text styles — `ui/text_styles.dart` was deleted; styles are now inline
+    `TextStyle`s everywhere. Consider a small shared type scale (headings, body,
+    labels, mono) so screens stop redefining the same sizes/weights.
+- Deliverable: a tightened token set in `tokens.dart` and a pass replacing
+  remaining magic numbers with tokens where it improves consistency.

@@ -44,6 +44,17 @@ class GameNotifier extends StateNotifier<Game?> {
     );
   }
 
+  void removeLastRound() {
+    final game = state;
+    if (game == null || game.rounds.isEmpty) {
+      return;
+    }
+
+    state = game.copyWith(
+      rounds: game.rounds.sublist(0, game.rounds.length - 1),
+    );
+  }
+
   void setMeasurement(int roundIndex, int playerIndex, double value) {
     final game = state;
     if (game == null) {

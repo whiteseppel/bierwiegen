@@ -1,19 +1,20 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+part 'game_config.freezed.dart';
+part 'game_config.g.dart';
+
 enum GameMode { standard, points }
 
 /// How each round's target weight is chosen.
 enum TargetMode { manual, auto }
 
-class GameConfig {
-  final GameMode mode;
-  final TargetMode targetMode;
+@freezed
+abstract class GameConfig with _$GameConfig {
+  const factory GameConfig({
+    @Default(GameMode.standard) GameMode mode,
+    @Default(TargetMode.manual) TargetMode targetMode,
+  }) = _GameConfig;
 
-  const GameConfig({
-    this.mode = GameMode.standard,
-    this.targetMode = TargetMode.manual,
-  });
-
-  GameConfig copyWith({GameMode? mode, TargetMode? targetMode}) => GameConfig(
-        mode: mode ?? this.mode,
-        targetMode: targetMode ?? this.targetMode,
-      );
+  factory GameConfig.fromJson(Map<String, dynamic> json) =>
+      _$GameConfigFromJson(json);
 }

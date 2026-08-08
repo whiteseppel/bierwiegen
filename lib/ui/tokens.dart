@@ -2,6 +2,13 @@ import 'package:flutter/material.dart';
 
 const double standardBorderRadius = 12.0;
 
+/// Standard spacing steps: gaps between elements and container padding.
+class Spacings {
+  static const double small = 8;
+  static const double medium = 16;
+  static const double large = 24;
+}
+
 class CustomColors {
   static const Color primaryColor = Color(0xFFFEAD2E);
   static const Color secondaryColor = Color(0xFF789283);

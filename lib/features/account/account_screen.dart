@@ -16,8 +16,9 @@ class AccountScreen extends ConsumerStatefulWidget {
 }
 
 class _AccountScreenState extends ConsumerState<AccountScreen> {
-  late final TextEditingController _nameController =
-      TextEditingController(text: ref.read(profileNameProvider));
+  late final TextEditingController _nameController = TextEditingController(
+    text: ref.read(profileNameProvider),
+  );
   final ScrollController _scrollController = ScrollController();
   bool _scrolled = false;
 
@@ -59,23 +60,23 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     _buildProfile(displayName, initial),
-                    const SizedBox(height: 26),
+                    const SizedBox(height: Spacings.large),
                     const _Divider(),
-                    const SizedBox(height: 26),
+                    const SizedBox(height: Spacings.large),
                     const _GamesSection(),
-                    const SizedBox(height: 26),
+                    const SizedBox(height: Spacings.large),
                     const _Divider(),
-                    const SizedBox(height: 26),
+                    const SizedBox(height: Spacings.large),
                     const _ScaleSection(),
-                    const SizedBox(height: 26),
+                    const SizedBox(height: Spacings.large),
                     const _Divider(),
-                    const SizedBox(height: 26),
+                    const SizedBox(height: Spacings.large),
                     const _StepsSection(),
-                    const SizedBox(height: 26),
+                    const SizedBox(height: Spacings.large),
                     const _ModesSection(),
-                    const SizedBox(height: 26),
+                    const SizedBox(height: Spacings.large),
                     const _Divider(),
-                    const SizedBox(height: 26),
+                    const SizedBox(height: Spacings.large),
                     const _LegalSection(),
                   ],
                 ),
@@ -110,7 +111,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                 ),
               ),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: Spacings.medium),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -128,7 +129,10 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                   const SizedBox(height: 2),
                   const Text(
                     'Profilbild ändern folgt',
-                    style: TextStyle(fontSize: 13, color: CustomColors.textFaint),
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: CustomColors.textFaint,
+                    ),
                   ),
                 ],
               ),
@@ -137,10 +141,10 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
         ),
         const SizedBox(height: 14),
         const _SectionLabel('Name'),
-        const SizedBox(height: 6),
+        const SizedBox(height: Spacings.small),
         Container(
           height: 56,
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.symmetric(horizontal: Spacings.medium),
           alignment: Alignment.center,
           decoration: BoxDecoration(
             color: Colors.white,
@@ -149,9 +153,12 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
           ),
           child: TextField(
             controller: _nameController,
-            onChanged: (value) =>
-                ref.read(profileNameProvider.notifier).state = value,
-            style: const TextStyle(fontSize: 16, color: CustomColors.textPrimary),
+            onChanged:
+                (value) => ref.read(profileNameProvider.notifier).setName(value),
+            style: const TextStyle(
+              fontSize: 16,
+              color: CustomColors.textPrimary,
+            ),
             decoration: const InputDecoration(
               isCollapsed: true,
               border: InputBorder.none,
@@ -163,7 +170,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
             ),
           ),
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: Spacings.small),
         const Text(
           'E-Mail und Benutzername kommen später dazu.',
           style: TextStyle(fontSize: 12, color: CustomColors.disabledText),
@@ -182,7 +189,7 @@ class _TopBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: 56,
-      padding: const EdgeInsets.symmetric(horizontal: 8),
+      padding: const EdgeInsets.symmetric(horizontal: Spacings.small),
       decoration: BoxDecoration(
         color: CustomColors.background,
         boxShadow: [
@@ -235,12 +242,13 @@ class _GamesSection extends StatelessWidget {
           borderRadius: BorderRadius.circular(standardBorderRadius),
           child: InkWell(
             borderRadius: BorderRadius.circular(standardBorderRadius),
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const RecentGamesScreen()),
-            ),
+            onTap:
+                () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const RecentGamesScreen()),
+                ),
             child: Container(
               height: 60,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: Spacings.medium),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(standardBorderRadius),
                 border: Border.all(color: const Color(0x0F000000)),
@@ -285,7 +293,7 @@ class _GamesSection extends StatelessWidget {
                       ],
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: Spacings.small),
                   const Text(
                     '›',
                     style: TextStyle(
@@ -333,12 +341,16 @@ class _ScaleSection extends ConsumerWidget {
         _ScaleActionButton(
           label: info.buttonLabel,
           primary: info.primaryButton,
-          onTap: info.busy ? notifier.resetConnection : _actionFor(info, notifier),
+          onTap:
+              info.busy ? notifier.resetConnection : _actionFor(info, notifier),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: Spacings.small),
         Text(
           info.hint,
-          style: const TextStyle(fontSize: 12, color: CustomColors.disabledText),
+          style: const TextStyle(
+            fontSize: 12,
+            color: CustomColors.disabledText,
+          ),
         ),
       ],
     );
@@ -368,7 +380,10 @@ class _ScaleStatusCard extends StatelessWidget {
           Container(
             width: 40,
             height: 40,
-            decoration: BoxDecoration(shape: BoxShape.circle, color: info.iconBg),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: info.iconBg,
+            ),
             alignment: Alignment.center,
             child: Icon(Icons.bluetooth, size: 20, color: info.iconFg),
           ),
@@ -404,8 +419,7 @@ class _ScaleStatusCard extends StatelessWidget {
               height: 18,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                valueColor:
-                    AlwaysStoppedAnimation(CustomColors.secondaryColor),
+                valueColor: AlwaysStoppedAnimation(CustomColors.secondaryColor),
               ),
             ),
           ],
@@ -441,9 +455,8 @@ class _ScaleActionButton extends StatelessWidget {
           alignment: Alignment.center,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(standardBorderRadius),
-            border: primary
-                ? null
-                : Border.all(color: CustomColors.secondaryColor),
+            border:
+                primary ? null : Border.all(color: CustomColors.secondaryColor),
           ),
           child: Text(
             label,
@@ -519,7 +532,8 @@ class _ScaleCardInfo {
       case ScaleConnectionState.notFound:
       case ScaleConnectionState.error:
       case ScaleConnectionState.disconnected:
-        final failed = scale.connectionState == ScaleConnectionState.notFound ||
+        final failed =
+            scale.connectionState == ScaleConnectionState.notFound ||
             scale.connectionState == ScaleConnectionState.error;
         final subtitle = switch (scale.connectionState) {
           ScaleConnectionState.notFound => 'Keine Waage gefunden',
@@ -547,16 +561,28 @@ class _StepsSection extends StatelessWidget {
   const _StepsSection();
 
   static const _steps = [
-    ('1', 'Startgewicht wiegen',
-        'Jeder stellt sein volles Glas einmal auf die Waage.'),
-    ('2', 'Ziel festlegen',
-        'Für jede Runde gilt ein Zielgewicht, das unter dem aktuellen liegt.'),
-    ('3', 'Trinken und wiegen',
-        'Reihum trinken, danach das Glas zurück auf die Waage. Wer am nächsten '
-            'am Ziel liegt, gewinnt die Runde.'),
-    ('4', 'Spielende',
-        'Sobald ein Glas unter 50 g fällt, endet das Spiel und der Endstand '
-            'wird ermittelt.'),
+    (
+      '1',
+      'Startgewicht wiegen',
+      'Jeder stellt sein volles Glas einmal auf die Waage.',
+    ),
+    (
+      '2',
+      'Ziel festlegen',
+      'Für jede Runde gilt ein Zielgewicht, das unter dem aktuellen liegt.',
+    ),
+    (
+      '3',
+      'Trinken und wiegen',
+      'Reihum trinken, danach das Glas zurück auf die Waage. Wer am nächsten '
+          'am Ziel liegt, gewinnt die Runde.',
+    ),
+    (
+      '4',
+      'Spielende',
+      'Sobald ein Glas unter 50 g fällt, endet das Spiel und der Endstand '
+          'wird ermittelt.',
+    ),
   ];
 
   @override
@@ -643,17 +669,33 @@ class _ModesSection extends StatelessWidget {
   const _ModesSection();
 
   static const _modes = [
-    ('Wertung', CustomColors.primaryColor, 'Standard',
-        'Wer am nächsten am Ziel liegt, holt den Rundensieg. Gezählt werden '
-            'die gewonnenen Runden.'),
-    ('Wertung', CustomColors.primaryColor, 'Punkte',
-        'Punkte nach Platzierung: 3 für den ersten, 2 für den zweiten, 1 für '
-            'den dritten Platz. Exakt getroffen zählt 5.'),
-    ('Ziele', CustomColors.secondaryColor, 'Manuelle Ziele',
-        'Ihr legt das Zielgewicht jeder Runde selbst fest.'),
-    ('Ziele', CustomColors.secondaryColor, 'Automatische Ziele',
-        'Das nächste Ziel wird ausgelost: 30 bis 80 g unter dem aktuellen '
-            'Ziel.'),
+    (
+      'Wertung',
+      CustomColors.primaryColor,
+      'Standard',
+      'Wer am nächsten am Ziel liegt, holt den Rundensieg. Gezählt werden '
+          'die gewonnenen Runden.',
+    ),
+    (
+      'Wertung',
+      CustomColors.primaryColor,
+      'Punkte',
+      'Punkte nach Platzierung: 3 für den ersten, 2 für den zweiten, 1 für '
+          'den dritten Platz. Exakt getroffen zählt 5.',
+    ),
+    (
+      'Ziele',
+      CustomColors.secondaryColor,
+      'Manuelle Ziele',
+      'Ihr legt das Zielgewicht jeder Runde selbst fest.',
+    ),
+    (
+      'Ziele',
+      CustomColors.secondaryColor,
+      'Automatische Ziele',
+      'Das nächste Ziel wird ausgelost: 30 bis 80 g unter dem aktuellen '
+          'Ziel.',
+    ),
   ];
 
   @override
@@ -707,10 +749,7 @@ class _ModeCard extends StatelessWidget {
               Container(
                 width: 8,
                 height: 8,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: dot,
-                ),
+                decoration: BoxDecoration(shape: BoxShape.circle, color: dot),
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -732,7 +771,7 @@ class _ModeCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: Spacings.small),
           Text(
             text,
             style: const TextStyle(
@@ -758,7 +797,7 @@ class _LegalSection extends StatelessWidget {
         const _SectionLabel('Rechtliches'),
         const SizedBox(height: 12),
         _LegalBlock(title: 'Datenschutz', text: AppStrings.privacy.trim()),
-        const SizedBox(height: 16),
+        const SizedBox(height: Spacings.medium),
         _LegalBlock(title: 'Impressum', text: AppStrings.imprint.trim()),
       ],
     );

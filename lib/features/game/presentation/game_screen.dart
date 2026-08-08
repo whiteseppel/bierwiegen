@@ -15,6 +15,7 @@ import 'submit_flow.dart';
 import 'widgets/confetti_widget.dart';
 import 'widgets/options_sheet.dart';
 import 'widgets/player_header_cell.dart';
+import 'widgets/round_delete.dart';
 import 'widgets/round_label_cell.dart';
 import 'widgets/scale_chip.dart';
 import 'widgets/scale_panel.dart';
@@ -72,11 +73,11 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                 _buildTopBar(),
                 Expanded(
                   child: Padding(
-                    padding: const EdgeInsets.all(8),
+                    padding: const EdgeInsets.all(Spacings.small),
                     child: Column(
                       children: [
                         _buildHeaderRow(game.players.length),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: Spacings.small),
                         Expanded(
                           child: SingleChildScrollView(
                             child: Column(
@@ -85,6 +86,11 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                                 _buildRounds(
                                   game.players.length,
                                   game.rounds.length,
+                                  showTrashDelete:
+                                      roundDeleteStyle ==
+                                          RoundDeleteStyle.trashCell &&
+                                      !game.isFinished &&
+                                      game.rounds.isNotEmpty,
                                 ),
                                 const SizedBox(height: 10),
                                 if (game.isFinished)
@@ -130,7 +136,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
 
     return Container(
       height: 56,
-      padding: const EdgeInsets.symmetric(horizontal: 6),
+      padding: const EdgeInsets.symmetric(horizontal: Spacings.small),
       decoration: const BoxDecoration(
         color: Colors.white,
         boxShadow: [
@@ -237,7 +243,11 @@ class _GameScreenState extends ConsumerState<GameScreen> {
     );
   }
 
-  Widget _buildRounds(int playerCount, int roundCount) {
+  Widget _buildRounds(
+    int playerCount,
+    int roundCount, {
+    required bool showTrashDelete,
+  }) {
     // Row -1 holds the initial weights; the label column stays fixed while
     // the cells scroll horizontally in sync with the header.
     final rowIndices = [-1, for (int i = 0; i < roundCount; i++) i];
@@ -248,7 +258,8 @@ class _GameScreenState extends ConsumerState<GameScreen> {
         Column(
           children: [
             for (final index in rowIndices) ...[
-              if (index != rowIndices.first) const SizedBox(height: 8),
+              if (index != rowIndices.first)
+                const SizedBox(height: Spacings.small),
               RoundLabelCell(roundIndex: index),
             ],
           ],
@@ -261,26 +272,49 @@ class _GameScreenState extends ConsumerState<GameScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 for (final index in rowIndices) ...[
-                  if (index != rowIndices.first) const SizedBox(height: 8),
-                  Container(
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.horizontal(
-                        right: Radius.circular(14),
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        for (int p = 0; p < playerCount; p++)
-                          WeightCell(roundIndex: index, playerIndex: p),
-                      ],
-                    ),
+                  if (index != rowIndices.first)
+                    const SizedBox(height: Spacings.small),
+                  _buildBodyRow(
+                    index,
+                    playerCount,
+                    showDelete: showTrashDelete && index == roundCount - 1,
                   ),
                 ],
               ],
             ),
           ),
         ),
+      ],
+    );
+  }
+
+  Widget _buildBodyRow(
+    int index,
+    int playerCount, {
+    required bool showDelete,
+  }) {
+    final cells = Container(
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.horizontal(right: Radius.circular(14)),
+      ),
+      child: Row(
+        children: [
+          for (int p = 0; p < playerCount; p++)
+            WeightCell(roundIndex: index, playerIndex: p),
+        ],
+      ),
+    );
+
+    if (!showDelete) {
+      return cells;
+    }
+
+    return Row(
+      children: [
+        cells,
+        const SizedBox(width: Spacings.small),
+        const DeleteRoundCell(),
       ],
     );
   }

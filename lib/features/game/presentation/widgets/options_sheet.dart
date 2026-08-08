@@ -34,7 +34,8 @@ class _OptionsSheet extends ConsumerWidget {
     final mode = game?.config.mode ?? GameMode.standard;
     final targetMode = game?.config.targetMode ?? TargetMode.manual;
 
-    final settingsSummary = '${mode == GameMode.points ? 'Punkte' : 'Standard'}'
+    final settingsSummary =
+        '${mode == GameMode.points ? 'Punkte' : 'Standard'}'
         ' · ${targetMode == TargetMode.auto ? 'Auto' : 'Manuell'}';
 
     return SafeArea(
@@ -75,12 +76,13 @@ class _OptionsSheet extends ConsumerWidget {
             dot: CustomColors.primaryColor,
             label: 'Spieleinstellungen',
             value: settingsSummary,
-            onTap: game == null
-                ? null
-                : () {
-                    Navigator.of(context).pop();
-                    showGameSettingsSheet(context);
-                  },
+            onTap:
+                game == null
+                    ? null
+                    : () {
+                      Navigator.of(context).pop();
+                      showGameSettingsSheet(context);
+                    },
           ),
           _OptionItem(
             dot: CustomColors.neutralDot,
@@ -137,37 +139,38 @@ class _GameSettingsSheet extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const Center(child: _Grabber()),
-            const SizedBox(height: 16),
+            const SizedBox(height: Spacings.medium),
             const Text(
               'Spieleinstellungen',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 18),
             const _SectionLabel('Wertung'),
-            const SizedBox(height: 8),
+            const SizedBox(height: Spacings.small),
             ChoiceTile(
               label: 'Standard',
               description: 'Wer am nächsten dran ist, gewinnt die Runde.',
               selected: mode == GameMode.standard,
               onTap: () => notifier.setMode(GameMode.standard),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: Spacings.small),
             ChoiceTile(
               label: 'Punkte',
-              description: '3 / 2 / 1 nach Platzierung, exakt getroffen zählt 5.',
+              description:
+                  '3 / 2 / 1 nach Platzierung, exakt getroffen zählt 5.',
               selected: mode == GameMode.points,
               onTap: () => notifier.setMode(GameMode.points),
             ),
             const SizedBox(height: 20),
             const _SectionLabel('Zielvorgabe'),
-            const SizedBox(height: 8),
+            const SizedBox(height: Spacings.small),
             ChoiceTile(
               label: 'Manuelle Ziele',
               description: 'Ihr legt das Zielgewicht jeder Runde selbst fest.',
               selected: targetMode == TargetMode.manual,
               onTap: () => notifier.setTargetMode(TargetMode.manual),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: Spacings.small),
             ChoiceTile(
               label: 'Automatische Ziele',
               description:
@@ -271,7 +274,7 @@ class _OptionItem extends StatelessWidget {
       onTap: onTap,
       child: Container(
         height: 56,
-        padding: const EdgeInsets.symmetric(horizontal: 24),
+        padding: const EdgeInsets.symmetric(horizontal: Spacings.large),
         child: Row(
           children: [
             Container(
@@ -282,7 +285,7 @@ class _OptionItem extends StatelessWidget {
                 borderRadius: BorderRadius.circular(4),
               ),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: Spacings.medium),
             Expanded(
               child: Text(
                 label,

@@ -130,12 +130,12 @@ class _GameCard extends StatelessWidget {
                         color: CustomColors.textMuted,
                       ),
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: Spacings.small),
                     _Podium(podium: podium, rest: rest),
                   ],
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: Spacings.small),
               const Text(
                 '›',
                 style: TextStyle(
@@ -205,7 +205,7 @@ class _Podium extends StatelessWidget {
     return Row(
       children: [
         for (int i = 0; i < podium.length; i++) ...[
-          if (i > 0) const SizedBox(width: 8),
+          if (i > 0) const SizedBox(width: Spacings.small),
           Flexible(
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -243,7 +243,7 @@ class _Podium extends StatelessWidget {
           ),
         ],
         if (rest > 0) ...[
-          const SizedBox(width: 8),
+          const SizedBox(width: Spacings.small),
           Text(
             '+$rest',
             style: const TextStyle(
@@ -278,7 +278,7 @@ class _EmptyState extends StatelessWidget {
                 color: CustomColors.textPrimary,
               ),
             ),
-            SizedBox(height: 6),
+            SizedBox(height: Spacings.small),
             Text(
               'Beendete Spiele erscheinen hier mit Ergebnis und Statistik.',
               textAlign: TextAlign.center,
@@ -300,7 +300,7 @@ class _TopBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: 56,
-      padding: const EdgeInsets.symmetric(horizontal: 8),
+      padding: const EdgeInsets.symmetric(horizontal: Spacings.small),
       color: CustomColors.background,
       child: Row(
         children: [

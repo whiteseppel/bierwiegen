@@ -43,9 +43,10 @@ class ChoiceTile extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: selected
-                        ? CustomColors.primaryColor
-                        : CustomColors.neutralDot,
+                    color:
+                        selected
+                            ? CustomColors.primaryColor
+                            : CustomColors.neutralDot,
                     width: 2,
                   ),
                 ),
@@ -55,9 +56,10 @@ class ChoiceTile extends StatelessWidget {
                     height: 10,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: selected
-                          ? CustomColors.primaryColor
-                          : Colors.transparent,
+                      color:
+                          selected
+                              ? CustomColors.primaryColor
+                              : Colors.transparent,
                     ),
                   ),
                 ),

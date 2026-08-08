@@ -89,13 +89,14 @@ class Dialogs {
   }) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => _styledDialog(
-        title: title,
-        body: body,
-        confirmLabel: confirmLabel,
-        onConfirm: () => Navigator.of(context).pop(true),
-        onCancel: () => Navigator.of(context).pop(false),
-      ),
+      builder:
+          (context) => _styledDialog(
+            title: title,
+            body: body,
+            confirmLabel: confirmLabel,
+            onConfirm: () => Navigator.of(context).pop(true),
+            onCancel: () => Navigator.of(context).pop(false),
+          ),
     );
     return confirmed ?? false;
   }
@@ -159,7 +160,10 @@ class Dialogs {
               color: CustomColors.textMuted,
             ),
           ),
-          if (input != null) ...[const SizedBox(height: 16), input],
+          if (input != null) ...[
+            const SizedBox(height: Spacings.medium),
+            input,
+          ],
         ],
       ),
       actions: [
@@ -178,7 +182,10 @@ class Dialogs {
           style: FilledButton.styleFrom(
             backgroundColor: CustomColors.primaryColor,
             foregroundColor: CustomColors.onPrimaryDark,
-            textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+            textStyle: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+            ),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(standardBorderRadius),
             ),

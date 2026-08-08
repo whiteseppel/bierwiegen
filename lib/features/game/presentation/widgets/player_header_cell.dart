@@ -22,9 +22,8 @@ class PlayerHeaderCell extends ConsumerWidget {
     }
 
     final score = playerIndex < scores.length ? scores[playerIndex] : 0;
-    final scoreLabel = game.config.mode == GameMode.points
-        ? '$score Pkt'
-        : '★ $score';
+    final scoreLabel =
+        game.config.mode == GameMode.points ? '$score Pkt' : '★ $score';
 
     return Container(
       width: weightCellWidth,

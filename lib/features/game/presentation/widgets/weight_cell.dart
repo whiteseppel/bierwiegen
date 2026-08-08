@@ -34,12 +34,15 @@ class WeightCell extends ConsumerStatefulWidget {
 class _WeightCellState extends ConsumerState<WeightCell> {
   FocusNode? _node;
 
-  CellRef get _cellRef =>
-      (round: widget.roundIndex, player: widget.playerIndex);
+  CellRef get _cellRef => (
+    round: widget.roundIndex,
+    player: widget.playerIndex,
+  );
 
-  String get _registryKey => widget.roundIndex < 0
-      ? CellRegistry.initialWeightKey(widget.playerIndex)
-      : CellRegistry.measurementKey(widget.roundIndex, widget.playerIndex);
+  String get _registryKey =>
+      widget.roundIndex < 0
+          ? CellRegistry.initialWeightKey(widget.playerIndex)
+          : CellRegistry.measurementKey(widget.roundIndex, widget.playerIndex);
 
   void _onFocusChange() {
     if (!mounted) {
@@ -48,7 +51,8 @@ class _WeightCellState extends ConsumerState<WeightCell> {
 
     if (_node!.hasFocus) {
       ref.read(focusedCellProvider.notifier).state = _cellRef;
-      final scaleLive = ref.read(scaleProvider).connectionState ==
+      final scaleLive =
+          ref.read(scaleProvider).connectionState ==
               ScaleConnectionState.connected &&
           !ref.read(scalePausedProvider);
       ref.read(keyboardOpenProvider.notifier).state = !scaleLive;
@@ -100,9 +104,10 @@ class _WeightCellState extends ConsumerState<WeightCell> {
     final controller = registry.controller(_registryKey);
 
     final round = widget.roundIndex < 0 ? null : game.rounds[widget.roundIndex];
-    final value = round == null
-        ? game.players[widget.playerIndex].initialWeight
-        : round.measurements[widget.playerIndex];
+    final value =
+        round == null
+            ? game.players[widget.playerIndex].initialWeight
+            : round.measurements[widget.playerIndex];
 
     final text = value == 0 ? '' : formatWeight(value);
     if (controller.text != text && !node.hasFocus) {
@@ -115,9 +120,10 @@ class _WeightCellState extends ConsumerState<WeightCell> {
         round != null && !gold && round.isClosestSoFar(widget.playerIndex);
 
     final delta = (round == null || value == 0) ? null : value - round.target;
-    final deltaLabel = delta == null
-        ? null
-        : delta == 0
+    final deltaLabel =
+        delta == null
+            ? null
+            : delta == 0
             ? '±0'
             : '${delta > 0 ? '+' : '−'}${formatWeight(delta.abs())}';
 
@@ -126,9 +132,10 @@ class _WeightCellState extends ConsumerState<WeightCell> {
       height: weightCellHeight,
       decoration: BoxDecoration(
         color: isFocused ? CustomColors.goldFocus : null,
-        border: isFocused
-            ? Border.all(color: CustomColors.goldFocusRing, width: 2)
-            : const Border(left: BorderSide(color: CustomColors.hairline)),
+        border:
+            isFocused
+                ? Border.all(color: CustomColors.goldFocusRing, width: 2)
+                : const Border(left: BorderSide(color: CustomColors.hairline)),
       ),
       child: Stack(
         children: [
@@ -141,11 +148,13 @@ class _WeightCellState extends ConsumerState<WeightCell> {
               child: IgnorePointer(
                 child: DecoratedBox(
                   decoration: BoxDecoration(
-                    color: gold
-                        ? CustomColors.primaryColor
-                        : CustomColors.secondaryColor,
-                    borderRadius:
-                        const BorderRadius.vertical(top: Radius.circular(2)),
+                    color:
+                        gold
+                            ? CustomColors.primaryColor
+                            : CustomColors.secondaryColor,
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(2),
+                    ),
                   ),
                 ),
               ),
@@ -178,12 +187,13 @@ class _WeightCellState extends ConsumerState<WeightCell> {
                   final parsed = double.tryParse(input);
                   _setValue(parsed ?? 0);
                 },
-                onSubmitted: (_) => handleCellSubmitted(
-                  context,
-                  ref,
-                  isInitialWeight: widget.roundIndex < 0,
-                  playerIndex: widget.playerIndex,
-                ),
+                onSubmitted:
+                    (_) => handleCellSubmitted(
+                      context,
+                      ref,
+                      isInitialWeight: widget.roundIndex < 0,
+                      playerIndex: widget.playerIndex,
+                    ),
               ),
             ),
           ),

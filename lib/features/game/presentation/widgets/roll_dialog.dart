@@ -41,8 +41,10 @@ class _RollDialogState extends State<_RollDialog>
     vsync: this,
     duration: const Duration(milliseconds: 1500),
   );
-  late final Animation<double> _animation =
-      CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic);
+  late final Animation<double> _animation = CurvedAnimation(
+    parent: _controller,
+    curve: Curves.easeOutCubic,
+  );
 
   @override
   void initState() {
@@ -67,9 +69,10 @@ class _RollDialogState extends State<_RollDialog>
         animation: _animation,
         builder: (context, _) {
           final rolling = _controller.status != AnimationStatus.completed;
-          final value = rolling
-              ? (current - (current - _target) * _animation.value).round()
-              : _target.round();
+          final value =
+              rolling
+                  ? (current - (current - _target) * _animation.value).round()
+                  : _target.round();
           final safeCurrent = current <= 0 ? 1.0 : current;
           final fillFraction = (value / safeCurrent).clamp(0.0, 1.0);
           final targetFraction = (_target / safeCurrent).clamp(0.0, 1.0);
@@ -88,7 +91,7 @@ class _RollDialogState extends State<_RollDialog>
                     color: CustomColors.textFaint,
                   ),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: Spacings.small),
                 Text(
                   rolling
                       ? 'Das nächste Ziel wird ausgelost'
@@ -110,7 +113,7 @@ class _RollDialogState extends State<_RollDialog>
                           targetFraction: targetFraction,
                         ),
                       ),
-                      const SizedBox(width: 16),
+                      const SizedBox(width: Spacings.medium),
                       Expanded(
                         child: _TargetReadout(
                           value: value,
@@ -135,7 +138,7 @@ class _RollDialogState extends State<_RollDialog>
                     ),
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: Spacings.medium),
                 _StartRoundButton(
                   enabled: !rolling,
                   onTap: () => Navigator.of(context).pop(_target),
@@ -240,7 +243,7 @@ class _TargetReadout extends StatelessWidget {
             color: CustomColors.textFaint,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: Spacings.small),
         Row(
           crossAxisAlignment: CrossAxisAlignment.baseline,
           textBaseline: TextBaseline.alphabetic,
@@ -253,9 +256,8 @@ class _TargetReadout extends StatelessWidget {
                 fontSize: 42,
                 letterSpacing: -1.5,
                 height: 1,
-                color: rolling
-                    ? CustomColors.textFaint
-                    : CustomColors.textPrimary,
+                color:
+                    rolling ? CustomColors.textFaint : CustomColors.textPrimary,
               ),
             ),
             const SizedBox(width: 4),
@@ -265,7 +267,7 @@ class _TargetReadout extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: Spacings.small),
         Text(
           'von ${formatWeight(current)} g',
           style: const TextStyle(
@@ -302,7 +304,9 @@ class _StartRoundButton extends StatelessWidget {
               fontSize: 15,
               fontWeight: FontWeight.w700,
               color:
-                  enabled ? CustomColors.onPrimaryDark : CustomColors.disabledText,
+                  enabled
+                      ? CustomColors.onPrimaryDark
+                      : CustomColors.disabledText,
             ),
           ),
         ),

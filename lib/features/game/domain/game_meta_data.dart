@@ -1,15 +1,19 @@
-class GameMetaData {
-  final DateTime createdAt;
-  final DateTime? finishedAt;
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-  const GameMetaData({required this.createdAt, this.finishedAt});
+part 'game_meta_data.freezed.dart';
+part 'game_meta_data.g.dart';
+
+@freezed
+abstract class GameMetaData with _$GameMetaData {
+  const GameMetaData._();
+
+  const factory GameMetaData({
+    required DateTime createdAt,
+    DateTime? finishedAt,
+  }) = _GameMetaData;
+
+  factory GameMetaData.fromJson(Map<String, dynamic> json) =>
+      _$GameMetaDataFromJson(json);
 
   bool get isFinished => finishedAt != null;
-
-  GameMetaData copyWith({DateTime? createdAt, DateTime? finishedAt}) {
-    return GameMetaData(
-      createdAt: createdAt ?? this.createdAt,
-      finishedAt: finishedAt ?? this.finishedAt,
-    );
-  }
 }

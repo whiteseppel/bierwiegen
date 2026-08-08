@@ -1,20 +1,25 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
+
 import 'game_config.dart';
 import 'game_meta_data.dart';
 import 'game_round.dart';
 import 'player.dart';
 
-class Game {
-  final List<Player> players;
-  final List<GameRound> rounds;
-  final GameConfig config;
-  final GameMetaData meta;
+part 'game.freezed.dart';
+part 'game.g.dart';
 
-  const Game({
-    required this.players,
-    required this.rounds,
-    required this.config,
-    required this.meta,
-  });
+@freezed
+abstract class Game with _$Game {
+  const Game._();
+
+  const factory Game({
+    required List<Player> players,
+    required List<GameRound> rounds,
+    required GameConfig config,
+    required GameMetaData meta,
+  }) = _Game;
+
+  factory Game.fromJson(Map<String, dynamic> json) => _$GameFromJson(json);
 
   bool get isFinished => meta.isFinished;
 
@@ -48,10 +53,9 @@ class Game {
   /// Players whose glass has dropped below [finishThreshold]; their presence
   /// ends the game.
   List<Player> get finishers => [
-        for (int i = 0; i < players.length; i++)
-          if ((lastMeasurement(i) ?? double.infinity) < finishThreshold)
-            players[i],
-      ];
+    for (int i = 0; i < players.length; i++)
+      if ((lastMeasurement(i) ?? double.infinity) < finishThreshold) players[i],
+  ];
 
   /// Weight the player's glass had before [roundIndex]: the last entered
   /// measurement of an earlier round, else the initial weight; null when
@@ -66,19 +70,5 @@ class Game {
 
     final initial = players[playerIndex].initialWeight;
     return initial != 0 ? initial : null;
-  }
-
-  Game copyWith({
-    List<Player>? players,
-    List<GameRound>? rounds,
-    GameConfig? config,
-    GameMetaData? meta,
-  }) {
-    return Game(
-      players: players ?? this.players,
-      rounds: rounds ?? this.rounds,
-      config: config ?? this.config,
-      meta: meta ?? this.meta,
-    );
   }
 }

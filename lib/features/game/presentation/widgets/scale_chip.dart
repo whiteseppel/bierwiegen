@@ -22,19 +22,19 @@ class ScaleChipData {
     if (scale.connectionState == ScaleConnectionState.connected) {
       return paused
           ? const ScaleChipData(
-              bg: CustomColors.goldTint,
-              fg: CustomColors.goldTextDark,
-              dot: CustomColors.primaryColor,
-              label: 'Pausiert',
-              connected: true,
-            )
+            bg: CustomColors.goldTint,
+            fg: CustomColors.goldTextDark,
+            dot: CustomColors.primaryColor,
+            label: 'Pausiert',
+            connected: true,
+          )
           : const ScaleChipData(
-              bg: CustomColors.greenTint,
-              fg: CustomColors.greenDark,
-              dot: CustomColors.secondaryColor,
-              label: 'Waage',
-              connected: true,
-            );
+            bg: CustomColors.greenTint,
+            fg: CustomColors.greenDark,
+            dot: CustomColors.secondaryColor,
+            label: 'Waage',
+            connected: true,
+          );
     }
 
     return switch (scale.connectionState) {
@@ -96,7 +96,7 @@ class ScaleChip extends StatelessWidget {
                 borderRadius: BorderRadius.circular(4),
               ),
             ),
-            const SizedBox(width: 6),
+            const SizedBox(width: Spacings.small),
             Text(
               label ?? data.label,
               style: TextStyle(

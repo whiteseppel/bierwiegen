@@ -3,6 +3,7 @@ enum ScaleConnectionState {
   scanning,
   connecting,
   connected,
+
   /// Connection dropped unexpectedly; automatic retries are running.
   reconnecting,
   notFound,

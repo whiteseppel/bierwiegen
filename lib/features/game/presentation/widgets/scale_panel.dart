@@ -102,7 +102,7 @@ class _ScalePanelState extends ConsumerState<ScalePanel> {
                           : null,
                   onTap: () => _onScaleChipTap(chip, paused),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: Spacings.small),
                 GestureDetector(
                   onTap: () => _toggleKeyboard(keyboardOpen),
                   child: Container(
@@ -132,7 +132,7 @@ class _ScalePanelState extends ConsumerState<ScalePanel> {
                 ),
               ],
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: Spacings.small),
             Row(
               crossAxisAlignment: CrossAxisAlignment.baseline,
               textBaseline: TextBaseline.alphabetic,
@@ -150,7 +150,7 @@ class _ScalePanelState extends ConsumerState<ScalePanel> {
                     color: CustomColors.textPrimary,
                   ),
                 ),
-                const SizedBox(width: 6),
+                const SizedBox(width: Spacings.small),
                 const Text(
                   'g',
                   style: TextStyle(fontSize: 18, color: CustomColors.textMuted),
@@ -170,7 +170,7 @@ class _ScalePanelState extends ConsumerState<ScalePanel> {
                         previous == null ? '–' : '${formatWeight(previous)} g',
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: Spacings.small),
                 Expanded(
                   child: _InfoTile(
                     background: CustomColors.greenTint,
@@ -186,7 +186,7 @@ class _ScalePanelState extends ConsumerState<ScalePanel> {
               const SizedBox(height: 14),
               _StabilityBar(scale: scale),
             ],
-            const SizedBox(height: 8),
+            const SizedBox(height: Spacings.small),
             Center(
               child: Text(
                 _hint(scale, chip, paused),

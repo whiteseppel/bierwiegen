@@ -16,9 +16,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Bierwiegen',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: CustomColors.primaryColor,
-        ),
+        colorScheme: ColorScheme.fromSeed(seedColor: CustomColors.primaryColor),
         useMaterial3: true,
       ),
       home: const StartScreen(),

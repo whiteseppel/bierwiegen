@@ -101,7 +101,7 @@ class GameResultView extends ConsumerWidget {
           ),
           const SizedBox(height: 14),
           for (int i = 0; i < ranking.length; i++) ...[
-            if (i > 0) const SizedBox(height: 8),
+            if (i > 0) const SizedBox(height: Spacings.small),
             _RankingRow(entry: ranking[i]),
           ],
           const SizedBox(height: 14),
@@ -362,7 +362,7 @@ class _RankingRow extends StatelessWidget {
     final exact = entry.result.exactHits;
     return Container(
       height: 54,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: Spacings.medium),
       decoration: BoxDecoration(
         color: top ? CustomColors.goldRowBg : Colors.white,
         borderRadius: BorderRadius.circular(standardBorderRadius),
@@ -432,7 +432,7 @@ class _TopBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: 56,
-      padding: const EdgeInsets.symmetric(horizontal: 8),
+      padding: const EdgeInsets.symmetric(horizontal: Spacings.small),
       color: CustomColors.background,
       child: Row(
         children: [

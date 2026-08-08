@@ -1,10 +1,18 @@
-class GameRound {
-  final double target;
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-  /// One entry per player; 0 means not yet entered.
-  final List<double> measurements;
+part 'game_round.freezed.dart';
+part 'game_round.g.dart';
 
-  const GameRound(this.target, this.measurements);
+@freezed
+abstract class GameRound with _$GameRound {
+  const GameRound._();
+
+  /// [measurements] has one entry per player; 0 means not yet entered.
+  const factory GameRound(double target, List<double> measurements) =
+      _GameRound;
+
+  factory GameRound.fromJson(Map<String, dynamic> json) =>
+      _$GameRoundFromJson(json);
 
   bool get isFinished => measurements.every((m) => m != 0);
 
@@ -33,7 +41,9 @@ class GameRound {
       return null;
     }
 
-    return entered.map((m) => (m - target).abs()).reduce((a, b) => a < b ? a : b);
+    return entered
+        .map((m) => (m - target).abs())
+        .reduce((a, b) => a < b ? a : b);
   }
 
   bool isClosestSoFar(int playerIndex) {

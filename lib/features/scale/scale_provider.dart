@@ -91,8 +91,7 @@ class ScaleNotifier extends StateNotifier<ScaleState> {
       await FlutterBluePlus.startScan(timeout: _scanDuration);
 
       Future.delayed(_scanDuration, () {
-        if (mounted &&
-            state.connectionState == ScaleConnectionState.scanning) {
+        if (mounted && state.connectionState == ScaleConnectionState.scanning) {
           _log('scan finished: no scale found');
           state = state.copyWith(
             connectionState: ScaleConnectionState.notFound,
@@ -137,9 +136,7 @@ class ScaleNotifier extends StateNotifier<ScaleState> {
       }
 
       if (btState == BluetoothConnectionState.connected) {
-        state = state.copyWith(
-          connectionState: ScaleConnectionState.connected,
-        );
+        state = state.copyWith(connectionState: ScaleConnectionState.connected);
       }
     });
 
@@ -162,8 +159,10 @@ class ScaleNotifier extends StateNotifier<ScaleState> {
       }
     }
 
-    _log('no weight characteristic found; services: '
-        '${[for (final s in services) s.serviceUuid].join(', ')}');
+    _log(
+      'no weight characteristic found; services: '
+      '${[for (final s in services) s.serviceUuid].join(', ')}',
+    );
     throw StateError('Die Waage sendet keine Gewichtsdaten');
   }
 
@@ -181,7 +180,8 @@ class ScaleNotifier extends StateNotifier<ScaleState> {
 
     try {
       for (int attempt = 0; attempt < _maxReconnectAttempts; attempt++) {
-        final delay = _reconnectDelays[min(attempt, _reconnectDelays.length - 1)];
+        final delay =
+            _reconnectDelays[min(attempt, _reconnectDelays.length - 1)];
         await Future.delayed(Duration(seconds: delay));
         // Stop when the user reset or started a manual connect meanwhile.
         if (!mounted ||
@@ -237,14 +237,15 @@ class ScaleNotifier extends StateNotifier<ScaleState> {
   void _logFrame(List<int> value) {
     if (_lastLoggedFrame != null &&
         _lastLoggedFrame!.length == value.length &&
-        List.generate(value.length, (i) => i)
-            .every((i) => _lastLoggedFrame![i] == value[i])) {
+        List.generate(
+          value.length,
+          (i) => i,
+        ).every((i) => _lastLoggedFrame![i] == value[i])) {
       return;
     }
 
     _lastLoggedFrame = [...value];
-    final hex =
-        value.map((b) => b.toRadixString(16).padLeft(2, '0')).join(' ');
+    final hex = value.map((b) => b.toRadixString(16).padLeft(2, '0')).join(' ');
     _log('frame $hex -> ${_decodeWeightFromIntList(value)} g');
   }
 

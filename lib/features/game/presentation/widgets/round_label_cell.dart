@@ -5,6 +5,7 @@ import '../../../../ui/tokens.dart';
 import '../../state/game_providers.dart';
 import '../dialogs.dart';
 import '../format.dart';
+import 'round_delete.dart';
 import 'weight_cell.dart';
 
 const double roundLabelWidth = 58;
@@ -28,23 +29,24 @@ class RoundLabelCell extends ConsumerWidget {
     final label =
         isInitial ? '—' : formatWeight(game.rounds[roundIndex].target);
 
-    return GestureDetector(
-      onLongPress: isInitial || game.isFinished
-          ? null
-          : () async {
-              final newTarget = await Dialogs.weightInputDialog(
-                context,
-                title: 'Ziel korrigieren',
-                body: 'Zielgewicht dieser Runde anpassen.',
-                confirmLabel: 'Speichern',
-                initialValue: game.rounds[roundIndex].target,
-              );
-              if (newTarget != null) {
-                ref
-                    .read(gameProvider.notifier)
-                    .updateTarget(roundIndex, newTarget);
-              }
-            },
+    final labelBody = GestureDetector(
+      onLongPress:
+          isInitial || game.isFinished
+              ? null
+              : () async {
+                final newTarget = await Dialogs.weightInputDialog(
+                  context,
+                  title: 'Ziel korrigieren',
+                  body: 'Zielgewicht dieser Runde anpassen.',
+                  confirmLabel: 'Speichern',
+                  initialValue: game.rounds[roundIndex].target,
+                );
+                if (newTarget != null) {
+                  ref
+                      .read(gameProvider.notifier)
+                      .updateTarget(roundIndex, newTarget);
+                }
+              },
       child: Container(
         width: roundLabelWidth,
         height: weightCellHeight,
@@ -85,5 +87,20 @@ class RoundLabelCell extends ConsumerWidget {
         ),
       ),
     );
+
+    final deletable =
+        !isInitial && !game.isFinished && roundIndex == game.rounds.length - 1;
+    if (roundDeleteStyle == RoundDeleteStyle.swipeReveal && deletable) {
+      return SwipeToRevealDelete(
+        key: ValueKey('swipe-delete-$roundIndex'),
+        width: roundLabelWidth,
+        height: weightCellHeight,
+        revealWidth: 44,
+        onDelete: () => confirmAndRemoveLastRound(context, ref),
+        child: labelBody,
+      );
+    }
+
+    return labelBody;
   }
 }
