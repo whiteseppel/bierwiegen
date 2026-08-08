@@ -8,8 +8,6 @@ import '../game/domain/game_config.dart';
 import '../game/presentation/game_screen.dart';
 import '../game/presentation/widgets/choice_tile.dart';
 import '../game/state/game_providers.dart';
-import '../info/introduction_screen.dart';
-import '../settings/options_screen.dart';
 
 class StartScreen extends ConsumerStatefulWidget {
   const StartScreen({super.key});
@@ -62,7 +60,7 @@ class _StartScreenState extends ConsumerState<StartScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            _AppBar(titleOpacity: _titleOpacity, onMenu: _openMenu),
+            _AppBar(titleOpacity: _titleOpacity, onAccount: _openAccount),
             Expanded(
               child: LayoutBuilder(
                 builder: (context, constraints) {
@@ -174,27 +172,10 @@ class _StartScreenState extends ConsumerState<StartScreen> {
     }
   }
 
-  Future<void> _openMenu() async {
-    final action = await showStartMenuSheet(context);
-    if (!mounted || action == null) {
-      return;
-    }
-    switch (action) {
-      case _MenuAction.account:
-        Navigator.of(context).push(
-          MaterialPageRoute(builder: (context) => const AccountScreen()),
-        );
-      case _MenuAction.settings:
-        Navigator.of(context).push(
-          MaterialPageRoute(builder: (context) => const OptionsScreen()),
-        );
-      case _MenuAction.rules:
-        Navigator.of(context).push(
-          MaterialPageRoute(builder: (context) => const IntroductionScreen()),
-        );
-      case _MenuAction.history:
-        _comingSoon();
-    }
+  void _openAccount() {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (context) => const AccountScreen()),
+    );
   }
 
   void _comingSoon() {
@@ -224,10 +205,10 @@ class _StartScreenState extends ConsumerState<StartScreen> {
 }
 
 class _AppBar extends StatelessWidget {
-  const _AppBar({required this.titleOpacity, required this.onMenu});
+  const _AppBar({required this.titleOpacity, required this.onAccount});
 
   final double titleOpacity;
-  final VoidCallback onMenu;
+  final VoidCallback onAccount;
 
   @override
   Widget build(BuildContext context) {
@@ -263,7 +244,7 @@ class _AppBar extends StatelessWidget {
             shape: const CircleBorder(),
             clipBehavior: Clip.antiAlias,
             child: InkWell(
-              onTap: onMenu,
+              onTap: onAccount,
               child: const SizedBox(
                 width: 44,
                 height: 44,
@@ -695,126 +676,3 @@ class _SectionLabel extends StatelessWidget {
   }
 }
 
-enum _MenuAction { account, settings, rules, history }
-
-Future<_MenuAction?> showStartMenuSheet(BuildContext context) {
-  return showModalBottomSheet<_MenuAction>(
-    context: context,
-    backgroundColor: Colors.white,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-    ),
-    builder: (context) => const _MenuSheet(),
-  );
-}
-
-class _MenuSheet extends StatelessWidget {
-  const _MenuSheet();
-
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const SizedBox(height: 12),
-          Center(
-            child: Container(
-              width: 32,
-              height: 4,
-              decoration: BoxDecoration(
-                color: const Color(0x26000000),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          const Padding(
-            padding: EdgeInsets.fromLTRB(24, 6, 24, 10),
-            child: _SectionLabel('Menü'),
-          ),
-          _MenuItem(
-            dot: CustomColors.goldTextDark,
-            label: 'Konto & Verbindung',
-            note: 'Konto',
-            onTap: () => Navigator.of(context).pop(_MenuAction.account),
-          ),
-          _MenuItem(
-            dot: CustomColors.secondaryColor,
-            label: 'Einstellungen',
-            note: 'Waage',
-            onTap: () => Navigator.of(context).pop(_MenuAction.settings),
-          ),
-          _MenuItem(
-            dot: CustomColors.primaryColor,
-            label: 'Was ist Bierwiegen?',
-            note: 'Regeln',
-            onTap: () => Navigator.of(context).pop(_MenuAction.rules),
-          ),
-          _MenuItem(
-            dot: CustomColors.neutralDot,
-            label: 'Spielverlauf',
-            note: 'bald',
-            onTap: () => Navigator.of(context).pop(_MenuAction.history),
-          ),
-          const SizedBox(height: 20),
-        ],
-      ),
-    );
-  }
-}
-
-class _MenuItem extends StatelessWidget {
-  const _MenuItem({
-    required this.dot,
-    required this.label,
-    required this.note,
-    required this.onTap,
-  });
-
-  final Color dot;
-  final String label;
-  final String note;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        height: 56,
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        child: Row(
-          children: [
-            Container(
-              width: 8,
-              height: 8,
-              decoration: BoxDecoration(
-                color: dot,
-                borderRadius: BorderRadius.circular(4),
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Text(
-                label,
-                style: const TextStyle(
-                  fontSize: 16,
-                  color: CustomColors.textPrimary,
-                ),
-              ),
-            ),
-            Text(
-              note,
-              style: const TextStyle(
-                fontSize: 12,
-                color: CustomColors.disabledText,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}

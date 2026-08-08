@@ -296,19 +296,22 @@ class _GameScreenState extends ConsumerState<GameScreen> {
   }
 
   Widget _buildPlayFooter(Game game) {
+    final ready = game.canStartNewRound;
     final finishers = game.finishers;
     final auto = game.config.targetMode == TargetMode.auto;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (finishers.isEmpty)
-          _buildNewRoundButton(auto ? '+ Neue Runde auslosen' : '+ Neue Runde')
-        else
-          _buildFinishButton(),
-        const SizedBox(height: 10),
+        if (ready)
+          if (finishers.isEmpty)
+            _buildNewRoundButton(
+                auto ? '+ Neue Runde auslosen' : '+ Neue Runde')
+          else
+            _buildFinishButton(),
+        if (ready) const SizedBox(height: 10),
         Text(
-          _finishHint(game, finishers),
+          _finishHint(game, ready, finishers),
           textAlign: TextAlign.center,
           style: const TextStyle(fontSize: 12, color: CustomColors.textFaint),
         ),
@@ -316,17 +319,20 @@ class _GameScreenState extends ConsumerState<GameScreen> {
     );
   }
 
-  String _finishHint(Game game, List<Player> finishers) {
+  String _finishHint(Game game, bool ready, List<Player> finishers) {
+    if (!ready) {
+      return game.allPlayersWeighedIn
+          ? 'Aktuelle Runde fertig wiegen.'
+          : 'Erst die Startgewichte aller Spieler eintragen.';
+    }
     if (finishers.isNotEmpty) {
       final names = finishers.map((p) => p.name).join(' und ');
       final verb = finishers.length == 1 ? 'ist' : 'sind';
       return '$names $verb unter '
           '${Game.finishThreshold.toInt()} g – das Spiel ist zu Ende.';
     }
-    return game.hasAnyMeasurement
-        ? 'Spiel endet, sobald jemand unter '
-            '${Game.finishThreshold.toInt()} g kommt.'
-        : 'Erst wiegen, dann geht es weiter.';
+    return 'Spiel endet, sobald jemand unter '
+        '${Game.finishThreshold.toInt()} g kommt.';
   }
 
   Widget _buildFinishButton() {

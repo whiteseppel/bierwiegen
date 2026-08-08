@@ -20,6 +20,11 @@ class Game {
 
   bool get allPlayersWeighedIn => players.every((p) => p.hasWeighedIn);
 
+  /// True once a new round can be added: every initial weight is in and either
+  /// no round has started yet or the current one is fully weighed.
+  bool get canStartNewRound =>
+      allPlayersWeighedIn && (rounds.isEmpty || rounds.last.isFinished);
+
   bool get hasFinishedRound => rounds.any((r) => r.isFinished);
 
   bool get hasAnyMeasurement =>

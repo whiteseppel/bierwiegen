@@ -55,31 +55,7 @@ void _clearFocus(WidgetRef ref) {
 
 Future<void> startNewRound(BuildContext context, WidgetRef ref) async {
   final game = ref.read(gameProvider);
-  if (game == null || game.isFinished) {
-    return;
-  }
-
-  if (!game.allPlayersWeighedIn) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        const SnackBar(
-          content: Text('Bitte zuerst die Startgewichte aller Spieler '
-              'eintragen.'),
-        ),
-      );
-    return;
-  }
-
-  if (game.rounds.isNotEmpty && !game.rounds.last.isFinished) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        const SnackBar(
-          content: Text('Bitte die aktuelle Runde abschließen, '
-              'bevor du eine neue Runde startest.'),
-        ),
-      );
+  if (game == null || game.isFinished || !game.canStartNewRound) {
     return;
   }
 

@@ -14,7 +14,44 @@ Game _game(List<GameRound> rounds) {
   );
 }
 
+Game _weighedIn(List<GameRound> rounds) {
+  return Game(
+    players: const [
+      Player('Anna', initialWeight: 500),
+      Player('Ben', initialWeight: 500),
+      Player('Cleo', initialWeight: 500),
+    ],
+    rounds: rounds,
+    config: const GameConfig(),
+    meta: GameMetaData(createdAt: DateTime(2026)),
+  );
+}
+
 void main() {
+  test('cannot start a round before every initial weight is entered', () {
+    expect(_game(const []).canStartNewRound, isFalse);
+  });
+
+  test('can start the first round once everyone is weighed in', () {
+    expect(_weighedIn(const []).canStartNewRound, isTrue);
+  });
+
+  test('cannot start a round while the current one is unfinished', () {
+    final game = _weighedIn(const [
+      GameRound(200, [180, 0, 0]),
+    ]);
+
+    expect(game.canStartNewRound, isFalse);
+  });
+
+  test('can start a round once the current one is fully weighed', () {
+    final game = _weighedIn(const [
+      GameRound(200, [180, 170, 160]),
+    ]);
+
+    expect(game.canStartNewRound, isTrue);
+  });
+
   test('no finishers while every glass stays at or above 50 g', () {
     final game = _game([
       const GameRound(200, [180, 90, 60]),

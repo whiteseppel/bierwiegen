@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../ui/tokens.dart';
 import '../history/recent_games_screen.dart';
+import '../info/strings.dart';
 import '../scale/scale_provider.dart';
 import '../scale/scale_state.dart';
 import 'account_providers.dart';
@@ -72,6 +73,10 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                     const _StepsSection(),
                     const SizedBox(height: 26),
                     const _ModesSection(),
+                    const SizedBox(height: 26),
+                    const _Divider(),
+                    const SizedBox(height: 26),
+                    const _LegalSection(),
                   ],
                 ),
               ),
@@ -738,6 +743,57 @@ class _ModeCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _LegalSection extends StatelessWidget {
+  const _LegalSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const _SectionLabel('Rechtliches'),
+        const SizedBox(height: 12),
+        _LegalBlock(title: 'Datenschutz', text: AppStrings.privacy.trim()),
+        const SizedBox(height: 16),
+        _LegalBlock(title: 'Impressum', text: AppStrings.imprint.trim()),
+      ],
+    );
+  }
+}
+
+class _LegalBlock extends StatelessWidget {
+  const _LegalBlock({required this.title, required this.text});
+
+  final String title;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w500,
+            color: CustomColors.textPrimary,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          text,
+          style: const TextStyle(
+            fontSize: 14,
+            height: 1.45,
+            color: CustomColors.textMuted,
+          ),
+        ),
+      ],
     );
   }
 }
