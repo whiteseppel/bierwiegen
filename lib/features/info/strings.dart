@@ -35,7 +35,11 @@ Beim langen Drücken auf das Zielgewicht lässt sich ein neuer Wert eingeben.
 ''';
 
   static const String privacy = '''
-Es werden keine Daten gesammelt. Es werdn keine Daten auf dem Gerät gespreichert oder versendet.
+Bierwiegen speichert deine Daten ausschließlich lokal auf deinem Gerät – deinen Namen, deine Profilfarbe und deine gespielten Spiele. Diese Daten verlassen dein Gerät nicht und werden nicht an Dritte weitergegeben. Sie werden allein dazu verwendet, dir deine eigenen Inhalte in der App anzuzeigen.
+
+Du behältst die volle Kontrolle: Einzelne Spiele kannst du jederzeit direkt in der Liste löschen, und beim Deinstallieren der App werden alle lokal gespeicherten Daten entfernt.
+
+Zukünftig können ein Nutzerkonto und die dazugehörigen Spiele gespeichert werden. Auch diese Daten dienen allein dazu, sie dir bereitzustellen, und werden nicht an Dritte weitergegeben.
 ''';
 
   static const String imprint = '''

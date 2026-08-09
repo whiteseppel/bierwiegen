@@ -27,28 +27,19 @@ input::placeholder{color:#A5A29B}
     <a href="./Home.dc.html" style="width:44px;height:44px;flex:none;border-radius:22px;display:flex;align-items:center;justify-content:center;text-decoration:none;color:#1C1B18" style-hover="background:rgba(0,0,0,.05)">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg>
     </a>
-    <div style="flex:1;min-width:0;font-size:20px;font-weight:700;letter-spacing:-.2px;white-space:nowrap">Konto</div>
+    <div style="flex:1;min-width:0;font-size:20px;font-weight:700;letter-spacing:-.2px;white-space:nowrap">Einstellungen</div>
   </div>
 
   <div onScroll="{{ onScroll }}" style="flex:1;overflow:auto;padding:8px 20px 32px;display:flex;flex-direction:column;gap:26px">
 
-    <div style="display:flex;flex-direction:column;gap:14px">
-      <div style="display:flex;align-items:center;gap:16px">
-        <div style="width:72px;height:72px;flex:none;border-radius:36px;background:#FDF1DC;color:#6B5416;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700">{{ initial }}</div>
-        <div style="min-width:0">
-          <div style="font-size:22px;font-weight:700;letter-spacing:-.3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ displayName }}</div>
-          <div style="margin-top:2px;font-size:13px;color:#8A877F">Profilbild ändern folgt</div>
-        </div>
+    <a href="./Account.dc.html" style="display:flex;align-items:center;gap:16px;padding:14px 16px;border-radius:14px;background:#FFFFFF;border:1px solid rgba(0,0,0,.06);text-decoration:none;color:#1C1B18" style-hover="background:#FAF9F6">
+      <div style="width:56px;height:56px;flex:none;border-radius:28px;background:#FDF1DC;color:#6B5416;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700">{{ initial }}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:19px;font-weight:700;letter-spacing:-.2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ displayName }}</div>
+        <div style="margin-top:2px;font-size:13px;color:#6F6C66">Konto verwalten</div>
       </div>
-
-      <div style="display:flex;flex-direction:column;gap:6px">
-        <div style="font-size:12px;font-weight:500;letter-spacing:.6px;color:#8A877F;text-transform:uppercase">Name</div>
-        <div style="display:flex;align-items:center;height:56px;padding:0 16px;border-radius:12px;background:#FFFFFF;border:1px solid rgba(0,0,0,.10)">
-          <input value="{{ name }}" onChange="{{ onName }}" placeholder="Dein Name" style="flex:1;min-width:0;height:100%;border:0;background:transparent;outline:none;font-size:16px;color:#1C1B18;padding:0" />
-        </div>
-        <div style="font-size:12px;color:#A5A29B">E-Mail und Benutzername kommen später dazu.</div>
-      </div>
-    </div>
+      <div style="font-size:18px;color:#A5A29B">›</div>
+    </a>
 
     <div style="height:1px;background:rgba(0,0,0,.08)"></div>
 
@@ -144,6 +135,22 @@ input::placeholder{color:#A5A29B}
       </div>
     </div>
 
+    <div style="height:1px;background:rgba(0,0,0,.08)"></div>
+
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div style="font-size:12px;font-weight:500;letter-spacing:.6px;color:#8A877F;text-transform:uppercase">App</div>
+      <div style="border-radius:12px;background:#FFFFFF;border:1px solid rgba(0,0,0,.06);overflow:hidden">
+        <sc-for list="{{ legalRows }}" as="l" hint-placeholder-count="5">
+          <div style="display:flex;align-items:center;gap:12px;height:52px;padding:0 16px;border-top:1px solid {{ l.sep }};cursor:pointer;user-select:none" style-hover="background:#FAF9F6">
+            <div style="flex:1;min-width:0;font-size:15px">{{ l.label }}</div>
+            <div style="flex:none;font-size:13px;color:#A5A29B;font-family:'Roboto Mono',monospace">{{ l.value }}</div>
+            <div style="flex:none;font-size:18px;color:#A5A29B">{{ l.chevron }}</div>
+          </div>
+        </sc-for>
+      </div>
+      <div style="padding:2px 4px;font-size:12px;line-height:1.5;color:#A5A29B;text-wrap:pretty">Bierwiegen ist ein Hobbyprojekt. Trinkt verantwortungsvoll und nur, wenn ihr das dürft.</div>
+    </div>
+
   </div>
 </div>
 </x-import>
@@ -230,9 +237,14 @@ class Component extends DCLogic {
 
     const nm = s.name.trim();
     return {
-      name: s.name,
-      onName: e => this.setState({ name: e.target.value }),
       displayName: nm || 'Dein Name',
+      legalRows: [
+        { label: 'Feedback geben', value: '', chevron: '›' },
+        { label: 'Impressum', value: '', chevron: '›' },
+        { label: 'Datenschutz', value: '', chevron: '›' },
+        { label: 'Lizenzen', value: '', chevron: '›' },
+        { label: 'Version', value: '0.4.2', chevron: '' },
+      ].map((l, i) => ({ ...l, sep: i === 0 ? 'transparent' : 'rgba(0,0,0,.06)' })),
       initial: (nm ? nm[0] : '?').toUpperCase(),
       onScroll: this.onScroll,
       barShadow: s.scrolled ? '0 1px 0 rgba(0,0,0,.08)' : 'none',

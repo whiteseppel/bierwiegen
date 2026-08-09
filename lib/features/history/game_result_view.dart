@@ -33,9 +33,7 @@ class GameResultView extends ConsumerWidget {
     switch (variant) {
       case GameResultVariant.summary:
         final finished = model.finishedAt;
-        final title =
-            '${finished.day}. ${monthShort(finished.month)} '
-            '${finished.year}';
+        final title = dayMonthYear(finished);
         return Scaffold(
           backgroundColor: CustomColors.background,
           body: SafeArea(
@@ -82,9 +80,7 @@ class GameResultView extends ConsumerWidget {
               Expanded(
                 child: _InfoTile(
                   label: 'Datum',
-                  value:
-                      '${weekdayName(finished.weekday)}, '
-                      '${finished.day}. ${monthShort(finished.month)}',
+                  value: weekdayDayMonth(finished),
                   sub: '${clock(finished)} Uhr',
                   subMono: true,
                 ),

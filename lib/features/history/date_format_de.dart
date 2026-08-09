@@ -1,23 +1,27 @@
-const _monthsShort = [
-  'Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', //
-  'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez',
-];
+import 'package:intl/intl.dart';
 
-const _weekdays = [
-  'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', //
-  'Freitag', 'Samstag', 'Sonntag',
-];
+const _locale = 'de_DE';
 
-/// Abbreviated German month for a `DateTime.month` (1–12).
-String monthShort(int month) => _monthsShort[month - 1];
+final _dayMonthYear = DateFormat('d. MMM y', _locale);
+final _weekdayDayMonth = DateFormat('EEEE, d. MMM', _locale);
+final _dayMonth = DateFormat('d. MMM', _locale);
+final _monthAbbrev = DateFormat('MMM', _locale);
+final _clock = DateFormat('HH:mm', _locale);
 
-/// German weekday for a `DateTime.weekday` (1 = Monday … 7 = Sunday).
-String weekdayName(int weekday) => _weekdays[weekday - 1];
+/// "21. Aug. 2025".
+String dayMonthYear(DateTime dt) => _dayMonthYear.format(dt);
 
-String _two(int value) => value.toString().padLeft(2, '0');
+/// "Donnerstag, 21. Aug.".
+String weekdayDayMonth(DateTime dt) => _weekdayDayMonth.format(dt);
 
-/// "21:34" for [dt].
-String clock(DateTime dt) => '${_two(dt.hour)}:${_two(dt.minute)}';
+/// "21. Aug.".
+String dayMonth(DateTime dt) => _dayMonth.format(dt);
+
+/// Abbreviated German month, e.g. "Aug.".
+String monthAbbrev(DateTime dt) => _monthAbbrev.format(dt);
+
+/// "21:34".
+String clock(DateTime dt) => _clock.format(dt);
 
 /// "48 Min" / "1 Std 6 Min" / "1 Std".
 String durationLabel(Duration d) {

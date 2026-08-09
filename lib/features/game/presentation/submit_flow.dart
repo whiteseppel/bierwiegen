@@ -65,7 +65,7 @@ Future<void> startNewRound(BuildContext context, WidgetRef ref) async {
   if (game.config.targetMode == TargetMode.auto) {
     target = await showRollDialog(
       context,
-      current: lastTarget ?? 500,
+      current: game.autoTargetBase ?? 500,
       roundNumber: game.rounds.length + 1,
     );
   } else {

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&amp;family=Roboto+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#DFDDD6;font-family:Roboto,system-ui,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px;box-sizing:border-box}
+a{color:#789283}a:hover{color:#5C7466}
+input{font-family:Roboto,system-ui,sans-serif}
+input::placeholder{color:#A5A29B}
+</style>
+</helmet>
+<x-import component-from-global-scope="AndroidDevice" from="./android-frame.jsx" hint-size="412px,892px">
+<div style="height:100%;position:relative;display:flex;flex-direction:column;background:#EFEEE9;overflow:hidden;color:#1C1B18">
+
+  <div style="height:56px;flex:none;display:flex;align-items:center;gap:4px;padding:0 8px;background:#EFEEE9;box-shadow:{{ barShadow }};z-index:10;transition:box-shadow .18s linear">
+    <a href="./Profile.dc.html" style="width:44px;height:44px;flex:none;border-radius:22px;display:flex;align-items:center;justify-content:center;text-decoration:none;color:#1C1B18" style-hover="background:rgba(0,0,0,.05)">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg>
+    </a>
+    <div style="flex:1;min-width:0;font-size:20px;font-weight:700;letter-spacing:-.2px;white-space:nowrap">Konto</div>
+  </div>
+
+  <div onScroll="{{ onScroll }}" style="flex:1;overflow:auto;padding:8px 20px 32px;display:flex;flex-direction:column;gap:26px">
+
+    <div style="display:flex;align-items:center;gap:16px">
+      <div style="width:76px;height:76px;flex:none;border-radius:38px;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:700;background:{{ avatarBg }};color:{{ avatarFg }}">{{ initial }}</div>
+      <div style="min-width:0">
+        <div style="font-size:22px;font-weight:700;letter-spacing:-.3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ displayName }}</div>
+        <div style="margin-top:2px;font-size:13px;color:#8A877F">{{ accountSub }}</div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <div style="font-size:12px;font-weight:500;letter-spacing:.6px;color:#8A877F;text-transform:uppercase">Name</div>
+      <div style="display:flex;align-items:center;height:56px;padding:0 16px;border-radius:12px;background:#FFFFFF;border:1px solid rgba(0,0,0,.10)">
+        <input value="{{ name }}" onChange="{{ onName }}" placeholder="Dein Name" style="flex:1;min-width:0;height:100%;border:0;background:transparent;outline:none;font-size:16px;color:#1C1B18;padding:0" />
+      </div>
+      <div style="font-size:12px;color:#A5A29B">So sehen dich Mitspieler in der Tabelle.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div style="font-size:12px;font-weight:500;letter-spacing:.6px;color:#8A877F;text-transform:uppercase">Farbe</div>
+      <div style="display:flex;gap:12px">
+        <sc-for list="{{ colors }}" as="c" hint-placeholder-count="5">
+          <div onClick="{{ c.onClick }}" style="width:48px;height:48px;flex:none;border-radius:24px;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:center;background:{{ c.bg }};box-shadow:{{ c.ring }}">
+            <sc-if value="{{ c.selected }}" hint-placeholder-val="{{ false }}">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{{ c.tick }}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"></path></svg>
+            </sc-if>
+          </div>
+        </sc-for>
+      </div>
+      <div style="font-size:12px;color:#A5A29B">Deine Farbe im Profil und in der Spielübersicht.</div>
+    </div>
+
+    <div style="height:1px;background:rgba(0,0,0,.08)"></div>
+
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="font-size:12px;font-weight:500;letter-spacing:.6px;color:#8A877F;text-transform:uppercase">Anmelden</div>
+      <div style="font-size:15px;line-height:1.5;color:#4A4843;text-wrap:pretty">Melde dich an, um deine Spiele auf mehreren Geräten zu behalten. Bis dahin bleibt alles nur auf diesem Telefon.</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <sc-for list="{{ providers }}" as="p" hint-placeholder-count="3">
+          <div onClick="{{ p.onClick }}" style="display:flex;align-items:center;gap:14px;height:56px;padding:0 16px;border-radius:12px;background:#FFFFFF;border:1px solid {{ p.border }};cursor:pointer;user-select:none" style-hover="background:#FAF9F6">
+            <div style="width:32px;height:32px;flex:none;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;background:{{ p.badgeBg }};color:{{ p.badgeFg }}">{{ p.badge }}</div>
+            <div style="flex:1;min-width:0;font-size:15px;font-weight:500">{{ p.label }}</div>
+            <div style="flex:none;font-size:13px;color:{{ p.stateFg }}">{{ p.state }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="height:1px;background:rgba(0,0,0,.08)"></div>
+
+    <div onClick="{{ onSignOut }}" style="height:50px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:500;color:#C0392B;cursor:pointer;user-select:none;border:1px solid rgba(192,57,43,.3)" style-hover="background:#FBECEA">{{ signOutLabel }}</div>
+
+  </div>
+</div>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:460,&quot;height&quot;:940}}">
+const SWATCHES = [
+  { id: 'amber', bg: '#FEAD2E', fg: '#2B2205', tick: '#2B2205' },
+  { id: 'sage', bg: '#789283', fg: '#FFFFFF', tick: '#FFFFFF' },
+  { id: 'clay', bg: '#C0704A', fg: '#FFFFFF', tick: '#FFFFFF' },
+  { id: 'plum', bg: '#7C5B77', fg: '#FFFFFF', tick: '#FFFFFF' },
+  { id: 'slate', bg: '#5A6470', fg: '#FFFFFF', tick: '#FFFFFF' },
+];
+
+class Component extends DCLogic {
+  state = { name: 'Lena', color: 'amber', linked: {}, scrolled: false };
+
+  onScroll = e => {
+    const on = e.target.scrollTop > 4;
+    if (on !== this.state.scrolled) this.setState({ scrolled: on });
+  };
+
+  renderVals() {
+    const s = this.state;
+    const nm = s.name.trim();
+    const sel = SWATCHES.filter(c => c.id === s.color)[0] || SWATCHES[0];
+    const linkedCount = Object.keys(s.linked).filter(k => s.linked[k]).length;
+
+    return {
+      name: s.name,
+      onName: e => this.setState({ name: e.target.value }),
+      displayName: nm || 'Dein Name',
+      initial: (nm ? nm[0] : '?').toUpperCase(),
+      accountSub: linkedCount ? 'Angemeldet · Spiele werden gesichert' : 'Nur auf diesem Gerät',
+      avatarBg: sel.bg, avatarFg: sel.fg,
+      onScroll: this.onScroll,
+      barShadow: s.scrolled ? '0 1px 0 rgba(0,0,0,.08)' : 'none',
+      colors: SWATCHES.map(c => ({
+        bg: c.bg, tick: c.tick, selected: c.id === s.color,
+        ring: c.id === s.color ? '0 0 0 3px #EFEEE9,0 0 0 5px ' + c.bg : 'none',
+        onClick: () => this.setState({ color: c.id }),
+      })),
+      providers: [
+        { id: 'google', label: 'Mit Google anmelden', badge: 'G', badgeBg: '#F1F0EC', badgeFg: '#4A4843' },
+        { id: 'apple', label: 'Mit Apple anmelden', badge: 'A', badgeBg: '#1C1B18', badgeFg: '#FFFFFF' },
+        { id: 'email', label: 'Mit E-Mail anmelden', badge: '@', badgeBg: '#EDF1EE', badgeFg: '#3F5348' },
+      ].map(p => {
+        const on = !!s.linked[p.id];
+        return { ...p,
+          border: on ? 'rgba(120,146,131,.55)' : 'rgba(0,0,0,.06)',
+          state: on ? 'Verbunden' : '',
+          stateFg: '#3F5348',
+          onClick: () => this.setState(x => ({ linked: { ...x.linked, [p.id]: !x.linked[p.id] } })),
+        };
+      }),
+      signOutLabel: linkedCount ? 'Abmelden' : 'Alle Daten auf diesem Gerät löschen',
+      onSignOut: () => this.setState({ linked: {} }),
+    };
+  }
+}
+</script>
+</body>
+</html>

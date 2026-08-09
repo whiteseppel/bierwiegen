@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'game_config.dart';
@@ -7,6 +9,11 @@ import 'player.dart';
 
 part 'game.freezed.dart';
 part 'game.g.dart';
+
+/// Range (grams) an automatic round draws below its base weight. The only
+/// step-size knobs for the auto target; see docs/auto_target_algorithm.md.
+const double kAutoDrawMin = 30;
+const double kAutoDrawMax = 80;
 
 @freezed
 abstract class Game with _$Game {
@@ -35,8 +42,34 @@ abstract class Game with _$Game {
   bool get hasAnyMeasurement =>
       rounds.any((r) => r.measurements.any((m) => m != 0));
 
-  /// A glass under this weight (grams) ends the game.
-  static const double finishThreshold = 50;
+  /// Lowest current weight across all players: their last measurement, else
+  /// initial weight. Null before anyone has weighed in.
+  double? get lowestCurrentWeight {
+    final weights = [
+      for (int i = 0; i < players.length; i++)
+        lastMeasurement(i) ?? players[i].initialWeight,
+    ].where((w) => w != 0);
+    if (weights.isEmpty) {
+      return null;
+    }
+    return weights.reduce((a, b) => a < b ? a : b);
+  }
+
+  /// Weight the next automatic target is drawn down from: whichever is higher,
+  /// the last round's target or the lightest current glass. Anchoring to the
+  /// lightest glass whenever nobody reached the last target caps the next forced
+  /// drink at the draw range, so successive undershoots can't compound into one
+  /// oversized round. Round 1 adds [kAutoDrawMin] so the opening step is gentle
+  /// (0–[kAutoDrawMax]−[kAutoDrawMin] g). Null before anyone has weighed in.
+  /// See docs/auto_target_algorithm.md.
+  double? get autoTargetBase {
+    final lowest = lowestCurrentWeight;
+    if (lowest == null) {
+      return null;
+    }
+    final lastTarget = rounds.isEmpty ? null : rounds.last.target;
+    return lastTarget == null ? lowest + kAutoDrawMin : max(lastTarget, lowest);
+  }
 
   /// Player's most recently entered measurement across all rounds; null when
   /// they have not been weighed in any round yet.
@@ -49,13 +82,6 @@ abstract class Game with _$Game {
     }
     return null;
   }
-
-  /// Players whose glass has dropped below [finishThreshold]; their presence
-  /// ends the game.
-  List<Player> get finishers => [
-    for (int i = 0; i < players.length; i++)
-      if ((lastMeasurement(i) ?? double.infinity) < finishThreshold) players[i],
-  ];
 
   /// Weight the player's glass had before [roundIndex]: the last entered
   /// measurement of an earlier round, else the initial weight; null when

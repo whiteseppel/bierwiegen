@@ -137,10 +137,14 @@ class _WeightCellState extends ConsumerState<WeightCell> {
                 ? Border.all(color: CustomColors.goldFocusRing, width: 2)
                 : const Border(left: BorderSide(color: CustomColors.hairline)),
       ),
+      // Keys pin each child to its own slot: without them, the accent bar
+      // appearing at index 0 recycles the field's EditableText, dropping the
+      // keyboard while the cell keeps focus.
       child: Stack(
         children: [
           if (gold || green)
             Positioned(
+              key: const ValueKey('accent'),
               left: 14,
               right: 14,
               bottom: 0,
@@ -160,6 +164,7 @@ class _WeightCellState extends ConsumerState<WeightCell> {
               ),
             ),
           Positioned.fill(
+            key: const ValueKey('field'),
             bottom: 12,
             child: Center(
               child: TextField(
@@ -199,6 +204,7 @@ class _WeightCellState extends ConsumerState<WeightCell> {
           ),
           if (deltaLabel != null)
             Positioned(
+              key: const ValueKey('delta'),
               left: 0,
               right: 0,
               bottom: 7,

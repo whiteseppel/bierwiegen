@@ -3,11 +3,14 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 import '../../../../ui/tokens.dart';
+import '../../domain/game.dart';
 import '../format.dart';
 
-/// Draws the next target: 30–80 g below [current], never below zero.
+/// Draws the next target: [kAutoDrawMin]–[kAutoDrawMax] g below [current],
+/// never below zero.
 double drawAutoTarget(double current) {
-  final draw = 30 + Random().nextInt(51);
+  final span = (kAutoDrawMax - kAutoDrawMin).toInt();
+  final draw = kAutoDrawMin + Random().nextInt(span + 1);
   return (current - draw).clamp(0.0, double.infinity);
 }
 

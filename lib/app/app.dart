@@ -18,6 +18,18 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: CustomColors.primaryColor),
         useMaterial3: true,
+        scaffoldBackgroundColor: CustomColors.background,
+        // The zoom transition otherwise fills with colorScheme.surface, which
+        // flashes behind the pages on push/pop since the scaffolds use a
+        // different background.
+        pageTransitionsTheme: const PageTransitionsTheme(
+          builders: {
+            TargetPlatform.android: ZoomPageTransitionsBuilder(
+              backgroundColor: CustomColors.background,
+            ),
+            TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+          },
+        ),
       ),
       home: const StartScreen(),
     );

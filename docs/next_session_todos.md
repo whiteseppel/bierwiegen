@@ -15,8 +15,8 @@ notes tying it to the current code so the next session has a head start.
   `GameMetaData`) was converted to **freezed** with `toJson`/`fromJson`
   (`json_serializable`, `build.yaml` sets `explicit_to_json`).
 - Round-trip covered by `test/features/history/game_repository_test.dart`.
-- Not yet done: **retention** (no cap on the stored list — decide later if needed)
-  and the **privacy text** update (item 2a).
+- **Retention — DONE (decided):** we retain all games, no cap. Revisit only if a
+  storage problem ever surfaces.
 
 ### 2. How we save player data — DONE
 - The account name now persists via `ProfileRepository`
@@ -26,24 +26,35 @@ notes tying it to the current code so the next session has a head start.
 - Still open: item 10 (auto-populate the name into the start screen) and item 9
   (account color).
 
-### 2a. Update the privacy / legal text
-- The privacy text (`AppStrings.privacy`, shown in the "Rechtliches" section of
-  the account screen) currently states no data is collected or stored. Once we
-  persist anything (game history, player name, account color — items 1, 2, 9),
-  this is no longer accurate and **must be rewritten** to describe what is stored,
-  where, and for how long.
-- While editing, also fix the existing German typos in `AppStrings.privacy`
-  (`werdn`, `gespreichert`) and review the `imprint` text.
-- Consider whether persisted data needs a way to be cleared (e.g. a "Daten
-  löschen" action) and reflect that in the text.
+### 2a. Update the privacy / legal text — DONE
+- `AppStrings.privacy` (`strings.dart`) was rewritten to describe what is stored
+  locally (name, profile color, games), that it never leaves the device or goes
+  to third parties, that it is fully deletable, and that a future account + games
+  may be stored the same way. The old typos (`werdn`, `gespreichert`) are fixed.
+- Follow-up if wanted: a one-tap "alle löschen" action (see item 2b); the text
+  currently points at per-game delete + uninstall.
 
-### 2b. Remove played games from the list — DONE
+### 2b. Remove played games from the list — DONE (follow-ups resolved / not pursued)
 - Each card in the "Letzte Spiele" list is now a `flutter_slidable` `Slidable`
   (`RecentGamesScreen`): swipe right-to-left reveals a red trash button that
   deletes the game. Backed by `GameHistoryNotifier.remove(Game)` →
   `GameRepository.delete(Game)`, so it drops from state and storage.
-- Open follow-ups if desired: a confirm step / undo snackbar, and an "alle
-  löschen" action.
+- Follow-ups (confirm step / undo snackbar / "alle löschen") are not of concern
+  for now — considered resolved.
+
+### 2c. Responsible-drinking disclaimer
+- **Goal:** add a short "Trink verantwortungsvoll" disclaimer so a drinking-game
+  app nudges responsible use (and covers us legally).
+- **Content:** brief German note — drink responsibly, know your limits, don't
+  drink and drive, not for minors. Keep the tone light but clear.
+- **Where to show it:** decide placement — candidates are the "Rechtliches"
+  section of the account screen (next to `AppStrings.privacy` / `imprint`), a
+  one-time notice on first launch, and/or a small line on the start screen
+  (`start_screen.dart`) before a game begins.
+- Add the text to `AppStrings` (`lib/features/info/strings.dart`) alongside the
+  other legal strings. Ties into item 2a (legal-text rewrite) — do them together.
+- Open questions: show once vs. always, and whether it needs an explicit
+  "Ich bin über 18" acknowledgement before the first game.
 
 ## Input / round flow
 
@@ -52,20 +63,25 @@ notes tying it to the current code so the next session has a head start.
   has a basic glass fill + count-down. Improve the beer animation (liquid motion,
   foam, easing, settle effect).
 
-### 4. Use the same input screen for manual adding
-- **Goal:** unify the manual "Neue Runde" flow to use the same popup UI as the
-  auto roll screen instead of the plain number dialog.
-- Today `startNewRound` (`lib/features/game/presentation/submit_flow.dart`)
-  branches: auto → `showRollDialog`, manual → `Dialogs.weightInputDialog`.
-- Make the roll/target screen accept a manual-entry mode (user types the target
-  in the same layout), so both modes share one screen.
+### 4. Use the same input screen for manual adding — DONE
+- Manual and auto "Neue Runde" now share one popup: `startNewRound`
+  (`submit_flow.dart`) routes both through the roll/target screen; the old
+  `Dialogs.weightInputDialog` branch is gone.
 
-### 5. Bigger name in the "Gewicht eingeben" popup
-- In `Dialogs.weightInputDialog` (`lib/features/game/presentation/dialogs.dart`),
-  make the player name larger / more prominent so it's clear whose weight is being
-  entered.
+### 5. Bigger name in the "Gewicht eingeben" popup — DONE
+- The unified target/weight popup (`Dialogs.targetWeightDialog`, `dialogs.dart`)
+  now shows the player name prominently.
 
-### 5a. Auto-mode first target must depend on the entered initial weights
+### 5a. Auto-mode first target must depend on the entered initial weights — DONE
+- The first auto round now anchors at `lowestCurrentWeight + kAutoDrawMin` instead
+  of a flat 500 (`startNewRound`, `submit_flow.dart`); later rounds still chain off
+  `lastTarget`. The draw range is named (`kAutoDrawMin` 30 / `kAutoDrawMax` 80 in
+  `roll_dialog.dart`) so the boundary is one variable. Effect: the lightest glass's
+  owner drinks at most `kAutoDrawMax − kAutoDrawMin` (50 g) in round 1, and never a
+  negative amount. Single global target kept by design, so heavier glasses drink
+  more per round — accepted trade-off.
+
+### 5a (original notes)
 - **Problem:** in automatic mode the very first round currently starts from a flat
   `500 g` baseline (`startNewRound` in `submit_flow.dart` →
   `showRollDialog(current: lastTarget ?? 500)`, drawing 30–80 g below). This
@@ -81,7 +97,16 @@ notes tying it to the current code so the next session has a head start.
   weights are on `Game.players[i].initialWeight`; `Game.previousWeight` /
   `lastMeasurement` give the current per-player weight.
 
-### 5b. Finish condition must account for container tare (not a fixed 50 g)
+### 5b. Finish condition must account for container tare (not a fixed 50 g) — DONE
+- Solved by making finishing **manual** instead of tare-based, so tare never has to
+  be known. The "Spiel beenden" button (primary) now shows below the "+ Neue Runde"
+  button (secondary) whenever `canStartNewRound && rounds.isNotEmpty` — i.e. once at
+  least one round is finished and the last round is complete (`_buildPlayFooter`,
+  `game_screen.dart`). The old absolute `Game.finishThreshold` (50 g) and `finishers`
+  getter were removed, along with the footer hint text. `finishGameDialog` still
+  confirms, so a mis-tap can't end the game accidentally.
+
+### 5b (original notes)
 - **Problem:** the game ends via an absolute threshold — a glass under
   `Game.finishThreshold` (50 g) marks a player as a *finisher*
   (`Game.finishers`), which is also what reveals the "Spiel beenden" button.
@@ -104,7 +129,7 @@ notes tying it to the current code so the next session has a head start.
     `game_screen.dart` `_buildPlayFooter` and `Game.canStartNewRound`.)
   - Keep it consistent with the auto-target step sizing in item 5a.
 
-### 5c. Remove a round — IMPLEMENTED (two variants to compare)
+### 5c. Remove a round — DONE
 - **Goal:** let players delete the current/last round.
 - **Example:** the group wants to finish, but someone accidentally taps
   "Neue Runde" and adds an empty round — we need a way to remove it so the finish
@@ -140,37 +165,30 @@ notes tying it to the current code so the next session has a head start.
   the now-unused `ui/text_styles.dart` and `ui/button_styles.dart`. `strings.dart`
   stays (some entries are currently unused but kept for the settings rework).
 
-### 7. Updated Bluetooth connection flow
-- Rework the scale connection UX end-to-end (scan → connect → connected →
-  reconnect → disconnect), covering `scale_provider.dart`, the account screen's
-  scale card (`_ScaleSection`), and the top-bar `ScaleChip`. Clarify states,
-  errors, and the "connects automatically next game" behavior.
+### 7. Updated Bluetooth connection flow — DONE
+- The scale connection UX was reworked end-to-end (scan → connect → reconnect →
+  disconnect) across `scale_provider.dart`, the account/settings scale card, and
+  the top-bar `ScaleChip`.
 
-### 8. Better settings screen (split menu vs. settings vs. account)
-- **Goal:** cleanly separate three concepts:
-  - **Menu** — navigation only.
-  - **Settings** — only the scale and the rules (with potential legal/privacy
-    text).
-  - **Account** — its own thing (name, color, games history).
-- The old `OptionsScreen` was removed (see item 6). Right now everything —
-  scale, rules, "Letzte Spiele", and the legal text — lives on the **account
-  screen**. The rework should split this back out: a dedicated **Settings**
-  (scale + rules + legal) distinct from **Account** (name, color, history).
+### 8. Better settings screen (split menu vs. settings vs. account) — DONE
+- Settings and Account are now split: a dedicated `settings_screen.dart` (scale +
+  rules + legal, with `legal_detail_screen.dart`) distinct from
+  `account_screen.dart` (name, color, history); shared pieces live in
+  `account_ui.dart`.
 
 ## Account personalization
 
-### 9. Account color
-- Let the user pick an account color from **8 pastel colors** that fit the game's
-  visual language (gold `#FEAD2E` / green `#789283` / warm off-white palette).
-- Use it for the avatar background/initial on the account screen (currently the
-  fixed gold tint in `account_screen.dart`) and wherever the player is shown.
-- Define the 8-swatch palette in `lib/ui/tokens.dart`. Persist per item 2.
+### 9. Account color — DONE
+- The player picks an avatar color, persisted via `ProfileRepository.saveColor`
+  and exposed through `profileColorProvider`; used for the avatar on the account
+  screen and wherever the player is shown (`start_screen`, `settings_screen`).
+- Shipped as **5 colors** defined in `lib/features/account/profile_color.dart`
+  (`ProfileColor` enum), not the originally-planned 8 pastels in `tokens.dart`.
 
-### 10. Auto-populate the user name in the player list on app start
-- On launch, prefill the first player field on the start screen with the saved
-  account name (`profileNameProvider`), instead of an empty field.
-- See `_StartScreenState` in `lib/features/home/start_screen.dart`. Depends on
-  item 2 (persisted name).
+### 10. Auto-populate the user name in the player list on app start — DONE
+- `_StartScreenState.initState` (`start_screen.dart`) prefills the first player
+  field with the saved account name (`profileNameProvider`) when it is non-empty,
+  and adds a trailing empty field so more players can be added.
 
 ## Localization / formatting
 

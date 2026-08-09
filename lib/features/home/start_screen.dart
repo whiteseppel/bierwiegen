@@ -3,7 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../../ui/tokens.dart';
-import '../account/account_screen.dart';
+import '../account/account_providers.dart';
+import '../account/settings_screen.dart';
 import '../game/domain/game_config.dart';
 import '../game/presentation/game_screen.dart';
 import '../game/presentation/widgets/choice_tile.dart';
@@ -29,6 +30,11 @@ class _StartScreenState extends ConsumerState<StartScreen> {
   void initState() {
     WakelockPlus.enable();
     _scrollController.addListener(_onScroll);
+    final savedName = ref.read(profileNameProvider).trim();
+    if (savedName.isNotEmpty) {
+      _playerControllers.first.text = savedName;
+      _playerControllers.add(TextEditingController());
+    }
     super.initState();
   }
 
@@ -41,13 +47,12 @@ class _StartScreenState extends ConsumerState<StartScreen> {
     super.dispose();
   }
 
-  void _onScroll() {
+  void _onScroll() => _updateTitle(_scrollController.offset);
+
+  void _updateTitle(double offset) {
     const start = 50.0;
     const end = 140.0;
-    final value = ((_scrollController.offset - start) / (end - start)).clamp(
-      0.0,
-      1.0,
-    );
+    final value = ((offset - start) / (end - start)).clamp(0.0, 1.0);
     if ((value - _titleOpacity).abs() > 0.01) {
       setState(() => _titleOpacity = value);
     }
@@ -64,41 +69,50 @@ class _StartScreenState extends ConsumerState<StartScreen> {
           children: [
             _AppBar(titleOpacity: _titleOpacity, onAccount: _openAccount),
             Expanded(
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  return SingleChildScrollView(
-                    controller: _scrollController,
-                    padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        minHeight: constraints.maxHeight - 42,
-                      ),
-                      child: IntrinsicHeight(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            const _TitleBlock(),
-                            const SizedBox(height: Spacings.large),
-                            const Text(
-                              'Gib die Namen der Mitspieler ein und lege '
-                              'direkt los!',
-                              style: TextStyle(
-                                fontSize: 15,
-                                height: 1.45,
-                                color: CustomColors.textMuted,
+              child: NotificationListener<ScrollMetricsNotification>(
+                // Fires when the viewport/extent changes without a user scroll
+                // — e.g. the keyboard closing or returning from the game — where
+                // the offset is silently clamped and _onScroll never runs.
+                onNotification: (notification) {
+                  _updateTitle(notification.metrics.pixels);
+                  return false;
+                },
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    return SingleChildScrollView(
+                      controller: _scrollController,
+                      padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          minHeight: constraints.maxHeight - 42,
+                        ),
+                        child: IntrinsicHeight(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              const _TitleBlock(),
+                              const SizedBox(height: Spacings.large),
+                              const Text(
+                                'Gib die Namen der Mitspieler ein und lege '
+                                'direkt los!',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  height: 1.45,
+                                  color: CustomColors.textMuted,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: Spacings.medium),
-                            _buildPlayerFields(),
-                            const SizedBox(height: 20),
-                            const Spacer(),
-                            _buildActions(canStart),
-                          ],
+                              const SizedBox(height: Spacings.medium),
+                              _buildPlayerFields(),
+                              const SizedBox(height: 20),
+                              const Spacer(),
+                              _buildActions(canStart),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
             ),
           ],
@@ -140,10 +154,11 @@ class _StartScreenState extends ConsumerState<StartScreen> {
           enabled: canStart,
           onPressed: canStart ? _startGame : null,
         ),
-        const SizedBox(height: 12),
-        const _OrDivider(),
-        const SizedBox(height: 12),
-        _JoinButton(onPressed: _comingSoon),
+        // "Spiel beitreten" is deferred until the join-game feature lands.
+        // const SizedBox(height: 12),
+        // const _OrDivider(),
+        // const SizedBox(height: 12),
+        // _JoinButton(onPressed: _comingSoon),
       ],
     );
   }
@@ -182,14 +197,15 @@ class _StartScreenState extends ConsumerState<StartScreen> {
   void _openAccount() {
     Navigator.of(
       context,
-    ).push(MaterialPageRoute(builder: (context) => const AccountScreen()));
+    ).push(MaterialPageRoute(builder: (context) => const SettingsScreen()));
   }
 
-  void _comingSoon() {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(const SnackBar(content: Text('Bald verfügbar')));
-  }
+  // Restore alongside the deferred "Spiel beitreten" button.
+  // void _comingSoon() {
+  //   ScaffoldMessenger.of(context)
+  //     ..hideCurrentSnackBar()
+  //     ..showSnackBar(const SnackBar(content: Text('Bald verfügbar')));
+  // }
 
   void _startGame() {
     final names = [
@@ -211,14 +227,14 @@ class _StartScreenState extends ConsumerState<StartScreen> {
   }
 }
 
-class _AppBar extends StatelessWidget {
+class _AppBar extends ConsumerWidget {
   const _AppBar({required this.titleOpacity, required this.onAccount});
 
   final double titleOpacity;
   final VoidCallback onAccount;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       height: 56,
       padding: const EdgeInsets.symmetric(horizontal: 14),
@@ -246,24 +262,32 @@ class _AppBar extends StatelessWidget {
             ),
           ),
           const Spacer(),
-          Material(
-            color: CustomColors.goldTint,
-            shape: const CircleBorder(),
-            clipBehavior: Clip.antiAlias,
-            child: InkWell(
-              onTap: onAccount,
-              child: const SizedBox(
-                width: 44,
-                height: 44,
-                child: Icon(
-                  Icons.person_outline,
-                  size: 24,
-                  color: CustomColors.goldTextDark,
-                ),
-              ),
-            ),
-          ),
+          _AccountButton(onTap: onAccount),
         ],
+      ),
+    );
+  }
+}
+
+class _AccountButton extends ConsumerWidget {
+  const _AccountButton({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final color = ref.watch(profileColorProvider);
+    return Material(
+      color: color.background,
+      shape: const CircleBorder(),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: SizedBox(
+          width: 44,
+          height: 44,
+          child: Icon(Icons.person_outline, size: 24, color: color.foreground),
+        ),
       ),
     );
   }
@@ -464,10 +488,9 @@ class _StartButton extends StatelessWidget {
             style: TextStyle(
               fontSize: 17,
               fontWeight: FontWeight.w700,
-              color:
-                  enabled
-                      ? CustomColors.onPrimaryDark
-                      : CustomColors.disabledText,
+              color: enabled
+                  ? CustomColors.onPrimaryDark
+                  : CustomColors.disabledText,
             ),
           ),
         ),
@@ -476,65 +499,66 @@ class _StartButton extends StatelessWidget {
   }
 }
 
-class _OrDivider extends StatelessWidget {
-  const _OrDivider();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Row(
-      children: [
-        Expanded(child: Divider(color: Color(0x24000000), height: 1)),
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: 14),
-          child: Text(
-            'oder',
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-              letterSpacing: 0.4,
-              color: CustomColors.textFaint,
-            ),
-          ),
-        ),
-        Expanded(child: Divider(color: Color(0x24000000), height: 1)),
-      ],
-    );
-  }
-}
-
-class _JoinButton extends StatelessWidget {
-  const _JoinButton({required this.onPressed});
-
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      borderRadius: BorderRadius.circular(standardBorderRadius),
-      child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(standardBorderRadius),
-        child: Container(
-          height: 56,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(standardBorderRadius),
-            border: Border.all(color: CustomColors.secondaryColor),
-          ),
-          child: const Text(
-            'Spiel beitreten',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-              color: CustomColors.greenDark,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
+// Deferred until the join-game feature lands.
+// class _OrDivider extends StatelessWidget {
+//   const _OrDivider();
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return const Row(
+//       children: [
+//         Expanded(child: Divider(color: Color(0x24000000), height: 1)),
+//         Padding(
+//           padding: EdgeInsets.symmetric(horizontal: 14),
+//           child: Text(
+//             'oder',
+//             style: TextStyle(
+//               fontSize: 13,
+//               fontWeight: FontWeight.w500,
+//               letterSpacing: 0.4,
+//               color: CustomColors.textFaint,
+//             ),
+//           ),
+//         ),
+//         Expanded(child: Divider(color: Color(0x24000000), height: 1)),
+//       ],
+//     );
+//   }
+// }
+//
+// class _JoinButton extends StatelessWidget {
+//   const _JoinButton({required this.onPressed});
+//
+//   final VoidCallback onPressed;
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Material(
+//       color: Colors.transparent,
+//       borderRadius: BorderRadius.circular(standardBorderRadius),
+//       child: InkWell(
+//         onTap: onPressed,
+//         borderRadius: BorderRadius.circular(standardBorderRadius),
+//         child: Container(
+//           height: 56,
+//           alignment: Alignment.center,
+//           decoration: BoxDecoration(
+//             borderRadius: BorderRadius.circular(standardBorderRadius),
+//             border: Border.all(color: CustomColors.secondaryColor),
+//           ),
+//           child: const Text(
+//             'Spiel beitreten',
+//             style: TextStyle(
+//               fontSize: 16,
+//               fontWeight: FontWeight.w500,
+//               color: CustomColors.greenDark,
+//             ),
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }
 
 typedef StartOptions = ({GameMode mode, TargetMode targetMode});
 
@@ -550,11 +574,10 @@ Future<StartOptions?> showStartOptionsSheet(
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
     ),
-    builder:
-        (context) => _StartOptionsSheet(
-          currentMode: currentMode,
-          currentTargetMode: currentTargetMode,
-        ),
+    builder: (context) => _StartOptionsSheet(
+      currentMode: currentMode,
+      currentTargetMode: currentTargetMode,
+    ),
   );
 }
 
@@ -641,10 +664,9 @@ class _StartOptionsSheetState extends State<_StartOptionsSheet> {
               elevation: 2,
               shadowColor: CustomColors.goldFocusRing,
               child: InkWell(
-                onTap:
-                    () => Navigator.of(
-                      context,
-                    ).pop((mode: _mode, targetMode: _targetMode)),
+                onTap: () => Navigator.of(
+                  context,
+                ).pop((mode: _mode, targetMode: _targetMode)),
                 borderRadius: BorderRadius.circular(standardBorderRadius),
                 child: Container(
                   height: 52,

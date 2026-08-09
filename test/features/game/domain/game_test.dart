@@ -52,31 +52,50 @@ void main() {
     expect(game.canStartNewRound, isTrue);
   });
 
-  test('no finishers while every glass stays at or above 50 g', () {
+  test('lowestCurrentWeight falls back to initial weights before any round', () {
+    expect(_weighedIn(const []).lowestCurrentWeight, 500);
+  });
+
+  test('lowestCurrentWeight uses the lightest last measurement', () {
     final game = _game([
       const GameRound(200, [180, 90, 60]),
     ]);
 
-    expect(game.finishers, isEmpty);
+    expect(game.lowestCurrentWeight, 60);
   });
 
-  test('a glass below 50 g makes that player a finisher', () {
-    final game = _game([
-      const GameRound(200, [180, 90, 60]),
-      const GameRound(120, [110, 40, 55]),
-    ]);
-
-    expect(game.finishers.map((p) => p.name), ['Ben']);
-  });
-
-  test('finisher status uses the most recent measurement', () {
+  test('lowestCurrentWeight ignores players not yet weighed this round', () {
     final game = _game([
       const GameRound(120, [110, 40, 55]),
       const GameRound(100, [90, 0, 0]),
     ]);
 
-    // Ben dropped below 50 g in round 1 and has no later measurement.
-    expect(game.finishers.map((p) => p.name), ['Ben']);
+    // Anna drops to 90 in round 2; Ben (40) and Cleo (55) keep round-1 weights.
+    expect(game.lowestCurrentWeight, 40);
+  });
+
+  test('autoTargetBase anchors round 1 to lightest weight plus the offset', () {
+    // 500 (lightest initial) + kAutoDrawMin (30): a gentler opening round.
+    expect(_weighedIn(const []).autoTargetBase, 530);
+  });
+
+  test('autoTargetBase chains off the last target when someone reached it', () {
+    final game = _weighedIn(const [
+      GameRound(400, [380, 390, 370]),
+    ]);
+
+    // Cleo is at 370 < 400, so the target keeps stepping down from 400.
+    expect(game.autoTargetBase, 400);
+  });
+
+  test('autoTargetBase re-anchors to the lightest glass on an all-undershoot', () {
+    final game = _weighedIn(const [
+      GameRound(400, [450, 460, 470]),
+    ]);
+
+    // Nobody reached 400; draw down from the lightest glass (450) instead so the
+    // next forced drink stays within the draw range.
+    expect(game.autoTargetBase, 450);
   });
 
   test('lastMeasurement is null before a player is weighed', () {

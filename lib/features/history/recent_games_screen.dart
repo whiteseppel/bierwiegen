@@ -46,7 +46,7 @@ class _GamesList extends StatelessWidget {
     final count = games.length;
     final intro =
         '$count ${count == 1 ? 'Spiel' : 'Spiele'} gespielt · '
-        'zuletzt am ${newest.day}. ${monthShort(newest.month)}';
+        'zuletzt am ${dayMonth(newest)}';
 
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(20, 6, 20, 32),
@@ -223,7 +223,7 @@ class _DateBadge extends StatelessWidget {
             ),
           ),
           Text(
-            monthShort(date.month).toUpperCase(),
+            monthAbbrev(date).toUpperCase(),
             style: const TextStyle(
               fontSize: 9,
               fontWeight: FontWeight.w500,

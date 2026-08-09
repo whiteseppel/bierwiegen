@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../ui/tokens.dart';
-import '../../../account/account_screen.dart';
+import '../../../account/settings_screen.dart';
 import '../../../scale/scale_provider.dart';
 import '../../domain/game_config.dart';
 import '../../state/game_providers.dart';
@@ -68,7 +68,7 @@ class _OptionsSheet extends ConsumerWidget {
               final navigator = Navigator.of(context);
               navigator.pop();
               navigator.push(
-                MaterialPageRoute(builder: (context) => const AccountScreen()),
+                MaterialPageRoute(builder: (context) => const SettingsScreen()),
               );
             },
           ),
