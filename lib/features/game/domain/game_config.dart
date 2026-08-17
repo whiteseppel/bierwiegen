@@ -12,7 +12,7 @@ enum TargetMode { manual, auto }
 abstract class GameConfig with _$GameConfig {
   const factory GameConfig({
     @Default(GameMode.standard) GameMode mode,
-    @Default(TargetMode.manual) TargetMode targetMode,
+    @Default(TargetMode.auto) TargetMode targetMode,
   }) = _GameConfig;
 
   factory GameConfig.fromJson(Map<String, dynamic> json) =>

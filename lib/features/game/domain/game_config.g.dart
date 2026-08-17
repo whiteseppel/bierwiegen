@@ -11,7 +11,7 @@ _GameConfig _$GameConfigFromJson(Map<String, dynamic> json) => _GameConfig(
       $enumDecodeNullable(_$GameModeEnumMap, json['mode']) ?? GameMode.standard,
   targetMode:
       $enumDecodeNullable(_$TargetModeEnumMap, json['targetMode']) ??
-      TargetMode.manual,
+      TargetMode.auto,
 );
 
 Map<String, dynamic> _$GameConfigToJson(_GameConfig instance) =>

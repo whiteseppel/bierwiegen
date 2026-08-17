@@ -7,14 +7,12 @@ part of 'game.dart';
 // **************************************************************************
 
 _Game _$GameFromJson(Map<String, dynamic> json) => _Game(
-  players:
-      (json['players'] as List<dynamic>)
-          .map((e) => Player.fromJson(e as Map<String, dynamic>))
-          .toList(),
-  rounds:
-      (json['rounds'] as List<dynamic>)
-          .map((e) => GameRound.fromJson(e as Map<String, dynamic>))
-          .toList(),
+  players: (json['players'] as List<dynamic>)
+      .map((e) => Player.fromJson(e as Map<String, dynamic>))
+      .toList(),
+  rounds: (json['rounds'] as List<dynamic>)
+      .map((e) => GameRound.fromJson(e as Map<String, dynamic>))
+      .toList(),
   config: GameConfig.fromJson(json['config'] as Map<String, dynamic>),
   meta: GameMetaData.fromJson(json['meta'] as Map<String, dynamic>),
 );

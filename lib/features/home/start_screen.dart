@@ -23,7 +23,7 @@ class _StartScreenState extends ConsumerState<StartScreen> {
   ];
   final ScrollController _scrollController = ScrollController();
   GameMode _mode = GameMode.standard;
-  TargetMode _targetMode = TargetMode.manual;
+  TargetMode _targetMode = TargetMode.auto;
   double _titleOpacity = 0;
 
   @override
@@ -643,19 +643,19 @@ class _StartOptionsSheetState extends State<_StartOptionsSheet> {
             const _SectionLabel('Zielvorgabe'),
             const SizedBox(height: Spacings.small),
             ChoiceTile(
-              label: 'Manuelle Ziele',
-              description: 'Ihr legt das Zielgewicht jeder Runde selbst fest.',
-              selected: _targetMode == TargetMode.manual,
-              onTap: () => setState(() => _targetMode = TargetMode.manual),
-            ),
-            const SizedBox(height: Spacings.small),
-            ChoiceTile(
               label: 'Automatische Ziele',
               description:
                   'Das nächste Ziel wird ausgelost: 25 – 70 g unter dem '
                   'aktuellen.',
               selected: _targetMode == TargetMode.auto,
               onTap: () => setState(() => _targetMode = TargetMode.auto),
+            ),
+            const SizedBox(height: Spacings.small),
+            ChoiceTile(
+              label: 'Manuelle Ziele',
+              description: 'Ihr legt das Zielgewicht jeder Runde selbst fest.',
+              selected: _targetMode == TargetMode.manual,
+              onTap: () => setState(() => _targetMode = TargetMode.manual),
             ),
             const SizedBox(height: 22),
             Material(

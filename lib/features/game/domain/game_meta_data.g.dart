@@ -9,10 +9,9 @@ part of 'game_meta_data.dart';
 _GameMetaData _$GameMetaDataFromJson(Map<String, dynamic> json) =>
     _GameMetaData(
       createdAt: DateTime.parse(json['createdAt'] as String),
-      finishedAt:
-          json['finishedAt'] == null
-              ? null
-              : DateTime.parse(json['finishedAt'] as String),
+      finishedAt: json['finishedAt'] == null
+          ? null
+          : DateTime.parse(json['finishedAt'] as String),
     );
 
 Map<String, dynamic> _$GameMetaDataToJson(_GameMetaData instance) =>

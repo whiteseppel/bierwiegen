@@ -210,7 +210,7 @@ return $default(_that.mode,_that.targetMode);case _:
 @JsonSerializable()
 
 class _GameConfig implements GameConfig {
-  const _GameConfig({this.mode = GameMode.standard, this.targetMode = TargetMode.manual});
+  const _GameConfig({this.mode = GameMode.standard, this.targetMode = TargetMode.auto});
   factory _GameConfig.fromJson(Map<String, dynamic> json) => _$GameConfigFromJson(json);
 
 @override@JsonKey() final  GameMode mode;

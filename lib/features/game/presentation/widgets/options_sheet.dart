@@ -165,19 +165,19 @@ class _GameSettingsSheet extends ConsumerWidget {
             const _SectionLabel('Zielvorgabe'),
             const SizedBox(height: Spacings.small),
             ChoiceTile(
-              label: 'Manuelle Ziele',
-              description: 'Ihr legt das Zielgewicht jeder Runde selbst fest.',
-              selected: targetMode == TargetMode.manual,
-              onTap: () => notifier.setTargetMode(TargetMode.manual),
-            ),
-            const SizedBox(height: Spacings.small),
-            ChoiceTile(
               label: 'Automatische Ziele',
               description:
                   'Das nächste Ziel wird ausgelost: 25 – 70 g unter dem '
                   'aktuellen.',
               selected: targetMode == TargetMode.auto,
               onTap: () => notifier.setTargetMode(TargetMode.auto),
+            ),
+            const SizedBox(height: Spacings.small),
+            ChoiceTile(
+              label: 'Manuelle Ziele',
+              description: 'Ihr legt das Zielgewicht jeder Runde selbst fest.',
+              selected: targetMode == TargetMode.manual,
+              onTap: () => notifier.setTargetMode(TargetMode.manual),
             ),
             const SizedBox(height: 22),
             _ApplyButton(onTap: () => Navigator.of(context).pop()),

@@ -149,7 +149,7 @@ class Component extends DCLogic {
     teams: false,
     optionsOpen: false,
     menuOpen: false,
-    targetMode: 'manual',
+    targetMode: 'auto',
     scrollT: 0,
   };
   onScroll = e => {
@@ -212,8 +212,8 @@ class Component extends DCLogic {
     });
 
     const targetModes = [
-      { id: 'manual', label: 'Manuelle Ziele', desc: 'Ihr legt das Zielgewicht jeder Runde selbst fest.' },
       { id: 'auto', label: 'Automatische Ziele', desc: 'Das nächste Ziel wird ausgelost: 25 – 70 g unter dem aktuellen.' },
+      { id: 'manual', label: 'Manuelle Ziele', desc: 'Ihr legt das Zielgewicht jeder Runde selbst fest.' },
     ].map(m => {
       const on = s.targetMode === m.id;
       return {
