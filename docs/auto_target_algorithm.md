@@ -17,7 +17,7 @@ single source of truth for the rationale; the code lives in:
 - A round draws the target **down** from a base weight by a random `draw`:
 
   ```
-  draw ∈ [kAutoDrawMin, kAutoDrawMax]   (uniform, currently 30–80 g)
+  draw ∈ [kAutoDrawMin, kAutoDrawMax]   (uniform, currently 25–70 g)
   newTarget = base − draw               (clamped at 0)
   ```
 
@@ -59,7 +59,7 @@ lowestCurrentWeight − newTarget
   ≤ kAutoDrawMax
 ```
 
-**Invariant: no player is ever forced to drink more than `kAutoDrawMax` (80 g) in a
+**Invariant: no player is ever forced to drink more than `kAutoDrawMax` (70 g) in a
 single automatic round.** Heavier glasses than the lightest may still drink more —
 that is the accepted cost of a single global target (see below).
 
@@ -71,7 +71,7 @@ that is the accepted cost of a single global target (see below).
   (per-player targets) was rejected to keep the model simple.
 - **Round 1 is deliberately gentle.** The base adds `kAutoDrawMin`, so the lightest
   player drinks only `draw − kAutoDrawMin` ∈ 0–(`kAutoDrawMax`−`kAutoDrawMin`) g
-  (0–50 g today) in the opening round — easing players in rather than a full step.
+  (0–45 g today) in the opening round — easing players in rather than a full step.
 - **A big overshoot makes the game "wait."** If one player massively overshoots
   (drops far below the target), `base` stays at `lastTarget`, so that player drinks
   little or nothing while the others catch up. Intended.

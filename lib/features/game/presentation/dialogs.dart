@@ -7,6 +7,7 @@ import '../../history/game_history_provider.dart';
 import '../state/game_providers.dart';
 import '../state/game_ui_providers.dart';
 import 'format.dart';
+import 'widgets/beer_glass.dart';
 import 'widgets/confetti_widget.dart';
 
 class Dialogs {
@@ -244,7 +245,12 @@ class _TargetWeightDialogState extends State<_TargetWeightDialog> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Expanded(child: _BeerGlass(fillFactor: fillFactor)),
+                  Expanded(
+                    child: BeerGlass(
+                      fillFraction: fillFactor,
+                      duration: const Duration(milliseconds: 180),
+                    ),
+                  ),
                   const SizedBox(width: 16),
                   Expanded(
                     child: Column(
@@ -394,74 +400,3 @@ class _TargetWeightDialogState extends State<_TargetWeightDialog> {
   }
 }
 
-/// A stylised glass filled from the bottom to [fillFactor] (0–1), with a foam
-/// cap and a reference line marking the full [fromWeight] level.
-class _BeerGlass extends StatelessWidget {
-  const _BeerGlass({required this.fillFactor});
-
-  final double fillFactor;
-
-  @override
-  Widget build(BuildContext context) {
-    const radius = BorderRadius.only(
-      topLeft: Radius.circular(10),
-      topRight: Radius.circular(10),
-      bottomLeft: Radius.circular(14),
-      bottomRight: Radius.circular(14),
-    );
-
-    return ClipRRect(
-      borderRadius: radius,
-      child: Container(
-        decoration: BoxDecoration(
-          color: CustomColors.tileBg,
-          border: Border.all(color: const Color(0x1A000000)),
-        ),
-        child: Stack(
-          children: [
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: FractionallySizedBox(
-                widthFactor: 1,
-                heightFactor: fillFactor,
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 180),
-                  curve: Curves.easeOut,
-                  child: Column(
-                    children: [
-                      const ColoredBox(
-                        color: Color(0xFFFFF3DC),
-                        child: SizedBox(height: 10, width: double.infinity),
-                      ),
-                      const Expanded(
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [Color(0xFFFFC55C), Color(0xFFF0A020)],
-                            ),
-                          ),
-                          child: SizedBox(width: double.infinity),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            const Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              child: ColoredBox(
-                color: Color(0xE6789283),
-                child: SizedBox(height: 2),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}

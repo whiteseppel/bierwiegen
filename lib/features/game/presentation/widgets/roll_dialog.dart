@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../../../ui/tokens.dart';
 import '../../domain/game.dart';
 import '../format.dart';
+import 'beer_glass.dart';
 
 /// Draws the next target: [kAutoDrawMin]–[kAutoDrawMax] g below [current],
 /// never below zero.
@@ -78,7 +79,6 @@ class _RollDialogState extends State<_RollDialog>
                   : _target.round();
           final safeCurrent = current <= 0 ? 1.0 : current;
           final fillFraction = (value / safeCurrent).clamp(0.0, 1.0);
-          final targetFraction = (_target / safeCurrent).clamp(0.0, 1.0);
 
           return Padding(
             padding: const EdgeInsets.fromLTRB(24, 24, 24, 20),
@@ -111,10 +111,7 @@ class _RollDialogState extends State<_RollDialog>
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Expanded(
-                        child: _Glass(
-                          fillFraction: fillFraction,
-                          targetFraction: targetFraction,
-                        ),
+                        child: BeerGlass(fillFraction: fillFraction),
                       ),
                       const SizedBox(width: Spacings.medium),
                       Expanded(
@@ -132,7 +129,9 @@ class _RollDialogState extends State<_RollDialog>
                   height: 18,
                   child: Text(
                     rolling
-                        ? '30 – 80 g weniger als ${formatWeight(current)} g'
+                        ? '${formatWeight(kAutoDrawMin)} – '
+                            '${formatWeight(kAutoDrawMax)} g weniger als '
+                            '${formatWeight(current)} g'
                         : '−${formatWeight(current - _target)} g gegenüber '
                             '${formatWeight(current)} g',
                     style: const TextStyle(
@@ -151,71 +150,6 @@ class _RollDialogState extends State<_RollDialog>
           );
         },
       ),
-    );
-  }
-}
-
-class _Glass extends StatelessWidget {
-  const _Glass({required this.fillFraction, required this.targetFraction});
-
-  final double fillFraction;
-  final double targetFraction;
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final height = constraints.maxHeight;
-        return DecoratedBox(
-          decoration: BoxDecoration(
-            color: CustomColors.tileBg,
-            border: Border.all(color: const Color(0x1A000000)),
-            borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(10),
-              bottom: Radius.circular(14),
-            ),
-          ),
-          child: ClipRRect(
-            borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(10),
-              bottom: Radius.circular(14),
-            ),
-            child: Stack(
-              children: [
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  height: height * fillFraction,
-                  child: Column(
-                    children: [
-                      Container(height: 10, color: const Color(0xFFFFF3DC)),
-                      const Expanded(
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [Color(0xFFFFC55C), Color(0xFFF0A020)],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: height * targetFraction,
-                  height: 2,
-                  child: const ColoredBox(color: Color(0xE6789283)),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
     );
   }
 }

@@ -174,7 +174,7 @@ class _GameSettingsSheet extends ConsumerWidget {
             ChoiceTile(
               label: 'Automatische Ziele',
               description:
-                  'Das nächste Ziel wird ausgelost: 30 – 80 g unter dem '
+                  'Das nächste Ziel wird ausgelost: 25 – 70 g unter dem '
                   'aktuellen.',
               selected: targetMode == TargetMode.auto,
               onTap: () => notifier.setTargetMode(TargetMode.auto),

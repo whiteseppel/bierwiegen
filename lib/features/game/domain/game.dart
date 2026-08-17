@@ -12,8 +12,8 @@ part 'game.g.dart';
 
 /// Range (grams) an automatic round draws below its base weight. The only
 /// step-size knobs for the auto target; see docs/auto_target_algorithm.md.
-const double kAutoDrawMin = 30;
-const double kAutoDrawMax = 80;
+const double kAutoDrawMin = 25;
+const double kAutoDrawMax = 70;
 
 @freezed
 abstract class Game with _$Game {

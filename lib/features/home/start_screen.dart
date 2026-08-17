@@ -652,7 +652,7 @@ class _StartOptionsSheetState extends State<_StartOptionsSheet> {
             ChoiceTile(
               label: 'Automatische Ziele',
               description:
-                  'Das nächste Ziel wird ausgelost: 30 – 80 g unter dem '
+                  'Das nächste Ziel wird ausgelost: 25 – 70 g unter dem '
                   'aktuellen.',
               selected: _targetMode == TargetMode.auto,
               onTap: () => setState(() => _targetMode = TargetMode.auto),
